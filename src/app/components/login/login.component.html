@@ -1,0 +1,69 @@
+<div style="width: 100%; height: 100%; background: #DBE7EC; justify-content: center;
+          align-items: center; display: inline-flex">
+    <!-- <app-toasts aria-live="polite" aria-atomic="true" class="checktoast"></app-toasts> -->
+    <form [formGroup]="form" (ngSubmit)="DoLogin()">
+        <div style="width: 539px; height: 88%; position: relative; margin-top: -40%;">
+            <div style="padding: 15.91px; left: 60px; top: 0px; position: absolute; flex-direction: column;
+                  justify-content: flex-start; align-items: flex-start; gap: 15.91px; display: inline-flex">
+                <div>
+                    <img src="../../../assets/SplashLogo.png" />
+                </div>
+            </div>
+            <div style="padding: 177px 0px 0px 122px; position: absolute; color: #233138; font-size: 18px;
+                  font-weight: 500; word-wrap: break-word">
+                Enter your credentials to continue
+            </div>
+            <div style="padding: 143.91px 0px 0px 143px; position: absolute; color: #A17C43;
+                  font-size: 24px; font-weight: 700; word-wrap: break-word">
+                Hi, Welcome Back
+            </div>
+            <div class="form-floating mb-3" style="top:230px;">
+                <input autoComplete="username" placeholder="Enter a valid email address" id="username"
+                    formControlName="username" name="UserName" class="form-control" autocomplete="off"
+                    placeholder="Username" [ngClass]="{ 'is-invalid': submitted && f['username'].errors }" />
+                <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
+                    <div *ngIf="f['username'].errors['required']">Username is required</div>
+                    <div *ngIf="f['username'].errors['minlength']">
+                        Username must be at least 6 characters
+                    </div>
+                    <div *ngIf="f['username'].errors['maxlength']">
+                        Username must not exceed 20 characters
+                    </div>
+                </div>
+                <label for="floatingInput" style="color:#727679;">Username</label>
+            </div>
+            <div class="form-floating mb-3" style="top:230px;">
+                <input autoComplete="current-password" placeholder="Password" placeholder="Enter password"
+                    formControlName="password" class="form-control" [type]="show ? 'text' : 'password'"
+                    [ngClass]="{ 'is-invalid': submitted && f['password'].errors }" id="password" name="Password" />
+                <i class="fa another-custom-class" [class.fa-eye]="!show" [class.fa-eye-slash]="show"
+                    (click)="onclicktoggle()" style="position: absolute;left: 95%;top: 40%;"></i>
+
+                <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+                    <div *ngIf="f['password'].errors['required']">Password is required</div>
+                    <div *ngIf="f['password'].errors['minlength']">
+                        Password must be at least 6 characters
+                    </div>
+                    <div *ngIf="f['password'].errors['maxlength']">
+                        Username must not exceed 40 characters
+                    </div>
+                </div>
+                <label for="password" style="color:#727679;">Password</label>
+            </div>
+
+            <!-- <div class="d-grid mt-4" style="top:215px; position: relative;">
+        <p (click)="forgotPassword()"
+          style="position: absolute; right: 0; color: #956f37; font-weight: 700; font-size: 16px; text-decoration: underline; cursor: pointer;">
+          Forgot Password?</p>
+        <p *ngIf="sentResetMail" style="margin-bottom: 0; color: #445966; font-weight: 600;">Rest Link Will be sent to
+          your Email!!</p>
+      </div> -->
+
+            <div class="d-grid mt-4" style="top:235px; position: relative;">
+                <button class="btn-login" [disabled]="isLoading"><i class="fa"
+                        [ngClass]="{'fa-spin fa-spinner': isLoading, 'fa-check': !isLoading}" style="color:white;"></i>
+                    {{button}}</button>
+            </div>
+        </div>
+    </form>
+</div>

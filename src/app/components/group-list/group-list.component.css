@@ -1,0 +1,33 @@
+.bodyclass {
+    background-color: white;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.flexdivHeader {
+    display: flex;
+    border-bottom: solid 1pt #dce3e7;
+    padding-bottom: 5px;
+    align-items: center;
+}
+
+.headerName {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 43.2px;
+}
+
+.text-center {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-green {
+    filter: brightness(0) invert(1);
+}
+
+.flexRight {
+    flex: 1;
+    text-align: right;
+}

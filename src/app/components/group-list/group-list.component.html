@@ -1,0 +1,59 @@
+<div class="bodyclass">
+    <div>
+        <div class="col-md-12 p-0 flexdivHeader">
+            <div class="col-md-7">
+                <h1 class="headerName">
+                    <img style="margin-top: -5px;height: 25px;" src="../../../assets/img/icons/Promotion.svg">
+                    Business Group List
+                </h1>
+            </div>
+            <div class="col-md-3">
+
+            </div>
+            <div class="col-md-2 p-0 flexRight">
+                <button class="btn btn-success text-center" (click)="AddNewPage()">
+                    <img alt="phonevector" class="filter-green"
+                        src="../../../assets/img/icons/Create Promotion.svg">
+                        Add New Group
+                </button>
+            </div>
+            <!-- <div>
+                <button (click)="exitPage()" mat-button color="primary" class="logoutbtn">
+                    Logout
+                </button>
+            </div> -->
+        </div>
+    </div>
+    <table mat-table [dataSource]="dataSource">
+        <ng-container matColumnDef="businessGroupName">
+            <th mat-header-cell *matHeaderCellDef> Business Group Name </th>
+            <td mat-cell *matCellDef="let element"> {{element.businessGroupName}} </td>
+        </ng-container>
+        <ng-container matColumnDef="packageTypeName">
+            <th mat-header-cell *matHeaderCellDef> Package Type </th>
+            <td mat-cell *matCellDef="let element"> {{element.packageTypeName}} </td>
+        </ng-container>
+        <ng-container matColumnDef="industryType">
+            <th mat-header-cell *matHeaderCellDef> Industry Type </th>
+            <td mat-cell *matCellDef="let element"> {{element.industryType}} </td>
+        </ng-container>
+        <ng-container matColumnDef="countLocations">
+            <th mat-header-cell *matHeaderCellDef> Count Locations </th>
+            <td mat-cell *matCellDef="let element"> {{element.countLocations}} </td>
+        </ng-container>
+        <ng-container matColumnDef="Action">
+            <th style="text-align: left;" *matHeaderCellDef>
+                Edit
+            </th>
+            <td style="text-align: left;" mat-cell *matCellDef="let element">
+                <div style="text-align: left;">
+                    <button (click)="Edit(element)" class="mr-2 editClass">Edit&nbsp;&nbsp;
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                </div>
+            </td>
+        </ng-container>
+        <tr mat-header-row class="tableHeaderCellDiv" *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns; "></tr>
+    </table>
+</div>

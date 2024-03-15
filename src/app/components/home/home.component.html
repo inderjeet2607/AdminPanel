@@ -1,0 +1,349 @@
+<div class="bodyclass">
+    <div>
+        <div class="col-md-12 p-0 flexdivHeader">
+            <div class="col-md-7">
+
+            </div>
+            <div class="col-md-3">
+
+            </div>
+            <div class="col-md-2 p-0 flexRight">
+                <button class="btn btn-success text-center brownColor mb-1" (click)="Cancel()">
+                    <img alt="phonevector" class="filter-green" src="../../../assets/img/icons/Cancel.svg">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    <div>
+        <mat-stepper [linear]="isLinear" #stepper>
+            <mat-step [stepControl]="firstFormGroup">
+                <form [formGroup]="firstFormGroup">
+                    <div class="wrapper" style="background: white;border-radius: 15px;">
+                        <h4>
+                            <b>Create Business Group</b>
+                        </h4>
+                        <ng-template matStepLabel>Group</ng-template>
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="groupName">
+                                            Business Group Name
+                                        </label>
+                                        <input id="groupName" class="form-control" formControlName="BusinessgroupName"
+                                            autocomplete="off"
+                                            [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['BusinessgroupName'].errors }">
+                                        <div *ngIf="submitted && firstFormGroup.controls['BusinessgroupName'].errors"
+                                            class="invalid-feedback">
+                                            <div
+                                                *ngIf="firstFormGroup.controls['BusinessgroupName'].errors['required']">
+                                                Business Group Name is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col-md-12">
+                                        <label>Business Group Logo</label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="file" class="custom-file" id="customFileLang"
+                                            text="Upload Image (Upto 1 MB)" (change)="onChange($event)">
+                                        <label class="custom-file-label" for="customFileLang">
+                                            Upload Image (Upto 1 MB)
+                                        </label>
+                                        <b *ngIf="file != undefined ">{{file.name}}</b>
+                                        <div style="width: 80%;background-color: #7DA3BA;" class="progress-bar"
+                                            role="progressbar" [style.width]="uploadProgress"
+                                            aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100"
+                                            *ngIf="filePath != null && filePath !=undefined">
+                                            {{uploadProgress}}
+                                        </div>
+                                        <mat-icon class="cancel-upload" (click)="onUpload()"
+                                            *ngIf="file != undefined && uploadProgress == undefined "
+                                            style="overflow: inherit;">
+                                            cloud_upload
+                                        </mat-icon>
+                                        <mat-icon class="cancel-upload" (click)="cancelUpload()"
+                                            *ngIf="uploadProgress !=  undefined || (filePath != null && filePath !=undefined && filePath != '')"
+                                            style="color: red; overflow: inherit;">
+                                            delete_forever
+                                        </mat-icon>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="Industry">
+                                            Industry Type
+                                        </label>
+                                        <ng-multiselect-dropdown [placeholder]="'Choose Industry Type'" id="Industry"
+                                            [settings]="dropdownSettingsSingle" [data]="industryTypeData"
+                                            formControlName="IndustryTypeID">
+                                        </ng-multiselect-dropdown>
+                                        <div style="width:100%;"
+                                            *ngIf="submitted && firstFormGroup.controls['IndustryTypeID'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="firstFormGroup.controls['IndustryTypeID'].errors['required']">
+                                                Industry Type is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="packageType">
+                                            Package Type
+                                        </label>
+                                        <ng-multiselect-dropdown [placeholder]="'Choose Package Type'" id="packageType"
+                                            [settings]="dropdownSettingsSinglePackage" [data]="packageTypeData"
+                                            formControlName="PackageTypeID">
+                                        </ng-multiselect-dropdown>
+                                        <div style="width:100%;"
+                                            *ngIf="submitted && firstFormGroup.controls['PackageTypeID'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="firstFormGroup.controls['PackageTypeID'].errors['required']">
+                                                Package Type is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label for="smsProfileID">
+                                        SMS Profile
+                                    </label>
+                                    <input id="smsProfileID" class="form-control" formControlName="SMSProfileID"
+                                        autocomplete="off"
+                                        [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['SMSProfileID'].errors }">
+                                    <div *ngIf="submitted && firstFormGroup.controls['SMSProfileID'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="firstFormGroup.controls['SMSProfileID'].errors['required']">
+                                            SMS Profile is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label for="smsPhoneNo">
+                                        SMS From Phone No
+                                    </label>
+                                    <input id="smsPhoneNo" class="form-control" formControlName="SMSPhoneNumber"
+                                        autocomplete="off" (keypress)="numberOnly($event)" maxlength="10"
+                                        [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['SMSPhoneNumber'].errors }">
+                                    <div *ngIf="submitted && firstFormGroup.controls['SMSPhoneNumber'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="firstFormGroup.controls['SMSPhoneNumber'].errors['required']">
+                                            SMS From Phone No is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6" style="display: flex;align-items: center;">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" formControlName="SignoutRequired"
+                                        value="" id="signOut">
+                                    <label class="form-check-label" for="signOut">
+                                        Sign In Sign Out functionality Required ?
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label for="signOutHours">
+                                        Auto Sign-out time (in Hours)
+                                    </label>
+                                    <input id="signOutHours" class="form-control" formControlName="SignoutHours"
+                                        autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6" style="display: flex;align-items: center;">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" formControlName="SpinWheelRequired"
+                                        value="" id="spinWheel">
+                                    <label class="form-check-label" for="spinWheel">
+                                        Spin Wheel Required ?
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label for="closureTime">
+                                        Daily Business Closure Time
+                                    </label>
+                                    <input id="closureTime" type="time" class="form-control"
+                                        formControlName="BusinessClosureTime"
+                                        [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['BusinessClosureTime'].errors }">
+                                    <div *ngIf="submitted && firstFormGroup.controls['BusinessClosureTime'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="firstFormGroup.controls['BusinessClosureTime'].errors['required']">
+                                            Business Closure Time is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4>
+                            <b>Create Admin User</b>
+                        </h4>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div>
+                                        <label for="emailID">
+                                            Valid Email
+                                        </label>
+                                        <i class="icon-fs-info ng-scope"
+                                            ngbTooltip="Email Verification link will be send to this Email address"
+                                            style="vertical-align: middle;">
+                                        </i>
+                                    </div>
+                                    <input id="emailID" class="form-control" formControlName="EmailID"
+                                        autocomplete="off"
+                                        [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['EmailID'].errors }">
+                                    <div *ngIf="submitted && firstFormGroup.controls['EmailID'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="firstFormGroup.controls['EmailID'].errors['required']">
+                                            Email ID is required
+                                        </div>
+                                        <div *ngIf="firstFormGroup.controls['EmailID'].errors['pattern']">
+                                            Enter valid Email ID
+                                        </div>
+                                    </div>
+                                    <div class="Unverified" *ngIf="firstFormGroup.controls['EmailID'].valid"
+                                        [ngClass]="{ 'Unverified': !isEmailVerified, 'Verified' : isEmailVerified }">
+                                        {{verificationText}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label for="PhoneNo">
+                                        Phone No
+                                    </label>
+                                    <input id="PhoneNo" class="form-control" formControlName="PhoneNumber"
+                                        autocomplete="off" (keypress)="numberOnly($event)" maxlength="10"
+                                        [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['PhoneNumber'].errors }">
+                                    <div *ngIf="submitted && firstFormGroup.controls['PhoneNumber'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="firstFormGroup.controls['PhoneNumber'].errors['required']">
+                                            PhoneNumber is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label for="firstName">
+                                        First Name
+                                    </label>
+                                    <input id="firstName" class="form-control" formControlName="FirstName"
+                                        autocomplete="off"
+                                        [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['FirstName'].errors }">
+                                    <div *ngIf="submitted && firstFormGroup.controls['FirstName'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="firstFormGroup.controls['FirstName'].errors['required']">
+                                            First Name is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <label for="lastName">
+                                        Last Name
+                                    </label>
+                                    <input id="lastName" class="form-control" formControlName="LastName"
+                                        autocomplete="off"
+                                        [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['LastName'].errors }">
+                                    <div *ngIf="submitted && firstFormGroup.controls['LastName'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="firstFormGroup.controls['LastName'].errors['required']">
+                                            Last Name is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-1">
+                            <!-- <div class="col-md-2">
+                                <button matStepperNext class="btn btn-dark text-center">
+                                    Next <img alt="phonevector" class="filter-green ml3"
+                                        src="../../../assets/img/icons/Next.svg">
+                                </button>
+                            </div> -->
+                            <div class="col-md-12 text-center">
+                                <button matStepperNext class="btn btn-success text-center" (click)="SaveGroupDetails()"
+                                    [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
+                                    Save & Continue 
+                                    <!-- <img alt="phonevector" class="filter-green ml3"
+                                        src="../../../assets/img/icons/Sand Campaign.svg"> -->
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </mat-step>
+            <mat-step [stepControl]="secondFormGroup" label="Locations">
+                <form [formGroup]="secondFormGroup">
+                    <div>
+                        <button mat-button matStepperNext>Next</button>
+                        <button mat-button matStepperPrevious>Back</button>
+                    </div>
+                </form>
+            </mat-step>
+            <mat-step [stepControl]="secondFormGroup" label="Payment Info">
+                <form [formGroup]="secondFormGroup">
+                    <div>
+                        <button mat-button matStepperNext>Next</button>
+                        <button mat-button matStepperPrevious>Back</button>
+                    </div>
+                </form>
+            </mat-step>
+            <mat-step [stepControl]="secondFormGroup" label="Sources">
+                <form [formGroup]="secondFormGroup">
+                    <div>
+                        <button mat-button matStepperNext>Next</button>
+                        <button mat-button matStepperPrevious>Back</button>
+                    </div>
+                </form>
+            </mat-step>
+            <mat-step [stepControl]="secondFormGroup" label="Users">
+                <form [formGroup]="secondFormGroup">
+                    <div>
+                        <button mat-button matStepperPrevious>Back</button>
+                        <button mat-button (click)="stepper.reset()">Reset</button>
+                    </div>
+                </form>
+            </mat-step>
+        </mat-stepper>
+    </div>
+</div>
