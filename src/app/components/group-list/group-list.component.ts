@@ -25,7 +25,6 @@ export class GroupListComponent implements OnInit {
   ngOnInit() {
     this._getList.GetBusinessGroups().subscribe({
       next: (data) => {
-        console.log(data);
         this.dataSource = data;
       },
       error: error => {
@@ -35,7 +34,6 @@ export class GroupListComponent implements OnInit {
   }
 
   Edit(element: any) {
-    console.log(element);
     this.route.navigate(['home', { id: element.id }]);
   }
 

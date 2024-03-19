@@ -75,9 +75,6 @@ i.icon-fs-info {
     font-weight: 500;
 }
 
-::ng-deep.mdc-label{
-    margin-top: 10px;
-}
-.datePicker{
-    padding: 1px;
+::ng-deep .multiselect-dropdown[_ngcontent-ng-c1411523848] .dropdown-btn[_ngcontent-ng-c1411523848] .selected-item-container[_ngcontent-ng-c1411523848] .selected-item[_ngcontent-ng-c1411523848] {
+    max-width: none !important;
 }

@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { HomeComponent } from './components/home/home.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -16,10 +16,7 @@ import { MatTableModule } from '@angular/material/table'
 import { GroupListComponent } from './components/group-list/group-list.component';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { MatIconModule } from '@angular/material/icon';
-import { MatRadioModule } from '@angular/material/radio'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { MatDatepickerModule } from '@angular/material/datepicker'
-import {provideNativeDateAdapter} from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -41,13 +38,9 @@ import {provideNativeDateAdapter} from '@angular/material/core';
     MatIconModule,
     NgbModule,
     NgMultiSelectDropDownModule.forRoot(),
-    MatRadioModule,
-    MatDatepickerModule,
-    FormsModule
   ],
   providers: [
-    provideAnimationsAsync(),
-    provideNativeDateAdapter()
+    provideAnimationsAsync()
   ],
   bootstrap: [AppComponent]
 })
