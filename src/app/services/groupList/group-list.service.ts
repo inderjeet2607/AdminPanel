@@ -9,7 +9,6 @@ import { map } from 'rxjs';
 export class GroupListService {
 
   private apiUrl = AppSettings.API_ENDPOINT + "/api/BusinessGroups";
-
   constructor(private httpClient: HttpClient) { }
 
   public GetBusinessGroups() {

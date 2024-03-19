@@ -9,6 +9,7 @@ import { IndustryService } from '../../services/industry/industry.service';
 import { PackageTypeService } from '../../services/packageType/package-type.service';
 import { AppSettings } from '../../services/Constants';
 import { GroupListService } from '../../services/groupList/group-list.service';
+import { BusinessProfilesService } from '../../services/businessProfile/business-profiles.service';
 
 
 @Component({
@@ -18,7 +19,7 @@ import { GroupListService } from '../../services/groupList/group-list.service';
 })
 
 export class HomeComponent {
-  isLinear = true;
+  isLinear = false;
   firstFormGroup: FormGroup;
   secondFormGroup: FormGroup;
   thirdFormGroup: FormGroup;
@@ -40,15 +41,17 @@ export class HomeComponent {
   packageTypeData: any = [];
   dropdownSettingsSingle: IDropdownSettings = {};
   dropdownSettingsSinglePackage: IDropdownSettings = {};
+  dropdownSettingsBusinessLocationName: IDropdownSettings = {};
   @ViewChild('stepper') public stepper: any;
   isLoading = false;
   isEmailVerified: boolean = false;
   verificationText = 'Unverified';
+  businessLocationName: any = [];
+
 
   constructor(private aroute: ActivatedRoute, private route: Router, private fb: FormBuilder, private _uploadService: UploadServiceService,
     private _industryService: IndustryService, private _packageService: PackageTypeService,
-    private _groupService: GroupListService) {
-
+    private _groupService: GroupListService, private _businessProfileService: BusinessProfilesService) {
     this.firstFormGroup = this.fb.group({
       BusinessgroupName: ['', Validators.required],
       // LogoFileName: ['', Validators.required],
@@ -64,27 +67,45 @@ export class HomeComponent {
       PhoneNumber: ['', Validators.required],
       FirstName: ['', Validators.required],
       LastName: ['', Validators.required],
+      BusinessLocationName: ['', Validators.required]
     });
     this.secondFormGroup = this.fb.group({
       secondCtrl: ['', Validators.required],
     });
     this.thirdFormGroup = this.fb.group({
-      secondCtrl: ['', Validators.required],
+      thirdCtrl: ['', Validators.required],
+      CardNo: ['', Validators.required, Validators.pattern("[0-9\s]{13,19}")],
+      BusinessLocationName: ['', Validators.required],
+      PackageTypeID: ['', Validators.required],
+      ExpiryDate: ['', Validators.required, Validators.pattern("^(0[1-9]|1[0-2])\/(20)\d{2}$")],
+      Cvv: ['', Validators.required, Validators.pattern("[0-9]")],
+      ZipCode: ['', Validators.required],
+      ChkMakeDefault: ['', Validators.required],
+      CardHolderName: ['', Validators.required],
+      AccNo: ['', Validators.required],
+      RoutingNo: ['', Validators.required],
+      AccHolderName: ['', Validators.required],
+      selectedOption: ['1']
     });
     this.fourthFormGroup = this.fb.group({
-      secondCtrl: ['', Validators.required],
+      fourthCtrl: ['', Validators.required],
+      SrcBusinessLocationName: ['', Validators.required],
+      CustTabletBrand: ['', Validators.required],
+      CustTabletModel: ['', Validators.required],
+      StoreTabletBrand: ['', Validators.required],
+      StoreTabletModel: ['', Validators.required]
     });
     this.fifthFormGroup = this.fb.group({
       secondCtrl: ['', Validators.required],
     });
-    this.isLinear = true;
+    this.isLinear = false;
   }
 
   ngOnInit() {
     this.aroute.params.subscribe((params: Params) => this.businessGroupID = params['id']);
     this.getIndustries();
     this.getPackageTypes();
-
+    this.getBusinessLocationName();
     // this.getBusinessGroupByID(6);
 
     this.dropdownSettingsSingle = {
@@ -98,8 +119,13 @@ export class HomeComponent {
       textField: 'packageName',
       singleSelection: true
     }
-  }
 
+    this.dropdownSettingsBusinessLocationName = {
+      idField: 'id',
+      textField: 'businessName',
+      singleSelection: true
+    }
+  }
   getIndustries() {
     this._industryService.GetIndustries().subscribe({
       next: (data: any) => {
@@ -118,6 +144,18 @@ export class HomeComponent {
       },
       error: (error: any) => {
 
+      }
+    })
+  }
+
+  getBusinessLocationName() {
+    this._businessProfileService.GetBusinessLocationByGroupId(1).subscribe({
+      next: (data: any) => {
+        this.businessLocationName = data;
+        console.log(this.businessLocationName)
+      },
+      error: (error: any) => {
+        console.log("This is error message", error)
       }
     })
   }
@@ -192,6 +230,22 @@ export class HomeComponent {
       });
   }
 
+  SavePaymentInfo() {
+    this.submitted = true;
+    if (this.thirdFormGroup.invalid) {
+      console.log("Invalid")
+      return;
+    }
+    this.isLoading = true;
+  }
+
+  ReviewAndSave() {
+    this.submitted = true;
+    if (this.fourthFormGroup.invalid) {
+      return;
+    }
+    this.isLoading = true;
+  }
   getBusinessGroupByID(id) {
     this._groupService.GetBusinessGroupByID(id).subscribe({
       next: (data: any) => {
