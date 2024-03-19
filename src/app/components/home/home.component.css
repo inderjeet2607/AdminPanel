@@ -74,3 +74,7 @@ i.icon-fs-info {
     color: red;
     font-weight: 500;
 }
+
+::ng-deep .multiselect-dropdown[_ngcontent-ng-c1411523848] .dropdown-btn[_ngcontent-ng-c1411523848] .selected-item-container[_ngcontent-ng-c1411523848] .selected-item[_ngcontent-ng-c1411523848] {
+    max-width: none !important;
+}

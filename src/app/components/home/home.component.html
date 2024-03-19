@@ -50,28 +50,27 @@
                                     <div class="col-md-12">
                                         <label>Business Group Logo</label>
                                     </div>
-                                    <div class="col">
-                                        <input type="file" class="custom-file" id="customFileLang"
-                                            text="Upload Image (Upto 1 MB)" (change)="onChange($event)">
-                                        <label class="custom-file-label" for="customFileLang">
+                                    <div class="col-md-12">
+                                        <input type="file" class="custom-file" id="businessGroupLogo"
+                                            (change)="onChange($event)">
+                                        <label class="custom-file-label" for="businessGroupLogo">
                                             Upload Image (Upto 1 MB)
                                         </label>
-                                        <b *ngIf="file != undefined ">{{file.name}}</b>
-                                        <div style="width: 80%;background-color: #7DA3BA;" class="progress-bar"
-                                            role="progressbar" [style.width]="uploadProgress"
-                                            aria-valuenow="uploadProgress" aria-valuemin="0" aria-valuemax="100"
-                                            *ngIf="filePath != null && filePath !=undefined">
-                                            {{uploadProgress}}
+                                        <div style="width: 80%;background-color: #7DA3BA;height: 20%;margin-top: 1%;
+                                        border-radius: 21px;font-size: 65%;" class="progress-bar" role="progressbar"
+                                            [style.width]="uploadProgressGroupLogo"
+                                            aria-valuenow="uploadProgressGroupLogo" aria-valuemin="0"
+                                            aria-valuemax="100"
+                                            *ngIf="filePathGroupLogo != null && filePathGroupLogo !=undefined">
+                                            {{uploadProgressGroupLogo}}
                                         </div>
-                                        <mat-icon class="cancel-upload" (click)="onUpload()"
-                                            *ngIf="file != undefined && uploadProgress == undefined "
-                                            style="overflow: inherit;">
-                                            cloud_upload
-                                        </mat-icon>
+                                    </div>
+                                    <div class="col" *ngIf="filePathGroupLogo != null" style="position: relative;">
+                                        <img src="{{filePathGroupLogo}}" height="70px" />
                                         <mat-icon class="cancel-upload" (click)="cancelUpload()"
-                                            *ngIf="uploadProgress !=  undefined || (filePath != null && filePath !=undefined && filePath != '')"
-                                            style="color: red; overflow: inherit;">
-                                            delete_forever
+                                            *ngIf="uploadProgressGroupLogo !=  undefined || (filePathGroupLogo != null && filePathGroupLogo !=undefined && filePathGroupLogo != '')"
+                                            style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                            cancel
                                         </mat-icon>
                                     </div>
                                 </div>
@@ -303,7 +302,7 @@
                             <div class="col-md-12 text-center">
                                 <button matStepperNext class="btn btn-success text-center" (click)="SaveGroupDetails()"
                                     [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
-                                    Save & Continue 
+                                    Save & Continue
                                     <!-- <img alt="phonevector" class="filter-green ml3"
                                         src="../../../assets/img/icons/Sand Campaign.svg"> -->
                                 </button>
@@ -314,6 +313,600 @@
             </mat-step>
             <mat-step [stepControl]="secondFormGroup" label="Locations">
                 <form [formGroup]="secondFormGroup">
+                    <div class="wrapper" style="background: white;border-radius: 15px;">
+                        <h4>
+                            <b>Create Business Location</b>
+                        </h4>
+                        <ng-template matStepLabel>Locations</ng-template>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-12">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="businessName">
+                                            Business Name
+                                        </label>
+                                        <input id="businessName" class="form-control"
+                                            formControlName="BusinessLocationName" autocomplete="off"
+                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['BusinessLocationName'].errors }">
+                                        <div *ngIf="finalSubmit && secondFormGroup.controls['BusinessLocationName'].errors"
+                                            class="invalid-feedback">
+                                            <div
+                                                *ngIf="secondFormGroup.controls['BusinessLocationName'].errors['required']">
+                                                Business Name is required
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <label for="shortName">
+                                            Short Name
+                                        </label>
+                                        <input id="shortName" class="form-control" formControlName="BusinessShortName"
+                                            autocomplete="off"
+                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['BusinessShortName'].errors }">
+                                        <div *ngIf="finalSubmit && secondFormGroup.controls['BusinessShortName'].errors"
+                                            class="invalid-feedback">
+                                            <div
+                                                *ngIf="secondFormGroup.controls['BusinessShortName'].errors['required']">
+                                                Business Short Name is required
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <label for="phoneNo">
+                                            Phone No
+                                        </label>
+                                        <input id="phoneNo" class="form-control" formControlName="PhoneNo"
+                                            autocomplete="off"
+                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['PhoneNo'].errors }">
+                                        <div *ngIf="finalSubmit && secondFormGroup.controls['PhoneNo'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="secondFormGroup.controls['PhoneNo'].errors['required']">
+                                                Phone No is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-12">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="address">
+                                            Address
+                                        </label>
+                                        <input id="address" class="form-control" formControlName="Address"
+                                            autocomplete="off"
+                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['Address'].errors }">
+                                        <div *ngIf="finalSubmit && secondFormGroup.controls['Address'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="secondFormGroup.controls['Address'].errors['required']">
+                                                Address is required
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <label for="state">
+                                            State
+                                        </label>
+                                        <ng-multiselect-dropdown [placeholder]="'Select State'" id="state"
+                                            [settings]="dropdownSettingsSingleState" [data]="statesData"
+                                            formControlName="StateID">
+                                        </ng-multiselect-dropdown>
+                                        <div style="width:100%;"
+                                            *ngIf="finalSubmit && secondFormGroup.controls['StateID'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="secondFormGroup.controls['StateID'].errors['required']">
+                                                State is required
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <label for="pincode">
+                                            Pincode
+                                        </label>
+                                        <input id="pincode" class="form-control" formControlName="Pincode"
+                                            autocomplete="off"
+                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['Pincode'].errors }">
+                                        <div *ngIf="finalSubmit && secondFormGroup.controls['Pincode'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="secondFormGroup.controls['Pincode'].errors['required']">
+                                                Pincode is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-12">
+                                <div class="form-row">
+                                    <div class="col-md-4">
+                                        <label for="businessLabels">
+                                            Business Labels (Up to 5 only)
+                                        </label>
+                                        <input id="businessLabels" class="form-control"
+                                            formControlName="BusinessLabelID" autocomplete="off"
+                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['BusinessLabelID'].errors }">
+                                        <div *ngIf="finalSubmit && secondFormGroup.controls['BusinessLabelID'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="secondFormGroup.controls['BusinessLabelID'].errors['required']">
+                                                Business Label is required
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-8">
+                                        <label for="description">
+                                            Description
+                                        </label>
+                                        <textarea id="description" class="form-control" formControlName="Description"
+                                            autocomplete="off" rows="1"
+                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['Description'].errors }">
+                                        </textarea>
+                                        <div *ngIf="finalSubmit && secondFormGroup.controls['Description'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="secondFormGroup.controls['Description'].errors['required']">
+                                                Description is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-8" style="padding-right: 6px;">
+                                <div class="col-md-12"
+                                    style="margin-left: 0;padding-left: 0;margin-right: 0;padding-right: 0;">
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <label for="website">
+                                                Website Url
+                                            </label>
+                                            <input id="website" class="form-control" formControlName="WebsiteUrl"
+                                                autocomplete="off">
+                                        </div>
+
+                                        <div class="col">
+                                            <label for="facebook">
+                                                Facebook Url
+                                            </label>
+                                            <input id="facebook" class="form-control" formControlName="FacebookUrl"
+                                                autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12"
+                                    style="margin-top: 1%;margin-left: 0;padding-left: 0;margin-right: 0;padding-right: 0;">
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <label for="twitter">
+                                                Twitter Url
+                                            </label>
+                                            <input id="twitter" class="form-control" formControlName="TwitterUrl"
+                                                autocomplete="off">
+                                        </div>
+
+                                        <div class="col">
+                                            <label for="google">
+                                                Google Url
+                                            </label>
+                                            <input id="google" class="form-control" formControlName="GoogleUrl"
+                                                autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12"
+                                    style="margin-top: 1%;margin-left: 0;padding-left: 0;margin-right: 0;padding-right: 0;">
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <label for="instagram">
+                                                Instagram Url
+                                            </label>
+                                            <input id="instagram" class="form-control" formControlName="InstagramUrl"
+                                                autocomplete="off">
+                                        </div>
+
+                                        <div class="col">
+                                            <label for="yelp">
+                                                Yelp Url
+                                            </label>
+                                            <input id="yelp" class="form-control" formControlName="YelpUrl"
+                                                autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12"
+                                    style="margin-top: 1%;margin-left: 0;padding-left: 0;margin-right: 0;padding-right: 0;">
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <div class="col-md-12" style="margin-left:0; padding-left: 0;">
+                                                <label>Business Logo</label>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <input type="file" class="custom-file" id="businessLogo"
+                                                    (change)="onChangeBusinessLogo($event)">
+                                                <label class="custom-file-label" for="businessLogo">
+                                                    Upload Image (Upto 1 MB)
+                                                </label>
+                                                <div style="width: 80%;background-color: #7DA3BA;height: 20%;margin-top: 1%;
+                                                border-radius: 21px;font-size: 65%;" class="progress-bar"
+                                                    role="progressbar" [style.width]="uploadProgressBusinessLogo"
+                                                    aria-valuenow="uploadProgressBusinessLogo" aria-valuemin="0"
+                                                    aria-valuemax="100"
+                                                    *ngIf="filePathBusinessLogo != null && filePathBusinessLogo !=undefined">
+                                                    {{uploadProgressBusinessLogo}}
+                                                </div>
+                                            </div>
+                                            <div class="col" *ngIf="filePathBusinessLogo != null"
+                                                style="position: relative;">
+                                                <img src="{{filePathBusinessLogo}}" height="70px" />
+                                                <mat-icon class="cancel-upload" (click)="cancelUploadBusinessLogo()"
+                                                    *ngIf="uploadProgressBusinessLogo != undefined || (filePathBusinessLogo != null && filePathBusinessLogo !=undefined && filePathBusinessLogo != '')"
+                                                    style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                                    cancel
+                                                </mat-icon>
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="col-md-12" style="margin-left:0; padding-left: 0;">
+                                                <label>Display Name</label>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <input type="file" class="custom-file" id="businessDisplayImage"
+                                                    (change)="onChangeBusinessDisplayImage($event)">
+                                                <label class="custom-file-label" for="businessDisplayImage">
+                                                    Upload Image (Upto 1 MB)
+                                                </label>
+                                                <div style="width: 80%;background-color: #7DA3BA;height: 20%;margin-top: 1%;
+                                                    border-radius: 21px;font-size: 65%;" class="progress-bar"
+                                                    role="progressbar"
+                                                    [style.width]="uploadProgressBusinessDisplayImage"
+                                                    aria-valuenow="uploadProgressBusinessDisplayImage" aria-valuemin="0"
+                                                    aria-valuemax="100"
+                                                    *ngIf="filePathBusinessDisplayImage != null && filePathBusinessDisplayImage !=undefined">
+                                                    {{uploadProgressBusinessDisplayImage}}
+                                                </div>
+                                            </div>
+                                            <div class="col" *ngIf="filePathBusinessDisplayImage != null"
+                                                style="position: relative;">
+                                                <img src="{{filePathBusinessDisplayImage}}" height="70px" />
+                                                <mat-icon class="cancel-upload"
+                                                    (click)="cancelUploadBusinessDisplayImage()"
+                                                    *ngIf="uploadProgressBusinessDisplayImage != undefined || (filePathBusinessDisplayImage != null && filePathBusinessDisplayImage !=undefined && filePathBusinessDisplayImage != '')"
+                                                    style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                                    cancel
+                                                </mat-icon>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" style="margin-left: 0; padding-left: 0;">
+                                <div class="col-md-12"
+                                    style="margin-left: 0;padding-left: 0;margin-right: 0;padding-right: 0;">
+                                    <div class="form-row">
+                                        <div class="col-md-12">
+                                            <label for="hours">
+                                                Business Working Hours
+                                            </label>
+                                        </div>
+                                        <div class="col-md-12">
+
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <div class="col-md-1">
+                                                        <label><b>Mon</b></label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-center">
+                                                        <div class="col-md-3"><label for="monFrom">From: </label></div>
+                                                        <div class="col-md-9 pr-0">
+                                                            <input type="time" class="form-control" id="monFrom"
+                                                                formControlName="MonFromTime">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 p-0 text-center">
+                                                        <div class="col-md-3 p-0"><label for="monTo">To: </label></div>
+                                                        <div class="col-md-9 p-0">
+                                                            <input type="time" class="form-control" id="monTo"
+                                                                formControlName="MonFromTime">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-center">
+                                                    <div class="col-md-1">
+                                                        <label><b>Tue</b></label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-center">
+                                                        <div class="col-md-3"><label for="tueFrom">From: </label></div>
+                                                        <div class="col-md-9 pr-0">
+                                                            <input type="time" class="form-control" id="tueFrom"
+                                                                formControlName="TueFromTime">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 p-0 text-center">
+                                                        <div class="col-md-3 p-0"><label for="tueTo">To: </label></div>
+                                                        <div class="col-md-9 p-0">
+                                                            <input type="time" class="form-control" id="tueTo"
+                                                                formControlName="TueToTime">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-center">
+                                                    <div class="col-md-1">
+                                                        <label><b>Wed</b></label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-center">
+                                                        <div class="col-md-3"><label for="wedFrom">From: </label></div>
+                                                        <div class="col-md-9 pr-0">
+                                                            <input type="time" class="form-control" id="wedFrom"
+                                                                formControlName="WedFromTime">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 p-0 text-center">
+                                                        <div class="col-md-3 p-0"><label for="wedTo">To: </label></div>
+                                                        <div class="col-md-9 p-0">
+                                                            <input type="time" class="form-control" id="wedTo"
+                                                                formControlName="WedToTime">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-center">
+                                                    <div class="col-md-1">
+                                                        <label><b>Thu</b></label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-center">
+                                                        <div class="col-md-3"><label for="thuFrom">From: </label></div>
+                                                        <div class="col-md-9 pr-0">
+                                                            <input type="time" class="form-control" id="thuFrom"
+                                                                formControlName="ThuFromTime">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 p-0 text-center">
+                                                        <div class="col-md-3 p-0"><label for="thuTo">To: </label></div>
+                                                        <div class="col-md-9 p-0">
+                                                            <input type="time" class="form-control" id="thuTo"
+                                                                formControlName="ThuToTime">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-center">
+                                                    <div class="col-md-1">
+                                                        <label><b>Fri</b></label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-center">
+                                                        <div class="col-md-3"><label for="friFrom">From: </label></div>
+                                                        <div class="col-md-9 pr-0">
+                                                            <input type="time" class="form-control" id="friFrom"
+                                                                formControlName="FriFromTime">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 p-0 text-center">
+                                                        <div class="col-md-3 p-0"><label for="friTo">To: </label></div>
+                                                        <div class="col-md-9 p-0">
+                                                            <input type="time" class="form-control" id="friTo"
+                                                                formControlName="FriToTime">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-center">
+                                                    <div class="col-md-1">
+                                                        <label><b>Sat</b></label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-center">
+                                                        <div class="col-md-3"><label for="satFrom">From: </label></div>
+                                                        <div class="col-md-9 pr-0">
+                                                            <input type="time" class="form-control" id="satFrom"
+                                                                formControlName="SatFromTime">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 p-0 text-center">
+                                                        <div class="col-md-3 p-0"><label for="satTo">To: </label></div>
+                                                        <div class="col-md-9 p-0">
+                                                            <input type="time" class="form-control" id="satTo"
+                                                                formControlName="SatToTime">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-center">
+                                                    <div class="col-md-1">
+                                                        <label><b>Sun</b></label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-center">
+                                                        <div class="col-md-3"><label for="sunFrom">From: </label></div>
+                                                        <div class="col-md-9 pr-0">
+                                                            <input type="time" class="form-control" id="sunFrom"
+                                                                formControlName="SunFromTime">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-5 p-0 text-center">
+                                                        <div class="col-md-3 p-0"><label for="sunTo">To: </label></div>
+                                                        <div class="col-md-9 p-0">
+                                                            <input type="time" class="form-control" id="sunTo"
+                                                                formControlName="SunToTime">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-12">
+                                <div class="form-row">
+                                    <div class="col-md-3">
+                                        <div class="col-md-12" style="margin-left:0; padding-left: 0;">
+                                            <label>Image 1</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <input type="file" class="custom-file" id="businessImage1"
+                                                (change)="onChangeBusinessImage1($event)">
+                                            <label class="custom-file-label" for="businessImage1">
+                                                Upload Image (Upto 1 MB)
+                                            </label>
+                                            <div style="width: 80%;background-color: #7DA3BA;height: 20%;margin-top: 1%;
+                                            border-radius: 21px;font-size: 65%;" class="progress-bar"
+                                                role="progressbar" [style.width]="uploadProgressBusinessImage1"
+                                                aria-valuenow="uploadProgressBusinessImage1" aria-valuemin="0"
+                                                aria-valuemax="100"
+                                                *ngIf="filePathBusinessImage1 != null && filePathBusinessImage1 !=undefined">
+                                                {{uploadProgressBusinessImage1}}
+                                            </div>
+                                        </div>
+                                        <div class="col" *ngIf="filePathBusinessImage1 != null"
+                                            style="position: relative;">
+                                            <img src="{{filePathBusinessImage1}}" height="70px" />
+                                            <mat-icon class="cancel-upload" (click)="cancelUploadBusinessImage1()"
+                                                *ngIf="uploadProgressBusinessImage1 != undefined || (filePathBusinessImage1 != null && filePathBusinessImage1 !=undefined && filePathBusinessImage1 != '')"
+                                                style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                                cancel
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="col-md-12" style="margin-left:0; padding-left: 0;">
+                                            <label>Image 2</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <input type="file" class="custom-file" id="businessImage2"
+                                                (change)="onChangeBusinessImage2($event)">
+                                            <label class="custom-file-label" for="businessImage2">
+                                                Upload Image (Upto 1 MB)
+                                            </label>
+                                            <div style="width: 80%;background-color: #7DA3BA;height: 20%;margin-top: 1%;
+                                            border-radius: 21px;font-size: 65%;" class="progress-bar"
+                                                role="progressbar" [style.width]="uploadProgressBusinessImage2"
+                                                aria-valuenow="uploadProgressBusinessImage2" aria-valuemin="0"
+                                                aria-valuemax="100"
+                                                *ngIf="filePathBusinessImage2 != null && filePathBusinessImage2 !=undefined">
+                                                {{uploadProgressBusinessImage2}}
+                                            </div>
+                                        </div>
+                                        <div class="col" *ngIf="filePathBusinessImage2 != null"
+                                            style="position: relative;">
+                                            <img src="{{filePathBusinessImage2}}" height="70px" />
+                                            <mat-icon class="cancel-upload" (click)="cancelUploadBusinessImage2()"
+                                                *ngIf="uploadProgressBusinessImage2 != undefined || (filePathBusinessImage2 != null && filePathBusinessImage2 !=undefined && filePathBusinessImage2 != '')"
+                                                style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                                cancel
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="col-md-12" style="margin-left:0; padding-left: 0;">
+                                            <label>Image 3</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <input type="file" class="custom-file" id="businessImage3"
+                                                (change)="onChangeBusinessImage3($event)">
+                                            <label class="custom-file-label" for="businessImage3">
+                                                Upload Image (Upto 1 MB)
+                                            </label>
+                                            <div style="width: 80%;background-color: #7DA3BA;height: 20%;margin-top: 1%;
+                                            border-radius: 21px;font-size: 65%;" class="progress-bar"
+                                                role="progressbar" [style.width]="uploadProgressBusinessImage3"
+                                                aria-valuenow="uploadProgressBusinessImage3" aria-valuemin="0"
+                                                aria-valuemax="100"
+                                                *ngIf="filePathBusinessImage3 != null && filePathBusinessImage3 !=undefined">
+                                                {{uploadProgressBusinessImage3}}
+                                            </div>
+                                        </div>
+                                        <div class="col" *ngIf="filePathBusinessImage3 != null"
+                                            style="position: relative;">
+                                            <img src="{{filePathBusinessImage3}}" height="70px" />
+                                            <mat-icon class="cancel-upload" (click)="cancelUploadBusinessImage2()"
+                                                *ngIf="uploadProgressBusinessImage3 != undefined || (filePathBusinessImage3 != null && filePathBusinessImage3 !=undefined && filePathBusinessImage3 != '')"
+                                                style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                                cancel
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="col-md-12" style="margin-left:0; padding-left: 0;">
+                                            <label>Image 4</label>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <input type="file" class="custom-file" id="businessImage4"
+                                                (change)="onChangeBusinessImage4($event)">
+                                            <label class="custom-file-label" for="businessImage4">
+                                                Upload Image (Upto 1 MB)
+                                            </label>
+                                            <div style="width: 80%;background-color: #7DA3BA;height: 20%;margin-top: 1%;
+                                            border-radius: 21px;font-size: 65%;" class="progress-bar"
+                                                role="progressbar" [style.width]="uploadProgressBusinessImage4"
+                                                aria-valuenow="uploadProgressBusinessImage4" aria-valuemin="0"
+                                                aria-valuemax="100"
+                                                *ngIf="filePathBusinessImage4 != null && filePathBusinessImage4 !=undefined">
+                                                {{uploadProgressBusinessImage4}}
+                                            </div>
+                                        </div>
+                                        <div class="col" *ngIf="filePathBusinessImage4 != null"
+                                            style="position: relative;">
+                                            <img src="{{filePathBusinessImage4}}" height="70px" />
+                                            <mat-icon class="cancel-upload" (click)="cancelUploadBusinessImage4()"
+                                                *ngIf="uploadProgressBusinessImage4 != undefined || (filePathBusinessImage4 != null && filePathBusinessImage4 !=undefined && filePathBusinessImage4 != '')"
+                                                style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                                cancel
+                                            </mat-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
                     <div>
                         <button mat-button matStepperNext>Next</button>
                         <button mat-button matStepperPrevious>Back</button>

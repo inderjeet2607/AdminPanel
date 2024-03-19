@@ -31,3 +31,10 @@
     flex: 1;
     text-align: right;
 }
+
+.editClass {
+    background: #7DA3BA;
+    border: none;
+    border-radius: 3px;
+    color: white;
+}
