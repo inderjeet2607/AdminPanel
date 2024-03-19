@@ -10,6 +10,7 @@ import { PackageTypeService } from '../../services/packageType/package-type.serv
 import { AppSettings } from '../../services/Constants';
 import { GroupListService } from '../../services/groupList/group-list.service';
 import { StateService } from '../../services/state/state.service';
+import { BusinessProfilesService } from '../../services/businessProfile/business-profiles.service';
 
 @Component({
   selector: 'app-home',
@@ -23,7 +24,6 @@ export class HomeComponent {
   secondFormGroup: FormGroup;
   thirdFormGroup: FormGroup;
   fourthFormGroup: FormGroup;
-  fifthFormGroup: FormGroup;
   businessGroupID: any;
   submitted = false;
   finalSubmit = false;
@@ -40,9 +40,11 @@ export class HomeComponent {
   industryTypeData: any = [];
   packageTypeData: any = [];
   statesData: any = [];
+  businessLocationName: any = [];
   dropdownSettingsSingle: IDropdownSettings = {};
   dropdownSettingsSinglePackage: IDropdownSettings = {};
   dropdownSettingsSingleState: IDropdownSettings = {};
+  dropdownSettingsBusinessLocationName: IDropdownSettings = {};
   //#region Business Logo variables
   fileBusinessLogo: File;
   uploadProgressBusinessLogo: any;
@@ -97,20 +99,20 @@ export class HomeComponent {
   fileNameBusinessImage3: any = null;
   filePathBusinessImage3: any = null;
   //#endregion
-   //#region Business Image 4
-   fileBusinessImage4: File;
-   uploadProgressBusinessImage4: any;
-   loadingBusinessImage4: boolean = false;
-   uploadSubBusinessImage4: Subscription;
-   isfileUploadedBusinessImage4 = false;
-   annImageBusinessImage4: any;
-   fileNameBusinessImage4: any = null;
-   filePathBusinessImage4: any = null;
-   //#endregion
+  //#region Business Image 4
+  fileBusinessImage4: File;
+  uploadProgressBusinessImage4: any;
+  loadingBusinessImage4: boolean = false;
+  uploadSubBusinessImage4: Subscription;
+  isfileUploadedBusinessImage4 = false;
+  annImageBusinessImage4: any;
+  fileNameBusinessImage4: any = null;
+  filePathBusinessImage4: any = null;
+  //#endregion
 
   constructor(private aroute: ActivatedRoute, private route: Router, private fb: FormBuilder, private _uploadService: UploadServiceService,
-    private _industryService: IndustryService, private _packageService: PackageTypeService,
-    private _groupService: GroupListService, private _stateService: StateService) {
+    private _industryService: IndustryService, private _packageService: PackageTypeService, private _groupService: GroupListService,
+    private _stateService: StateService, private _businessProfileService: BusinessProfilesService) {
 
     this.firstFormGroup = this.fb.group({
       BusinessgroupName: ['', Validators.required],
@@ -158,13 +160,26 @@ export class HomeComponent {
       SunToTime: ['']
     });
     this.thirdFormGroup = this.fb.group({
-      secondCtrl: ['', Validators.required],
+      CardNo: [''],
+      BusinessLocationName: ['', Validators.required],
+      PackageTypeID: ['', Validators.required],
+      ExpiryDate: [''],
+      Cvv: [''],
+      ZipCode: ['', Validators.required],
+      ChkMakeDefault: [''],
+      CardHolderName: [''],
+      AccNo: [''],
+      RoutingNo: [''],
+      AccHolderName: [''],
+      selectedOption: ['1'],
+      GoLiveDate: ['']
     });
     this.fourthFormGroup = this.fb.group({
-      secondCtrl: ['', Validators.required],
-    });
-    this.fifthFormGroup = this.fb.group({
-      secondCtrl: ['', Validators.required],
+      SrcBusinessLocationName: ['', Validators.required],
+      CustTabletBrand: ['', Validators.required],
+      CustTabletModel: ['', Validators.required],
+      StoreTabletBrand: ['', Validators.required],
+      StoreTabletModel: ['', Validators.required],
     });
   }
 
@@ -173,6 +188,8 @@ export class HomeComponent {
     this.getIndustries();
     this.getPackageTypes();
     this.getStates();
+    this.getBusinessLocationName();
+
     if (this.businessGroupID != null && this.businessGroupID != '' && this.businessGroupID != undefined && this.businessGroupID != 'New') {
       this.getBusinessGroupByID(this.businessGroupID);
     }
@@ -192,6 +209,12 @@ export class HomeComponent {
     this.dropdownSettingsSingleState = {
       idField: 'id',
       textField: 'name',
+      singleSelection: true
+    }
+
+    this.dropdownSettingsBusinessLocationName = {
+      idField: 'id',
+      textField: 'businessName',
       singleSelection: true
     }
   }
@@ -225,6 +248,17 @@ export class HomeComponent {
       },
       error: (error: any) => {
 
+      }
+    })
+  }
+
+  getBusinessLocationName() {
+    this._businessProfileService.GetBusinessLocationByGroupId(1).subscribe({
+      next: (data: any) => {
+        this.businessLocationName = data;
+      },
+      error: (error: any) => {
+        console.log("This is error message", error)
       }
     })
   }
@@ -449,93 +483,93 @@ export class HomeComponent {
   }
   //#endregion
 
-//#region BusinessImage3
-onChangeBusinessImage3(event: any) {
-  this.fileBusinessImage3 = event.target.files[0];
+  //#region BusinessImage3
+  onChangeBusinessImage3(event: any) {
+    this.fileBusinessImage3 = event.target.files[0];
 
-  if (this.fileBusinessImage3) {
-    this.loadingBusinessImage3 = true;
-    this.uploadSubBusinessImage3 = this._uploadService.uploadBusinessImage(this.fileBusinessImage3).subscribe((event: any) => {
-      if (event.type == HttpEventType.UploadProgress) {
-        this.uploadProgressBusinessImage3 = Math.round(100 * (event.loaded / event.total)).toString() + "%";
-      }
-      if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
-        this.loadingBusinessImage3 = false; // Flag variable
-        this.isfileUploadedBusinessImage3 = true;
-        this.annImageBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage3.name;
-        let array = event.partialText.split('|')[1].split('\\');
-        this.fileNameBusinessImage3 = array[array.length - 1];
-        this.filePathBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage3;
-      } else {
-        this.loadingBusinessImage3 = false;
-        this.isfileUploadedBusinessImage3 = false;
-      }
-    });
+    if (this.fileBusinessImage3) {
+      this.loadingBusinessImage3 = true;
+      this.uploadSubBusinessImage3 = this._uploadService.uploadBusinessImage(this.fileBusinessImage3).subscribe((event: any) => {
+        if (event.type == HttpEventType.UploadProgress) {
+          this.uploadProgressBusinessImage3 = Math.round(100 * (event.loaded / event.total)).toString() + "%";
+        }
+        if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
+          this.loadingBusinessImage3 = false; // Flag variable
+          this.isfileUploadedBusinessImage3 = true;
+          this.annImageBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage3.name;
+          let array = event.partialText.split('|')[1].split('\\');
+          this.fileNameBusinessImage3 = array[array.length - 1];
+          this.filePathBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage3;
+        } else {
+          this.loadingBusinessImage3 = false;
+          this.isfileUploadedBusinessImage3 = false;
+        }
+      });
+    }
+    this.loadingBusinessImage3 = false;
   }
-  this.loadingBusinessImage3 = false;
-}
 
-cancelUploadBusinessImage3() {
-  if (this.uploadSubBusinessImage3 != null) {
-    this.uploadSubBusinessImage3.unsubscribe();
+  cancelUploadBusinessImage3() {
+    if (this.uploadSubBusinessImage3 != null) {
+      this.uploadSubBusinessImage3.unsubscribe();
+    }
+    this.uploadProgressBusinessImage3 = "0%";
+    this.isfileUploadedBusinessImage3 = false;
+    this.fileNameBusinessImage3 = 'Upload Image (Upto 1 MB)';
+    this.resetBusinessImage3Details();
   }
-  this.uploadProgressBusinessImage3 = "0%";
-  this.isfileUploadedBusinessImage3 = false;
-  this.fileNameBusinessImage3 = 'Upload Image (Upto 1 MB)';
-  this.resetBusinessImage3Details();
-}
 
-resetBusinessImage3Details() {
-  this.fileBusinessImage3 = null;
-  this.filePathBusinessImage3 = null;
-  this.uploadProgressBusinessImage3 = null;
-  this.uploadSubBusinessImage3 = null;
-}
-//#endregion
-
-//#region BusinessImage4
-onChangeBusinessImage4(event: any) {
-  this.fileBusinessImage4 = event.target.files[0];
-
-  if (this.fileBusinessImage4) {
-    this.loadingBusinessImage4 = true;
-    this.uploadSubBusinessImage4 = this._uploadService.uploadBusinessImage(this.fileBusinessImage4).subscribe((event: any) => {
-      if (event.type == HttpEventType.UploadProgress) {
-        this.uploadProgressBusinessImage4 = Math.round(100 * (event.loaded / event.total)).toString() + "%";
-      }
-      if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
-        this.loadingBusinessImage4 = false; // Flag variable
-        this.isfileUploadedBusinessImage4 = true;
-        this.annImageBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage4.name;
-        let array = event.partialText.split('|')[1].split('\\');
-        this.fileNameBusinessImage4 = array[array.length - 1];
-        this.filePathBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage4;
-      } else {
-        this.loadingBusinessImage4 = false;
-        this.isfileUploadedBusinessImage4 = false;
-      }
-    });
+  resetBusinessImage3Details() {
+    this.fileBusinessImage3 = null;
+    this.filePathBusinessImage3 = null;
+    this.uploadProgressBusinessImage3 = null;
+    this.uploadSubBusinessImage3 = null;
   }
-  this.loadingBusinessImage4 = false;
-}
+  //#endregion
 
-cancelUploadBusinessImage4() {
-  if (this.uploadSubBusinessImage4 != null) {
-    this.uploadSubBusinessImage4.unsubscribe();
+  //#region BusinessImage4
+  onChangeBusinessImage4(event: any) {
+    this.fileBusinessImage4 = event.target.files[0];
+
+    if (this.fileBusinessImage4) {
+      this.loadingBusinessImage4 = true;
+      this.uploadSubBusinessImage4 = this._uploadService.uploadBusinessImage(this.fileBusinessImage4).subscribe((event: any) => {
+        if (event.type == HttpEventType.UploadProgress) {
+          this.uploadProgressBusinessImage4 = Math.round(100 * (event.loaded / event.total)).toString() + "%";
+        }
+        if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
+          this.loadingBusinessImage4 = false; // Flag variable
+          this.isfileUploadedBusinessImage4 = true;
+          this.annImageBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage4.name;
+          let array = event.partialText.split('|')[1].split('\\');
+          this.fileNameBusinessImage4 = array[array.length - 1];
+          this.filePathBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage4;
+        } else {
+          this.loadingBusinessImage4 = false;
+          this.isfileUploadedBusinessImage4 = false;
+        }
+      });
+    }
+    this.loadingBusinessImage4 = false;
   }
-  this.uploadProgressBusinessImage4 = "0%";
-  this.isfileUploadedBusinessImage4 = false;
-  this.fileNameBusinessImage4 = 'Upload Image (Upto 1 MB)';
-  this.resetBusinessImage4Details();
-}
 
-resetBusinessImage4Details() {
-  this.fileBusinessImage4 = null;
-  this.filePathBusinessImage4 = null;
-  this.uploadProgressBusinessImage4 = null;
-  this.uploadSubBusinessImage4 = null;
-}
-//#endregion
+  cancelUploadBusinessImage4() {
+    if (this.uploadSubBusinessImage4 != null) {
+      this.uploadSubBusinessImage4.unsubscribe();
+    }
+    this.uploadProgressBusinessImage4 = "0%";
+    this.isfileUploadedBusinessImage4 = false;
+    this.fileNameBusinessImage4 = 'Upload Image (Upto 1 MB)';
+    this.resetBusinessImage4Details();
+  }
+
+  resetBusinessImage4Details() {
+    this.fileBusinessImage4 = null;
+    this.filePathBusinessImage4 = null;
+    this.uploadProgressBusinessImage4 = null;
+    this.uploadSubBusinessImage4 = null;
+  }
+  //#endregion
 
   Cancel() {
     this.route.navigate(['group-list']);
@@ -645,6 +679,23 @@ resetBusinessImage4Details() {
       return false;
     }
     return true;
+  }
+
+  SavePaymentInfo() {
+    this.submitted = true;
+    if (this.thirdFormGroup.invalid) {
+      console.log("Invalid")
+      return;
+    }
+    this.isLoading = true;
+  }
+
+  ReviewAndSave() {
+    this.submitted = true;
+    if (this.fourthFormGroup.invalid) {
+      return;
+    }
+    this.isLoading = true;
   }
 
 }

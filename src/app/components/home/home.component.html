@@ -303,8 +303,6 @@
                                 <button matStepperNext class="btn btn-success text-center" (click)="SaveGroupDetails()"
                                     [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
                                     Save & Continue
-                                    <!-- <img alt="phonevector" class="filter-green ml3"
-                                        src="../../../assets/img/icons/Sand Campaign.svg"> -->
                                 </button>
                             </div>
                         </div>
@@ -904,36 +902,401 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div>
+                        <button mat-button matStepperNext>Next</button>
+                        <button mat-button matStepperPrevious>Back</button>
+                    </div>
+                </form>
+            </mat-step>
+            <mat-step [stepControl]="thirdFormGroup" label="Payment Info">
+                <form [formGroup]="thirdFormGroup">
+                    <div class="wrapper" style="background: white;border-radius: 15px;">
+                        <h4>
+                            <b>Create Payment Info</b>
+                        </h4>
+                        <ng-template matStepLabel>Payment Info</ng-template>
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="Industry">
+                                            Business Location Name
+                                        </label>
+                                        <ng-multiselect-dropdown [placeholder]="'Choose Business Location Name'"
+                                            id="businessLocationName" [settings]="dropdownSettingsBusinessLocationName"
+                                            [data]="businessLocationName" formControlName="BusinessLocationName">
+                                        </ng-multiselect-dropdown>
+                                        <div style="width:100%;"
+                                            *ngIf="submitted && thirdFormGroup.controls['BusinessLocationName'].errors"
+                                            class="invalid-feedback">
+                                            <div
+                                                *ngIf="thirdFormGroup.controls['BusinessLocationName'].errors['required']">
+                                                Business Location Type is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="packageType">
+                                            Package Type
+                                        </label>
+                                        <ng-multiselect-dropdown [placeholder]="'Choose Package Type'" id="packageType"
+                                            [settings]="dropdownSettingsSinglePackage" [data]="packageTypeData"
+                                            formControlName="PackageTypeID">
+                                        </ng-multiselect-dropdown>
+                                        <div style="width:100%;"
+                                            *ngIf="submitted && firstFormGroup.controls['PackageTypeID'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="firstFormGroup.controls['PackageTypeID'].errors['required']">
+                                                Package Type is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    </div>
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-4">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="SelectType">
+                                            Select Type
+                                        </label> <br>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" id="debit" value="1"
+                                                formControlName="selectedOption">
+                                            <label class="form-check-label" for="debit">
+                                                Debit Card
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" id="credit" value="2"
+                                                formControlName="selectedOption">
+                                            <label class="form-check-label" for="credit">
+                                                Credit Card
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" id="bank" value="3"
+                                                formControlName="selectedOption">
+                                            <label class="form-check-label" for="bank">
+                                                Bank Transfer
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="col">
+                                    <label for="PaymenSchedule">
+                                        Payment Schedule
+                                    </label> <br>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" id="monthly" value="1"
+                                            name="paymentSchedule">
+                                        <label class="form-check-label" for="monthly">
+                                            Monthly
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" id="yearly" value="2"
+                                            name="paymentSchedule">
+                                        <label class="form-check-label" for="yearly">
+                                            Yearly
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="liveDate">
+                                    Go Live Date
+                                </label>
+                                <input id="liveDate" type="date" class="form-control" formControlName="GoLiveDate" />
+                            </div>
+                        </div>
 
+                        <div class="row" style="margin-bottom: 1%;"
+                            *ngIf="thirdFormGroup.get('selectedOption').value==='3'">
+                            <div class="col-md-3">
+                                <div class="form-row">
+                                    <label for="AccountNo">
+                                        Account Number
+                                    </label>
+                                    <input id="AccountNo" class="form-control" formControlName="AccNo"
+                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['AccNo'].errors }">
+                                    <div *ngIf="submitted && thirdFormGroup.controls['AccNo'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="thirdFormGroup.controls['AccNo'].errors['required']">
+                                            Account Number is Required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-row">
+                                    <label for="RoutingNo">
+                                        Routing Number
+                                    </label>
+                                    <input id="RoutingNo" class="form-control" formControlName="RoutingNo"
+                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['RoutingNo'].errors }">
+                                    <div *ngIf="submitted && thirdFormGroup.controls['RoutingNo'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="thirdFormGroup.controls['RoutingNo'].errors['required']">
+                                            Routing Number is Required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="cardHolderName">
+                                            Card Holder Name
+                                        </label>
+                                        <input id="cardHolderName" class="form-control" formControlName="CardHolderName"
+                                            [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardHolderName'].errors }"
+                                            style="text-transform: uppercase;">
+                                        <div *ngIf="submitted && thirdFormGroup.controls['CardHolderName'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="thirdFormGroup.controls['CardHolderName'].errors['required']">
+                                                Card Holder Name is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 1%;"
+                            *ngIf="thirdFormGroup.get('selectedOption').value!=='3'">
+                            <div class="col-md-3">
+                                <div class="form-row">
+                                    <label for="CardNo">
+                                        Card Number
+                                    </label>
+                                    <input id="CardNo" class="form-control" formControlName="CardNo"
+                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardNo'].errors }"
+                                        maxlength="16" placeholder="xxxx xxxx xxxx xxxx">
+                                    <div *ngIf="submitted && thirdFormGroup.controls['CardNo'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="thirdFormGroup.controls['CardNo'].errors['required']">
+                                            Card Number is Required
+                                        </div>
+                                        <div *ngIf="thirdFormGroup.controls['CardNo'].errors['pattern']">
+                                            Enter valid Card number
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-row">
+                                    <label for="expDate">
+                                        Expiry Month/Year
+                                    </label>
+                                    <input id="expDate" class="form-control" style="width: 70%;"
+                                        formControlName="ExpiryDate"
+                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ExpiryDate'].errors }"
+                                        placeholder="MM/YY" maxlength="7">
+                                    <div *ngIf="submitted && thirdFormGroup.controls['ExpiryDate'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['required']">
+                                            Expiry Date is required
+                                        </div>
+                                        <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['pattern']">
+                                            Enter valid format for Expiry Date
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-3" *ngIf="thirdFormGroup.get('selectedOption').value!=='3'">
+                                <div class="form-row" style="width: 21%;">
+                                    <label for="cvv">
+                                        CVV
+                                    </label>
+                                    <input id="cvv" class="form-control" formControlName="Cvv"
+                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['Cvv'].errors }"
+                                        maxlength="3" pattern="[0-9]">
+                                    <div *ngIf="submitted && thirdFormGroup.controls['Cvv'].errors"
+                                        class="invalid-feedback">
+                                        <div *ngIf="thirdFormGroup.controls['Cvv'].errors['required']">
+                                            This field is required
+                                        </div>
+                                        <div *ngIf="thirdFormGroup.controls['Cvv'].errors['pattern']">
+                                            This field only accepts number
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="zipCode">
+                                            Zip Code
+                                        </label>
+                                        <input id="zipCode" class="form-control" formControlName="ZipCode"
+                                            [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ZipCode'].errors }"
+                                            maxlength="6">
+                                        <div *ngIf="submitted && thirdFormGroup.controls['ZipCode'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="thirdFormGroup.controls['ZipCode'].errors['required']">
+                                                Zip Code is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-row" style="margin-top: 35px;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" formControlName="ChkMakeDefault"
+                                            value="" id="ChkMakeDefault">
+                                        <label class="form-check-label" for="ChkMakeDefault">
+                                            Make Default
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-md-12 text-center">
+                                <button matStepperNext class="btn btn-success text-center" (click)="SavePaymentInfo()"
+                                    [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
+                                    Save & Continue
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div>
-                        <button mat-button matStepperNext>Next</button>
                         <button mat-button matStepperPrevious>Back</button>
                     </div>
                 </form>
             </mat-step>
-            <mat-step [stepControl]="secondFormGroup" label="Payment Info">
-                <form [formGroup]="secondFormGroup">
-                    <div>
-                        <button mat-button matStepperNext>Next</button>
-                        <button mat-button matStepperPrevious>Back</button>
+            <mat-step [stepControl]="fourthFormGroup" label="Sources">
+                <form [formGroup]="fourthFormGroup">
+                    <div class="wrapper" style="background: white;border-radius: 15px;">
+                        <h4>
+                            <b>Create Sources</b>
+                        </h4>
+                        <ng-template matStepLabel>Sources</ng-template>
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="Industry">
+                                            Business Location Name
+                                        </label>
+                                        <ng-multiselect-dropdown [placeholder]="'Choose Business Location Name'"
+                                            id="businessLocationName" [settings]="dropdownSettingsBusinessLocationName"
+                                            [data]="businessLocationName" formControlName="SrcBusinessLocationName">
+                                        </ng-multiselect-dropdown>
+                                        <div style="width:100%;"
+                                            *ngIf="submitted && fourthFormGroup.controls['SrcBusinessLocationName'].errors"
+                                            class="invalid-feedback">
+                                            <div
+                                                *ngIf="fourthFormGroup.controls['SrcBusinessLocationName'].errors['required']">
+                                                This field is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;text-align: center;">
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="Industry">
+                                            <b>Customer Tablet</b>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="col">
+                                        <label for="Industry">
+                                            <b>Store Tablet</b>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <label for="CustTabletBrand">
+                                    Tablet Brand
+                                </label>
+                                <input id="CustTabletBrand" class="form-control" formControlName="CustTabletBrand"
+                                    [ngClass]="{ 'is-invalid': submitted && fourthFormGroup.controls['CustTabletBrand'].errors }">
+                                <div *ngIf="submitted && fourthFormGroup.controls['CustTabletBrand'].errors"
+                                    class="invalid-feedback">
+                                    <div *ngIf="fourthFormGroup.controls['CustTabletBrand'].errors['required']">
+                                        This field is Required
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="StoreTabletBrand">
+                                    Tablet Brand
+                                </label>
+                                <input id="StoreTabletBrand" class="form-control" formControlName="StoreTabletBrand"
+                                    [ngClass]="{ 'is-invalid': submitted && fourthFormGroup.controls['StoreTabletBrand'].errors }">
+                                <div *ngIf="submitted && fourthFormGroup.controls['StoreTabletBrand'].errors"
+                                    class="invalid-feedback">
+                                    <div *ngIf="fourthFormGroup.controls['StoreTabletBrand'].errors['required']">
+                                        This field is Required
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6">
+                                <label for="CustTabletModel">
+                                    Tablet Model
+                                </label>
+                                <input id="CustTabletModel" class="form-control" formControlName="CustTabletModel"
+                                    [ngClass]="{ 'is-invalid': submitted && fourthFormGroup.controls['CustTabletModel'].errors }">
+                                <div *ngIf="submitted && fourthFormGroup.controls['CustTabletModel'].errors"
+                                    class="invalid-feedback">
+                                    <div *ngIf="fourthFormGroup.controls['CustTabletModel'].errors['required']">
+                                        This field is Required
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="StoreTabletModel">
+                                    Tablet Model
+                                </label>
+                                <input id="StoreTabletModel" class="form-control" formControlName="StoreTabletModel"
+                                    [ngClass]="{ 'is-invalid': submitted && fourthFormGroup.controls['StoreTabletModel'].errors }">
+                                <div *ngIf="submitted && fourthFormGroup.controls['StoreTabletModel'].errors"
+                                    class="invalid-feedback">
+                                    <div *ngIf="fourthFormGroup.controls['StoreTabletModel'].errors['required']">
+                                        This field is Required
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-md-12 text-center">
+                                <button matStepperNext class="btn btn-success text-center" (click)="ReviewAndSave()"
+                                    [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
+                                    Review & Save
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </form>
-            </mat-step>
-            <mat-step [stepControl]="secondFormGroup" label="Sources">
-                <form [formGroup]="secondFormGroup">
-                    <div>
-                        <button mat-button matStepperNext>Next</button>
-                        <button mat-button matStepperPrevious>Back</button>
-                    </div>
-                </form>
-            </mat-step>
-            <mat-step [stepControl]="secondFormGroup" label="Users">
-                <form [formGroup]="secondFormGroup">
                     <div>
                         <button mat-button matStepperPrevious>Back</button>
-                        <button mat-button (click)="stepper.reset()">Reset</button>
                     </div>
                 </form>
             </mat-step>

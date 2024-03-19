@@ -37,7 +37,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     MatTableModule,
     MatIconModule,
     NgbModule,
-    NgMultiSelectDropDownModule.forRoot(),
+    NgMultiSelectDropDownModule.forRoot()
   ],
   providers: [
     provideAnimationsAsync()
