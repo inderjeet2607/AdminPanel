@@ -34,7 +34,7 @@ export class GroupListComponent implements OnInit {
   }
 
   Edit(element: any) {
-    this.route.navigate(['home', { id: element.id }]);
+    this.route.navigate(['home', { id: element.id, paymentInfoID: 0 }]);
   }
 
   exitPage() {
@@ -43,7 +43,7 @@ export class GroupListComponent implements OnInit {
   }
 
   AddNewPage() {
-    this.route.navigate(['home', { id: "New" }]);
+    this.route.navigate(['home', { id: "New", paymentInfoID: 0 }]);
   }
 
   Cancel() {

@@ -376,8 +376,8 @@
                                         </label>
                                         <input id="businessName" class="form-control"
                                             formControlName="BusinessLocationName" autocomplete="off"
-                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['BusinessLocationName'].errors }">
-                                        <div *ngIf="finalSubmit && secondFormGroup.controls['BusinessLocationName'].errors"
+                                            [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['BusinessLocationName'].errors }">
+                                        <div *ngIf="secondStepSubmitted && secondFormGroup.controls['BusinessLocationName'].errors"
                                             class="invalid-feedback">
                                             <div
                                                 *ngIf="secondFormGroup.controls['BusinessLocationName'].errors['required']">
@@ -392,8 +392,8 @@
                                         </label>
                                         <input id="shortName" class="form-control" formControlName="BusinessShortName"
                                             autocomplete="off"
-                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['BusinessShortName'].errors }">
-                                        <div *ngIf="finalSubmit && secondFormGroup.controls['BusinessShortName'].errors"
+                                            [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['BusinessShortName'].errors }">
+                                        <div *ngIf="secondStepSubmitted && secondFormGroup.controls['BusinessShortName'].errors"
                                             class="invalid-feedback">
                                             <div
                                                 *ngIf="secondFormGroup.controls['BusinessShortName'].errors['required']">
@@ -408,8 +408,8 @@
                                         </label>
                                         <input id="phoneNo" class="form-control" formControlName="PhoneNo"
                                             autocomplete="off" (keypress)="numberOnly($event)" maxlength="10"
-                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['PhoneNo'].errors }">
-                                        <div *ngIf="finalSubmit && secondFormGroup.controls['PhoneNo'].errors"
+                                            [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['PhoneNo'].errors }">
+                                        <div *ngIf="secondStepSubmitted && secondFormGroup.controls['PhoneNo'].errors"
                                             class="invalid-feedback">
                                             <div *ngIf="secondFormGroup.controls['PhoneNo'].errors['required']">
                                                 Phone No is required
@@ -429,8 +429,8 @@
                                         </label>
                                         <input id="address" class="form-control" formControlName="Address"
                                             autocomplete="off"
-                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['Address'].errors }">
-                                        <div *ngIf="finalSubmit && secondFormGroup.controls['Address'].errors"
+                                            [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['Address'].errors }">
+                                        <div *ngIf="secondStepSubmitted && secondFormGroup.controls['Address'].errors"
                                             class="invalid-feedback">
                                             <div *ngIf="secondFormGroup.controls['Address'].errors['required']">
                                                 Address is required
@@ -447,7 +447,7 @@
                                             formControlName="StateID">
                                         </ng-multiselect-dropdown>
                                         <div style="width:100%;"
-                                            *ngIf="finalSubmit && secondFormGroup.controls['StateID'].errors"
+                                            *ngIf="secondStepSubmitted && secondFormGroup.controls['StateID'].errors"
                                             class="invalid-feedback">
                                             <div *ngIf="secondFormGroup.controls['StateID'].errors['required']">
                                                 State is required
@@ -461,8 +461,8 @@
                                         </label>
                                         <input id="pincode" class="form-control" formControlName="Pincode"
                                             autocomplete="off"
-                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['Pincode'].errors }">
-                                        <div *ngIf="finalSubmit && secondFormGroup.controls['Pincode'].errors"
+                                            [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['Pincode'].errors }">
+                                        <div *ngIf="secondStepSubmitted && secondFormGroup.controls['Pincode'].errors"
                                             class="invalid-feedback">
                                             <div *ngIf="secondFormGroup.controls['Pincode'].errors['required']">
                                                 Pincode is required
@@ -480,10 +480,31 @@
                                         <label for="businessLabels">
                                             Business Labels (Up to 5 only)
                                         </label>
-                                        <input id="businessLabels" class="form-control"
+                                        <input id="businessLabels" class="form-control" [matChipInputFor]="chipGrid"
                                             formControlName="BusinessLabelID" autocomplete="off"
-                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['BusinessLabelID'].errors }">
-                                        <div *ngIf="finalSubmit && secondFormGroup.controls['BusinessLabelID'].errors"
+                                            (input)="businessLabelOnChange()"
+                                            [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['BusinessLabelID'].errors }">
+                                        <div
+                                            *ngIf='secondFormGroup.controls["BusinessLabelID"].value != undefined && secondFormGroup.controls["BusinessLabelID"].value.length >= 2'>
+                                            <mat-list role="list" *ngFor="let label of filteredBusinessLabels"
+                                                [value]="label.id">
+                                                <mat-list-item role="listitem"
+                                                    (click)="selectBusiness(label.id)">{{label.name}}</mat-list-item>
+                                            </mat-list>
+                                        </div>
+
+                                        <div>
+                                            <mat-chip-grid #chipGrid>
+                                                <mat-chip-row *ngFor="let b of selectedBusinessLabels">
+                                                    {{b.name}}
+                                                    <button matChipRemove (click)="removeBusiness(b.id)">
+                                                        <mat-icon>cancel</mat-icon>
+                                                    </button>
+                                                </mat-chip-row>
+                                            </mat-chip-grid>
+                                        </div>
+
+                                        <div *ngIf="secondStepSubmitted && secondFormGroup.controls['BusinessLabelID'].errors"
                                             class="invalid-feedback">
                                             <div *ngIf="secondFormGroup.controls['BusinessLabelID'].errors['required']">
                                                 Business Label is required
@@ -497,9 +518,9 @@
                                         </label>
                                         <textarea id="description" class="form-control" formControlName="Description"
                                             autocomplete="off" rows="1"
-                                            [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['Description'].errors }">
+                                            [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['Description'].errors }">
                                         </textarea>
-                                        <div *ngIf="finalSubmit && secondFormGroup.controls['Description'].errors"
+                                        <div *ngIf="secondStepSubmitted && secondFormGroup.controls['Description'].errors"
                                             class="invalid-feedback">
                                             <div *ngIf="secondFormGroup.controls['Description'].errors['required']">
                                                 Description is required
@@ -964,7 +985,61 @@
                 </form>
             </mat-step>
             <mat-step [stepControl]="thirdFormGroup" label="Payment Info">
-                <form [formGroup]="thirdFormGroup">
+                <div class="row mt-1 mb-1" *ngIf="showPaymentList">
+                    <div class="col-md-12 p-0 d-flex">
+                        <div class="col-md-7">
+
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control" placeholder="Search By Location Name" autocomplete="off" />
+                        </div>
+                        <div class="col-md-2 flexRight">
+                            <button class="btn btn-success text-center" (click)="AddNewPaymentInfo()">
+                                <img alt="phonevector" class="filter-green"
+                                    src="../../../assets/img/icons/Create Promotion.svg">
+                                Add Payment Info
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <table *ngIf="showPaymentList" mat-table [dataSource]="dataSourcePaymentInfo">
+                    <ng-container matColumnDef="businessLocationName">
+                        <th mat-header-cell *matHeaderCellDef> Business Name </th>
+                        <td mat-cell *matCellDef="let element"> {{element.businessLocationName}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="paymentType">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Payment Type </th>
+                        <td mat-cell *matCellDef="let element" style="text-align: center;"> {{element.paymentType}}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="cardOrAccNumber">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Card/Account Number </th>
+                        <td mat-cell *matCellDef="let element" style="text-align: center;"> {{element.cardOrAcNumber}}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="isDefault">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Default </th>
+                        <td mat-cell *matCellDef="let element" style="text-align: center;"> {{element.isDefault}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="Action">
+                        <th mat-header-cell style="text-align: center;" *matHeaderCellDef>
+                            Edit
+                        </th>
+                        <td style="text-align: center;" mat-cell *matCellDef="let element">
+                            <div>
+                                <button (click)="EditPaymentInfo(element)" class="editClass">Edit
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row class="tableHeaderCellDiv"
+                        *matHeaderRowDef="paymentInfoDisplayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: paymentInfoDisplayedColumns; "></tr>
+                </table>
+
+                <form [formGroup]="thirdFormGroup" *ngIf="!showPaymentList">
                     <div class="wrapper" style="background: white;border-radius: 15px;">
                         <h4>
                             <b>Create Payment Info</b>
@@ -1021,14 +1096,14 @@
                                         <label>
                                             Monthly Amount
                                         </label>
-                                        <input class="form-control" formControlName="paymentAmount"
+                                        <input class="form-control" formControlName="paymentAmountMonthly"
                                             (keypress)="numberOnly($event)" />
                                     </div>
                                     <div *ngIf="thirdFormGroup.get('paymentSchedule').value === '2'">
                                         <label>
                                             Yearly Amount
                                         </label>
-                                        <input class="form-control" formControlName="paymentAmount"
+                                        <input class="form-control" formControlName="paymentAmountYearly"
                                             (keypress)="numberOnly($event)" />
                                     </div>
                                 </div>
@@ -1079,7 +1154,7 @@
 
                         <div class="row" style="margin-bottom: 1%;"
                             *ngIf="thirdFormGroup.get('selectedOption').value=='3'">
-                            <div class="col-md-6 pl-0">
+                            <div class="col-md-6 pl-0 pr-0">
                                 <div class="col p-0 d-flex">
                                     <div class="col-md-6">
                                         <div class="form-row">
@@ -1087,6 +1162,7 @@
                                                 Account Number
                                             </label>
                                             <input id="AccountNo" class="form-control" formControlName="AccNo"
+                                                (keypress)="numberOnly($event)"
                                                 [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['AccNo'].errors }">
                                             <div *ngIf="submitted && thirdFormGroup.controls['AccNo'].errors"
                                                 class="invalid-feedback">
@@ -1096,13 +1172,13 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-row">
                                             <div class="col">
-                                                <label for="cardHolderName">
-                                                    Card Holder Name
+                                                <label for="cardHolderName1">
+                                                    Account Holder Name
                                                 </label>
-                                                <input id="cardHolderName" class="form-control"
+                                                <input id="cardHolderName1" class="form-control"
                                                     formControlName="CardHolderName"
                                                     [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardHolderName'].errors }"
                                                     style="text-transform: uppercase;">
@@ -1110,13 +1186,18 @@
                                                     class="invalid-feedback">
                                                     <div
                                                         *ngIf="thirdFormGroup.controls['CardHolderName'].errors['required']">
-                                                        Card Holder Name is required
+                                                        Account Holder Name is required
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-2" style="padding-right: 6px;">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 pl-0 pr-0">
+                                <div class="col p-0 d-flex">
+                                    <div class="col-md-6">
                                         <div class="form-row">
                                             <label for="RoutingNo">
                                                 Routing No.
@@ -1131,14 +1212,14 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-6"></div>
                                 </div>
                             </div>
-                            <div class="col-md-6"></div>
                         </div>
 
                         <div class="row" style="margin-bottom: 1%;"
                             *ngIf="thirdFormGroup.get('selectedOption').value!=='3'">
-                            <div class="col-md-6 pl-0">
+                            <div class="col-md-6 pl-0 pr-0">
                                 <div class="col p-0 d-flex">
                                     <div class="col-md-6">
                                         <div class="form-row">
@@ -1148,7 +1229,8 @@
                                                 </label>
                                                 <input id="CardNo" class="form-control" formControlName="CardNo"
                                                     [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardNo'].errors }"
-                                                    maxlength="16" placeholder="xxxx xxxx xxxx xxxx">
+                                                    maxlength="16" placeholder="xxxx xxxx xxxx xxxx"
+                                                    (keypress)="numberOnly($event)">
                                                 <div *ngIf="submitted && thirdFormGroup.controls['CardNo'].errors"
                                                     class="invalid-feedback">
                                                     <div *ngIf="thirdFormGroup.controls['CardNo'].errors['required']">
@@ -1161,40 +1243,111 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+
+                                    <div class="col-md-6">
                                         <div class="form-row">
-                                            <label for="expDate">
-                                                Expiry Month/Year
-                                            </label>
-                                            <input id="expDate" class="form-control" formControlName="ExpiryDate"
-                                                [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ExpiryDate'].errors }"
-                                                placeholder="MM/YY" maxlength="7">
-                                            <div *ngIf="submitted && thirdFormGroup.controls['ExpiryDate'].errors"
-                                                class="invalid-feedback">
-                                                <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['required']">
-                                                    Expiry Date is required
-                                                </div>
-                                                <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['pattern']">
-                                                    Enter valid format for Expiry Date
+                                            <div class="col">
+                                                <label for="CardHolderName">
+                                                    Card Holder Name
+                                                </label>
+                                                <input id="CardHolderName" class="form-control"
+                                                    formControlName="CardHolderName"
+                                                    [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardHolderName'].errors }"
+                                                    style="text-transform: uppercase;">
+                                                <div *ngIf="submitted && thirdFormGroup.controls['CardHolderName'].errors"
+                                                    class="invalid-feedback">
+                                                    <div
+                                                        *ngIf="thirdFormGroup.controls['CardHolderName'].errors['required']">
+                                                        Card Holder Name is Required
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-2" style="padding-right: 6px;">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 pl-0">
+                                <div class="col p-0 d-flex">
+                                    <div class="col-md-6" style="padding-right: 6px;">
                                         <div class="form-row">
-                                            <label for="cvv">
-                                                CVV
-                                            </label>
-                                            <input id="cvv" class="form-control" formControlName="Cvv"
-                                                [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['Cvv'].errors }"
-                                                maxlength="3" pattern="[0-9]">
-                                            <div *ngIf="submitted && thirdFormGroup.controls['Cvv'].errors"
-                                                class="invalid-feedback">
-                                                <div *ngIf="thirdFormGroup.controls['Cvv'].errors['required']">
-                                                    This field is required
+                                            <div class="col">
+                                                <label for="expDate">
+                                                    Expiry Month/Year
+                                                </label>
+                                                <input id="expDate" class="form-control" formControlName="ExpiryDate"
+                                                    [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ExpiryDate'].errors }"
+                                                    placeholder="MM/YY" maxlength="7">
+                                                <div *ngIf="submitted && thirdFormGroup.controls['ExpiryDate'].errors"
+                                                    class="invalid-feedback">
+                                                    <div
+                                                        *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['required']">
+                                                        Expiry Date is required
+                                                    </div>
+                                                    <div
+                                                        *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['pattern']">
+                                                        Enter valid format for Expiry Date
+                                                    </div>
                                                 </div>
-                                                <div *ngIf="thirdFormGroup.controls['Cvv'].errors['pattern']">
-                                                    This field only accepts number
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-row">
+                                            <div class="col">
+                                                <label for="cvv">
+                                                    CVV
+                                                </label>
+                                                <input id="cvv" class="form-control" formControlName="Cvv"
+                                                    [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['Cvv'].errors }"
+                                                    maxlength="3" pattern="[0-9]" (keypress)="numberOnly($event)">
+                                                <div *ngIf="submitted && thirdFormGroup.controls['Cvv'].errors"
+                                                    class="invalid-feedback">
+                                                    <div *ngIf="thirdFormGroup.controls['Cvv'].errors['required']">
+                                                        This field is required
+                                                    </div>
+                                                    <div *ngIf="thirdFormGroup.controls['Cvv'].errors['pattern']">
+                                                        This field only accepts number
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 1%;">
+                            <div class="col-md-6 pl-0">
+                                <div class="col p-0 d-flex">
+                                    <div class="col-md-6">
+                                        <div class="form-row">
+                                            <div class="col">
+                                                <label for="zipCode">
+                                                    Zip Code
+                                                </label>
+                                                <input id="zipCode" class="form-control" formControlName="ZipCode"
+                                                    [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ZipCode'].errors }"
+                                                    maxlength="6">
+                                                <div *ngIf="submitted && thirdFormGroup.controls['ZipCode'].errors"
+                                                    class="invalid-feedback">
+                                                    <div *ngIf="thirdFormGroup.controls['ZipCode'].errors['required']">
+                                                        Zip Code is required
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-row">
+                                            <div class="col" style="margin-top: 36px;">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        formControlName="ChkMakeDefault" value="" id="ChkMakeDefault">
+                                                    <label class="form-check-label" for="ChkMakeDefault">
+                                                        Make Default
+                                                    </label>
                                                 </div>
                                             </div>
                                         </div>
@@ -1202,38 +1355,6 @@
                                 </div>
                             </div>
                             <div class="col-md-6"></div>
-                        </div>
-
-                        <div class="row" style="margin-bottom: 1%;">
-                            <div class="col-md-3">
-                                <div class="form-row">
-                                    <div class="col">
-                                        <label for="zipCode">
-                                            Zip Code
-                                        </label>
-                                        <input id="zipCode" class="form-control" formControlName="ZipCode"
-                                            [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ZipCode'].errors }"
-                                            maxlength="6">
-                                        <div *ngIf="submitted && thirdFormGroup.controls['ZipCode'].errors"
-                                            class="invalid-feedback">
-                                            <div *ngIf="thirdFormGroup.controls['ZipCode'].errors['required']">
-                                                Zip Code is required
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-row" style="margin-top: 35px;">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" formControlName="ChkMakeDefault"
-                                            value="" id="ChkMakeDefault">
-                                        <label class="form-check-label" for="ChkMakeDefault">
-                                            Make Default
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="row mt-1">
@@ -1373,6 +1494,358 @@
                         <b>Summary of {{firstFormGroup.controls['BusinessgroupName'].value}}</b>
                     </h4>
                     <ng-template matStepLabel>Summary</ng-template>
+                    <div class="row" style="margin-bottom: 1%;">
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        Business Name : {{firstFormGroup.controls['BusinessgroupName'].value}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        Industry Type : {{firstFormGroup.controls['IndustryTypeID'].value.length != 0 ?
+                                        firstFormGroup.controls['IndustryTypeID'].value[0].name : ''}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        Package Type :
+                                        {{firstFormGroup.controls['PackageTypeID'].value.length != 0 ?
+                                        firstFormGroup.controls['PackageTypeID'].value[0].packageName : ''}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-bottom: 1%">
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        SMS Profile : {{firstFormGroup.controls['SMSProfileID'].value}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        SMS Phone : {{firstFormGroup.controls['SMSPhoneNumber'].value}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        Spin Wheel : {{firstFormGroup.controls['SpinWheelRequired'].value == true ?
+                                        "Yes" : "No"}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-bottom: 1%">
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        Sign In / Sign Out Required? :
+                                        {{firstFormGroup.controls['SignoutRequired'].value == true ? "Yes" : "No"}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        Auto Signout Hours : {{firstFormGroup.controls['SignoutHours'].value}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>
+                                        Daily Closure Time :
+                                        {{firstFormGroup.controls['BusinessClosureTime'].value}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-bottom: 1%;">
+
+                        <div class="accordion" id="businessGroupName">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                        Business Group
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                                    data-bs-parent="#businessGroupName">
+                                    <div class="accordion-body">
+                                        {{firstFormGroup.controls['BusinessgroupName'].value}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion" id="businessLocation">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Business Location
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                    data-bs-parent="#businessLocation">
+                                    <div class="accordion-body">
+                                        {{this.secondFormGroup.controls['BusinessLocationName'].value}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion" id="paymentInfo">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseThree" aria-expanded="false"
+                                        aria-controls="collapseThree">
+                                        Payment Info
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse"
+                                    aria-labelledby="headingThree" data-bs-parent="#paymentInfo">
+                                    <div class="accordion-body">
+
+                                        <div class="row" style="margin-bottom: 1%">
+                                            <div class="col-md-3">
+                                                <div class="form-row">
+                                                    <div class="col">
+                                                        <label>
+                                                            Business Name :
+                                                            {{firstFormGroup.controls['BusinessgroupName'].value}}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-bottom: 1%">
+                                            <div class="col-md-3">
+                                                <div class="form-row">
+                                                    <div class="col">
+                                                        <label>
+                                                            Payment Schedule :
+                                                            {{thirdFormGroup.controls['paymentSchedule'].value == 1 ?
+                                                            "Monthly":
+                                                            (thirdFormGroup.controls['paymentSchedule'].value == 2 ?
+                                                            "Yearly" : "")}}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-bottom: 1%">
+                                            <div class="col-md-3">
+                                                <div class="form-row">
+                                                    <div class="col">
+                                                        <label>
+                                                            Payment Type :
+                                                            {{thirdFormGroup.controls['selectedOption'].value == 1 ?
+                                                            "Debit Card" :
+                                                            thirdFormGroup.controls['selectedOption'].value == 2 ?
+                                                            "Credit Card" :
+                                                            (thirdFormGroup.controls['selectedOption'].value == 3 ?
+                                                            "Bank Transfer" : "")}}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-bottom: 1%;"
+                                            *ngIf="thirdFormGroup.controls['selectedOption'].value === '1'">
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Card Number:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Expiry Month/Year:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Zip Code:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Make Default:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-bottom: 1%;"
+                                            *ngIf="thirdFormGroup.controls['selectedOption'].value === '2'">
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Card Number:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Expiry Month/Year:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Zip Code:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Make Default:
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row" style="margin-bottom: 1%;"
+                                            *ngIf="thirdFormGroup.controls['selectedOption'].value === '3'">
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Account Number:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Routing Number:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Account Holder Name:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Zip Code:
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="col">
+                                                    <label>
+                                                        Make Default:
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row" style="margin-bottom: 1%">
+                                            <div class="col-md-3">
+                                                <div class="form-row">
+                                                    <div class="col">
+                                                        <label>
+                                                            Go Live Date :
+                                                            {{thirdFormGroup.controls['GoLiveDate'].value |
+                                                            date:'dd-MM-yyyy'}}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion" id="sources">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingFour">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFour" aria-expanded="false"
+                                        aria-controls="collapseFour">
+                                        Source
+                                    </button>
+                                </h2>
+                                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
+                                    data-bs-parent="#sources">
+                                    <div class="accordion-body">
+                                        <div class="row" style="margin-bottom: 1%;">
+                                            <label>
+                                                Business Location Name :
+                                                {{secondFormGroup.controls['BusinessLocationName'].value}}
+                                            </label>
+                                        </div>
+                                        <div class="row" style="margin-bottom: 1%;">
+                                            <h4> Customer Tablet </h4>
+                                            <label>
+                                                Tablet Brand
+                                            </label>
+                                            <label>
+                                                Tablet Model
+                                            </label>
+                                        </div>
+                                        <div class="row" style="margin-bottom: 1%;">
+                                            <h4> Store Tablet </h4>
+                                            <label>
+                                                Tablet Brand
+                                            </label>
+                                            <label>
+                                                Tablet Model
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </mat-step>
         </mat-stepper>

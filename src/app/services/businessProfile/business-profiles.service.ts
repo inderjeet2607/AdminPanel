@@ -10,7 +10,7 @@ export class BusinessProfilesService {
 
   private apiUrl = AppSettings.API_ENDPOINT + "/api/BusinessProfiles";
 
-  constructor(private httpClient: HttpClient, private router: Router) { }
+  constructor(private httpClient: HttpClient) { }
 
   public GetBusinessLocationByGroupId(id) {
     return this.httpClient.get<any>(this.apiUrl + "/GetBusinessProfilesByGroupID/" + id).pipe();

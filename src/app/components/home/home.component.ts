@@ -1,5 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -12,6 +12,9 @@ import { GroupListService } from '../../services/groupList/group-list.service';
 import { StateService } from '../../services/state/state.service';
 import { BusinessProfilesService } from '../../services/businessProfile/business-profiles.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { BusinessLabelService } from '../../services/businessLabel/business-label.service';
+import { ToastrService } from 'ngx-toastr';
+import { PaymentInfoService } from '../../services/paymentInfo/payment-info.service';
 
 export interface BusinessLocationList {
   legalName: string;
@@ -19,6 +22,13 @@ export interface BusinessLocationList {
   industry: string;
   city: string;
   pinCode: string;
+}
+
+export interface PaymentInfoList {
+  businessLocationName: string;
+  paymentType: string;
+  cardOrAccNumber: string;
+  isDefault: string;
 }
 
 @Component({
@@ -35,7 +45,7 @@ export class HomeComponent {
   fourthFormGroup: FormGroup;
   businessGroupID: any;
   submitted = false;
-  finalSubmit = false;
+  secondStepSubmitted = false;
   //#region Group Logo variables
   fileGroupLogo: File;
   uploadProgressGroupLogo: any;
@@ -121,10 +131,19 @@ export class HomeComponent {
   dataSourceBusinessLocation: MatTableDataSource<BusinessLocationList>;
   businessLocationDisplayedColumns: string[] = ['legalName', 'businessName', 'industry', 'city', 'pinCode', 'Action'];
   showLocationList: Boolean = true;
+  selectedBusinessLabels: { id: number, name: string }[] = [];
+  filteredBusinessLabels: any = [];
+  businessLabels: any = [];
+  dataSourcePaymentInfo: MatTableDataSource<PaymentInfoList>;
+  paymentInfoDisplayedColumns: string[] = ['businessLocationName', 'paymentType', 'cardOrAccNumber', 'isDefault', 'Action'];
+  showPaymentList: Boolean = true;
+  paymentInfoes: any = [];
+  paymentInfoID: Number = 0;
 
   constructor(private aroute: ActivatedRoute, private route: Router, private fb: FormBuilder, private _uploadService: UploadServiceService,
     private _industryService: IndustryService, private _packageService: PackageTypeService, private _groupService: GroupListService,
-    private _stateService: StateService, private _businessProfileService: BusinessProfilesService) {
+    private _stateService: StateService, private _businessProfileService: BusinessProfilesService,
+    private _businessLabelService: BusinessLabelService, private toast: ToastrService, private _paymentInfoService: PaymentInfoService) {
 
     this.firstFormGroup = this.fb.group({
       BusinessgroupName: ['', Validators.required],
@@ -181,11 +200,11 @@ export class HomeComponent {
       CardHolderName: [''],
       AccNo: [''],
       RoutingNo: [''],
-      AccHolderName: [''],
       selectedOption: [''],
       GoLiveDate: [''],
       paymentSchedule: [''],
-      paymentAmount: ['']
+      paymentAmountMonthly: [''],
+      paymentAmountYearly: ['']
     });
     this.fourthFormGroup = this.fb.group({
       SrcBusinessLocationName: ['', Validators.required],
@@ -197,14 +216,19 @@ export class HomeComponent {
   }
 
   ngOnInit() {
-    this.aroute.params.subscribe((params: Params) => this.businessGroupID = params['id']);
+    this.aroute.params.subscribe((params: Params) => {
+      this.businessGroupID = params['id'],
+      this.paymentInfoID = params['paymentInfoID']
+    });
     this.getIndustries();
     this.getPackageTypes();
     this.getStates();
-    this.getBusinessLocationName();
+    this.GetBusinessLabels();
 
     if (this.businessGroupID != null && this.businessGroupID != '' && this.businessGroupID != undefined && this.businessGroupID != 'New') {
       this.getBusinessGroupByID(this.businessGroupID);
+      this.getBusinessLocationsByGroupID();
+      this.getPaymentInfoesByGroupID();
     }
 
     this.dropdownSettingsSingle = {
@@ -238,7 +262,7 @@ export class HomeComponent {
         this.industryTypeData = data;
       },
       error: (error: any) => {
-
+        console.log("This is error message", error)
       }
     })
   }
@@ -249,7 +273,7 @@ export class HomeComponent {
         this.statesData = data;
       },
       error: (error: any) => {
-
+        console.log("This is error message", error)
       }
     })
   }
@@ -260,18 +284,42 @@ export class HomeComponent {
         this.packageTypeData = data;
       },
       error: (error: any) => {
-
+        console.log("This is error message", error)
       }
     })
   }
 
-  getBusinessLocationName() {
-    this._businessProfileService.GetBusinessLocationByGroupId(1).subscribe({
+  getBusinessLocationsByGroupID() {
+    this._businessProfileService.GetBusinessLocationByGroupId(this.businessGroupID).subscribe({
       next: (data: any) => {
         this.businessLocationName = data;
         this.dataSourceBusinessLocation = this.businessLocationName;
       },
       error: (error: any) => {
+        console.log("This is error message", error)
+      }
+    })
+  }
+
+  getPaymentInfoesByGroupID() {
+    this._paymentInfoService.GetPaymentInfoesByBusinessGroupID(this.businessGroupID).subscribe({
+      next: (data: any) => {
+        this.paymentInfoes = data;
+        this.dataSourcePaymentInfo = this.paymentInfoes;
+      },
+      error: (error: any) => {
+        console.log("This is error message", error)
+      }
+    })
+  }
+
+  GetBusinessLabels() {
+    this._businessLabelService.GetBusinessLabels().subscribe({
+      next: (data) => {
+        this.businessLabels = data;
+        this.filteredBusinessLabels = this.businessLabels;
+      },
+      error: error => {
         console.log("This is error message", error)
       }
     })
@@ -587,6 +635,7 @@ export class HomeComponent {
 
   Cancel() {
     this.route.navigate(['group-list']);
+    this.paymentInfoID = 0;
   }
 
   SaveGroupDetails() {
@@ -780,26 +829,102 @@ export class HomeComponent {
   }
 
   SaveLocationDetails() {
+    this.secondStepSubmitted = true;
+    if (this.secondFormGroup.invalid) {
+      return;
+    }
+
     this.stepper.next();
   }
 
   changePaymentAmount(value: number) {
-    if (value == 1) {
-      this.thirdFormGroup.controls['paymentAmount'].setValue(
-        this.packageTypeData.filter((x: { id: any; }) => x.id == (
-          this.firstFormGroup.controls['PackageTypeID'].value[0].id
-        ))[0].pricePerMonth
-      );
+    if (this.paymentInfoID == 0) {
+      if (value == 1) {
+        this.thirdFormGroup.controls['paymentAmountMonthly'].setValue(
+          this.packageTypeData.filter((x: { id: any; }) => x.id == (
+            this.firstFormGroup.controls['PackageTypeID'].value[0].id
+          ))[0].pricePerMonth
+        );
+      }
+      else if (value == 2) {
+        this.thirdFormGroup.controls['paymentAmountYearly'].setValue(
+          this.packageTypeData.filter((x: { id: any; }) => x.id == (
+            this.firstFormGroup.controls['PackageTypeID'].value[0].id
+          ))[0].yearlyAmount
+        );
+      }
+    }
+  }
 
-      console.log(this.thirdFormGroup.controls['paymentAmount'].value)
+  businessLabelOnChange() {
+    if (this.secondFormGroup.controls["BusinessLabelID"].value.length >= 2) {
+      this.filteredBusinessLabels = this.businessLabels.filter(x => x.name.toLowerCase().includes(this.secondFormGroup.controls['BusinessLabelID'].value.toLowerCase()));
     }
-    else if (value == 2) {
-      this.thirdFormGroup.controls['paymentAmount'].setValue(
-        this.packageTypeData.filter((x: { id: any; }) => x.id == (
-          this.firstFormGroup.controls['PackageTypeID'].value[0].id
-        ))[0].yearlyAmount
-      );
+    else {
+      this.filteredBusinessLabels = this.businessLabels;
     }
+  }
+
+  selectBusiness(id: any) {
+    if (this.selectedBusinessLabels.length == 5) {
+      this.toast.warning("You can select upto 5 Business labels only !", '', { positionClass: 'toast-bottom-right' })
+      return;
+    }
+
+    if (this.selectedBusinessLabels.filter(x => x.id == id).length == 0) {
+      this.secondFormGroup.controls['BusinessLabelID'].setValue('');
+      this.selectedBusinessLabels.push({
+        id: id,
+        name: this.businessLabels.filter(x => x.id == id)[0].name
+      })
+    }
+  }
+
+  removeBusiness(id: any) {
+    this.selectedBusinessLabels.splice((this.selectedBusinessLabels.indexOf(this.selectedBusinessLabels.filter(x => x.id == id)[0])), 1);
+  }
+
+  AddNewPaymentInfo() {
+    this.showPaymentList = false;
+  }
+
+  EditPaymentInfo(e) {
+    this._paymentInfoService.GetPaymentInfoByID(e.id).subscribe({
+      next: (data: any) => {
+        this.paymentInfoID = e.id;
+        this.thirdFormGroup.controls['CardNo'].setValue(data.cardNumber);
+        let selectedLocation: { id: any, businessName: any }[] = [];
+        selectedLocation.push({
+          id: data.businessLocationId,
+          businessName: this.businessLocationName.filter(x => x.id == data.businessLocationId)[0].businessName
+        });
+        this.thirdFormGroup.controls['BusinessLocationName'].setValue(selectedLocation);
+        this.thirdFormGroup.controls['ExpiryDate'].setValue(data.expireMonth + "/" + data.expireYear);
+        this.thirdFormGroup.controls['Cvv'].setValue(data.cvv);
+        this.thirdFormGroup.controls['ZipCode'].setValue(data.zipCode);
+        this.thirdFormGroup.controls['ChkMakeDefault'].setValue(data.isDefault);
+        this.thirdFormGroup.controls['CardHolderName'].setValue(data.cardHolderName);
+        this.thirdFormGroup.controls['AccNo'].setValue(data.accountNumber);
+        this.thirdFormGroup.controls['RoutingNo'].setValue(data.routingName);
+        this.thirdFormGroup.controls['selectedOption'].setValue(data.paymentType);
+
+        let dt = new Date(data.goLiveDate).getDate();
+        let month = (new Date(data.goLiveDate).getMonth() + 1) < 10 ? ("0" + (new Date(data.goLiveDate).getMonth() + 1)) :
+          (new Date(data.goLiveDate).getMonth() + 1);
+        let year = new Date(data.goLiveDate).getFullYear();
+        let liveDate = (year + "-" + month + "-" + dt)
+        this.thirdFormGroup.controls['GoLiveDate'].setValue(liveDate);
+
+        this.thirdFormGroup.controls['paymentSchedule'].setValue(JSON.stringify(data.paymentScheduleID));
+        this.thirdFormGroup.controls['paymentAmountMonthly'].setValue(data.packageMonthlyAmount);
+        this.thirdFormGroup.controls['paymentAmountYearly'].setValue(data.packageYearlyAmount);
+
+        this.showPaymentList = false;
+      },
+      error: (error: any) => {
+
+      }
+    })
   }
 
 }
