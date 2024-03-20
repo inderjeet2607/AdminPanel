@@ -33,6 +33,7 @@
     background-color: white;
     padding: 15px;
     border-radius: 12px;
+    overflow: hidden;
 }
 
 .brownColor {
@@ -85,4 +86,15 @@ i.icon-fs-info {
 
 .datePicker{
     padding: 1px;
+}
+
+.editClass {
+    background: #7DA3BA;
+    border: none;
+    border-radius: 3px;
+    color: white;
+}
+
+.filter-green {
+    filter: brightness(0) invert(1);
 }

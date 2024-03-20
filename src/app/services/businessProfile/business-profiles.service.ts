@@ -15,4 +15,8 @@ export class BusinessProfilesService {
   public GetBusinessLocationByGroupId(id) {
     return this.httpClient.get<any>(this.apiUrl + "/GetBusinessProfilesByGroupID/" + id).pipe();
   }
+
+  public GetBusinessLocationById(id) {
+    return this.httpClient.get<any>(this.apiUrl + "/" + id).pipe();
+  }
 }

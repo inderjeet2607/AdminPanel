@@ -1,6 +1,6 @@
 <div class="bodyclass">
     <div>
-        <div class="col-md-12 p-0 flexdivHeader">
+        <div class="col-md-12 flexdivHeader">
             <div class="col-md-7">
                 <h1 class="headerName">
                     <img style="margin-top: -5px;height: 25px;" src="../../../assets/img/icons/Promotion.svg">
@@ -8,7 +8,7 @@
                 </h1>
             </div>
             <div class="col-md-3">
-
+                <input class="form-control" placeholder="Search By Group Name" autocomplete="off" />
             </div>
             <div class="col-md-2 p-0 flexRight">
                 <button class="btn btn-success text-center" (click)="AddNewPage()">
@@ -46,7 +46,7 @@
             </th>
             <td style="text-align: center;" mat-cell *matCellDef="let element">
                 <div>
-                    <button (click)="Edit(element)" class="mr-2 editClass">Edit&nbsp;&nbsp;
+                    <button (click)="Edit(element)" class="editClass">Edit
                         <i class="fa fa-pencil"></i>
                     </button>
                 </div>

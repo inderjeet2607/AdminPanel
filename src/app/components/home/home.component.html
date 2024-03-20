@@ -1,11 +1,11 @@
 <div class="bodyclass">
     <div>
-        <div class="col-md-12 p-0 flexdivHeader">
-            <div class="col-md-7">
-
-            </div>
-            <div class="col-md-3">
-
+        <div class="col-md-12 flexdivHeader">
+            <div class="col-md-2"></div>
+            <div class="col-md-8 text-center">
+                <h4>
+                    <b>{{firstFormGroup.controls['BusinessgroupName'].value}}</b>
+                </h4>
             </div>
             <div class="col-md-2 p-0 flexRight">
                 <button class="btn btn-success text-center brownColor mb-1" (click)="Cancel()">
@@ -293,14 +293,8 @@
                         </div>
 
                         <div class="row mt-1">
-                            <!-- <div class="col-md-2">
-                                <button matStepperNext class="btn btn-dark text-center">
-                                    Next <img alt="phonevector" class="filter-green ml3"
-                                        src="../../../assets/img/icons/Next.svg">
-                                </button>
-                            </div> -->
                             <div class="col-md-12 text-center">
-                                <button matStepperNext class="btn btn-success text-center" (click)="SaveGroupDetails()"
+                                <button class="btn btn-success text-center" (click)="SaveGroupDetails()"
                                     [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
                                     Save & Continue
                                 </button>
@@ -310,7 +304,63 @@
                 </form>
             </mat-step>
             <mat-step [stepControl]="secondFormGroup" label="Locations">
-                <form [formGroup]="secondFormGroup">
+                <div class="row mt-1 mb-1" *ngIf="showLocationList">
+                    <div class="col-md-12 p-0 d-flex">
+                        <div class="col-md-7">
+
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control" placeholder="Search By Location Name" autocomplete="off" />
+                        </div>
+                        <div class="col-md-2 flexRight">
+                            <button class="btn btn-success text-center" (click)="AddNewLocation()">
+                                <img alt="phonevector" class="filter-green"
+                                    src="../../../assets/img/icons/Create Promotion.svg">
+                                Add New Location
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <table *ngIf="showLocationList" mat-table [dataSource]="dataSourceBusinessLocation">
+                    <ng-container matColumnDef="legalName">
+                        <th mat-header-cell *matHeaderCellDef> Business Name </th>
+                        <td mat-cell *matCellDef="let element"> {{element.legalName}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="businessName">
+                        <th mat-header-cell *matHeaderCellDef> Short Name </th>
+                        <td mat-cell *matCellDef="let element"> {{element.businessName}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="industry">
+                        <th mat-header-cell *matHeaderCellDef> Industry </th>
+                        <td mat-cell *matCellDef="let element"> {{element.industry}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="city">
+                        <th mat-header-cell *matHeaderCellDef> City </th>
+                        <td mat-cell *matCellDef="let element"> {{element.city}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="pinCode">
+                        <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Pin Code </th>
+                        <td mat-cell *matCellDef="let element" style="text-align: center;"> {{element.pinCode}} </td>
+                    </ng-container>
+                    <ng-container matColumnDef="Action">
+                        <th mat-header-cell style="text-align: center;" *matHeaderCellDef>
+                            Edit
+                        </th>
+                        <td style="text-align: center;" mat-cell *matCellDef="let element">
+                            <div>
+                                <button (click)="EditBusinessLocation(element)" class="editClass">Edit
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row class="tableHeaderCellDiv"
+                        *matHeaderRowDef="businessLocationDisplayedColumns; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: businessLocationDisplayedColumns; "></tr>
+                </table>
+
+                <form *ngIf="!showLocationList" [formGroup]="secondFormGroup">
                     <div class="wrapper" style="background: white;border-radius: 15px;">
                         <h4>
                             <b>Create Business Location</b>
@@ -357,7 +407,7 @@
                                             Phone No
                                         </label>
                                         <input id="phoneNo" class="form-control" formControlName="PhoneNo"
-                                            autocomplete="off"
+                                            autocomplete="off" (keypress)="numberOnly($event)" maxlength="10"
                                             [ngClass]="{ 'is-invalid': finalSubmit && secondFormGroup.controls['PhoneNo'].errors }">
                                         <div *ngIf="finalSubmit && secondFormGroup.controls['PhoneNo'].errors"
                                             class="invalid-feedback">
@@ -622,7 +672,7 @@
                                                         <div class="col-md-3 p-0"><label for="monTo">To: </label></div>
                                                         <div class="col-md-9 p-0">
                                                             <input type="time" class="form-control" id="monTo"
-                                                                formControlName="MonFromTime">
+                                                                formControlName="MonToTime">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -903,9 +953,13 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <button mat-button matStepperNext>Next</button>
-                        <button mat-button matStepperPrevious>Back</button>
+                    <div class="row mt-1">
+                        <div class="col-md-12 text-center">
+                            <button class="btn btn-success text-center" (click)="SaveLocationDetails()"
+                                [disabled]="isLoading">
+                                Save & Continue
+                            </button>
+                        </div>
                     </div>
                 </form>
             </mat-step>
@@ -938,30 +992,51 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <div class="form-row">
                                     <div class="col">
-                                        <label for="packageType">
-                                            Package Type
-                                        </label>
-                                        <ng-multiselect-dropdown [placeholder]="'Choose Package Type'" id="packageType"
-                                            [settings]="dropdownSettingsSinglePackage" [data]="packageTypeData"
-                                            formControlName="PackageTypeID">
-                                        </ng-multiselect-dropdown>
-                                        <div style="width:100%;"
-                                            *ngIf="submitted && firstFormGroup.controls['PackageTypeID'].errors"
-                                            class="invalid-feedback">
-                                            <div *ngIf="firstFormGroup.controls['PackageTypeID'].errors['required']">
-                                                Package Type is required
-                                            </div>
+                                        <label for="PaymenSchedule" class="mb-3">
+                                            Payment Schedule
+                                        </label> <br>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" id="monthly" value="1"
+                                                formControlName="paymentSchedule" (change)="changePaymentAmount(1)">
+                                            <label class="form-check-label" for="monthly">
+                                                Monthly
+                                            </label>
                                         </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" id="yearly" value="2"
+                                                formControlName="paymentSchedule" (change)="changePaymentAmount(2)">
+                                            <label class="form-check-label" for="yearly">
+                                                Yearly
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-row">
+                                    <div *ngIf="thirdFormGroup.get('paymentSchedule').value === '1'">
+                                        <label>
+                                            Monthly Amount
+                                        </label>
+                                        <input class="form-control" formControlName="paymentAmount"
+                                            (keypress)="numberOnly($event)" />
+                                    </div>
+                                    <div *ngIf="thirdFormGroup.get('paymentSchedule').value === '2'">
+                                        <label>
+                                            Yearly Amount
+                                        </label>
+                                        <input class="form-control" formControlName="paymentAmount"
+                                            (keypress)="numberOnly($event)" />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row" style="margin-bottom: 1%;">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-row">
                                     <div class="col">
                                         <label for="SelectType">
@@ -991,148 +1066,145 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="col">
-                                    <label for="PaymenSchedule">
-                                        Payment Schedule
-                                    </label> <br>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" id="monthly" value="1"
-                                            name="paymentSchedule">
-                                        <label class="form-check-label" for="monthly">
-                                            Monthly
-                                        </label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" id="yearly" value="2"
-                                            name="paymentSchedule">
-                                        <label class="form-check-label" for="yearly">
-                                            Yearly
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="liveDate">
                                     Go Live Date
                                 </label>
                                 <input id="liveDate" type="date" class="form-control" formControlName="GoLiveDate" />
                             </div>
+                            <div class="col-md-3">
+
+                            </div>
                         </div>
 
                         <div class="row" style="margin-bottom: 1%;"
-                            *ngIf="thirdFormGroup.get('selectedOption').value==='3'">
-                            <div class="col-md-3">
-                                <div class="form-row">
-                                    <label for="AccountNo">
-                                        Account Number
-                                    </label>
-                                    <input id="AccountNo" class="form-control" formControlName="AccNo"
-                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['AccNo'].errors }">
-                                    <div *ngIf="submitted && thirdFormGroup.controls['AccNo'].errors"
-                                        class="invalid-feedback">
-                                        <div *ngIf="thirdFormGroup.controls['AccNo'].errors['required']">
-                                            Account Number is Required
+                            *ngIf="thirdFormGroup.get('selectedOption').value=='3'">
+                            <div class="col-md-6 pl-0">
+                                <div class="col p-0 d-flex">
+                                    <div class="col-md-6">
+                                        <div class="form-row">
+                                            <label for="AccountNo">
+                                                Account Number
+                                            </label>
+                                            <input id="AccountNo" class="form-control" formControlName="AccNo"
+                                                [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['AccNo'].errors }">
+                                            <div *ngIf="submitted && thirdFormGroup.controls['AccNo'].errors"
+                                                class="invalid-feedback">
+                                                <div *ngIf="thirdFormGroup.controls['AccNo'].errors['required']">
+                                                    Account Number is Required
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-row">
-                                    <label for="RoutingNo">
-                                        Routing Number
-                                    </label>
-                                    <input id="RoutingNo" class="form-control" formControlName="RoutingNo"
-                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['RoutingNo'].errors }">
-                                    <div *ngIf="submitted && thirdFormGroup.controls['RoutingNo'].errors"
-                                        class="invalid-feedback">
-                                        <div *ngIf="thirdFormGroup.controls['RoutingNo'].errors['required']">
-                                            Routing Number is Required
+                                    <div class="col-md-4">
+                                        <div class="form-row">
+                                            <div class="col">
+                                                <label for="cardHolderName">
+                                                    Card Holder Name
+                                                </label>
+                                                <input id="cardHolderName" class="form-control"
+                                                    formControlName="CardHolderName"
+                                                    [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardHolderName'].errors }"
+                                                    style="text-transform: uppercase;">
+                                                <div *ngIf="submitted && thirdFormGroup.controls['CardHolderName'].errors"
+                                                    class="invalid-feedback">
+                                                    <div
+                                                        *ngIf="thirdFormGroup.controls['CardHolderName'].errors['required']">
+                                                        Card Holder Name is required
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-row">
-                                    <div class="col">
-                                        <label for="cardHolderName">
-                                            Card Holder Name
-                                        </label>
-                                        <input id="cardHolderName" class="form-control" formControlName="CardHolderName"
-                                            [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardHolderName'].errors }"
-                                            style="text-transform: uppercase;">
-                                        <div *ngIf="submitted && thirdFormGroup.controls['CardHolderName'].errors"
-                                            class="invalid-feedback">
-                                            <div *ngIf="thirdFormGroup.controls['CardHolderName'].errors['required']">
-                                                Card Holder Name is required
+                                    <div class="col-md-2" style="padding-right: 6px;">
+                                        <div class="form-row">
+                                            <label for="RoutingNo">
+                                                Routing No.
+                                            </label>
+                                            <input id="RoutingNo" class="form-control" formControlName="RoutingNo"
+                                                [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['RoutingNo'].errors }">
+                                            <div *ngIf="submitted && thirdFormGroup.controls['RoutingNo'].errors"
+                                                class="invalid-feedback">
+                                                <div *ngIf="thirdFormGroup.controls['RoutingNo'].errors['required']">
+                                                    Routing Number is Required
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-6"></div>
                         </div>
+
                         <div class="row" style="margin-bottom: 1%;"
                             *ngIf="thirdFormGroup.get('selectedOption').value!=='3'">
-                            <div class="col-md-3">
-                                <div class="form-row">
-                                    <label for="CardNo">
-                                        Card Number
-                                    </label>
-                                    <input id="CardNo" class="form-control" formControlName="CardNo"
-                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardNo'].errors }"
-                                        maxlength="16" placeholder="xxxx xxxx xxxx xxxx">
-                                    <div *ngIf="submitted && thirdFormGroup.controls['CardNo'].errors"
-                                        class="invalid-feedback">
-                                        <div *ngIf="thirdFormGroup.controls['CardNo'].errors['required']">
-                                            Card Number is Required
+                            <div class="col-md-6 pl-0">
+                                <div class="col p-0 d-flex">
+                                    <div class="col-md-6">
+                                        <div class="form-row">
+                                            <div class="col">
+                                                <label for="CardNo">
+                                                    Card Number
+                                                </label>
+                                                <input id="CardNo" class="form-control" formControlName="CardNo"
+                                                    [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['CardNo'].errors }"
+                                                    maxlength="16" placeholder="xxxx xxxx xxxx xxxx">
+                                                <div *ngIf="submitted && thirdFormGroup.controls['CardNo'].errors"
+                                                    class="invalid-feedback">
+                                                    <div *ngIf="thirdFormGroup.controls['CardNo'].errors['required']">
+                                                        Card Number is Required
+                                                    </div>
+                                                    <div *ngIf="thirdFormGroup.controls['CardNo'].errors['pattern']">
+                                                        Enter valid Card number
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div *ngIf="thirdFormGroup.controls['CardNo'].errors['pattern']">
-                                            Enter valid Card number
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-row">
+                                            <label for="expDate">
+                                                Expiry Month/Year
+                                            </label>
+                                            <input id="expDate" class="form-control" formControlName="ExpiryDate"
+                                                [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ExpiryDate'].errors }"
+                                                placeholder="MM/YY" maxlength="7">
+                                            <div *ngIf="submitted && thirdFormGroup.controls['ExpiryDate'].errors"
+                                                class="invalid-feedback">
+                                                <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['required']">
+                                                    Expiry Date is required
+                                                </div>
+                                                <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['pattern']">
+                                                    Enter valid format for Expiry Date
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" style="padding-right: 6px;">
+                                        <div class="form-row">
+                                            <label for="cvv">
+                                                CVV
+                                            </label>
+                                            <input id="cvv" class="form-control" formControlName="Cvv"
+                                                [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['Cvv'].errors }"
+                                                maxlength="3" pattern="[0-9]">
+                                            <div *ngIf="submitted && thirdFormGroup.controls['Cvv'].errors"
+                                                class="invalid-feedback">
+                                                <div *ngIf="thirdFormGroup.controls['Cvv'].errors['required']">
+                                                    This field is required
+                                                </div>
+                                                <div *ngIf="thirdFormGroup.controls['Cvv'].errors['pattern']">
+                                                    This field only accepts number
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-row">
-                                    <label for="expDate">
-                                        Expiry Month/Year
-                                    </label>
-                                    <input id="expDate" class="form-control" style="width: 70%;"
-                                        formControlName="ExpiryDate"
-                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['ExpiryDate'].errors }"
-                                        placeholder="MM/YY" maxlength="7">
-                                    <div *ngIf="submitted && thirdFormGroup.controls['ExpiryDate'].errors"
-                                        class="invalid-feedback">
-                                        <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['required']">
-                                            Expiry Date is required
-                                        </div>
-                                        <div *ngIf="thirdFormGroup.controls['ExpiryDate'].errors['pattern']">
-                                            Enter valid format for Expiry Date
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="col-md-6"></div>
                         </div>
+
                         <div class="row" style="margin-bottom: 1%;">
-                            <div class="col-md-3" *ngIf="thirdFormGroup.get('selectedOption').value!=='3'">
-                                <div class="form-row" style="width: 21%;">
-                                    <label for="cvv">
-                                        CVV
-                                    </label>
-                                    <input id="cvv" class="form-control" formControlName="Cvv"
-                                        [ngClass]="{ 'is-invalid': submitted && thirdFormGroup.controls['Cvv'].errors }"
-                                        maxlength="3" pattern="[0-9]">
-                                    <div *ngIf="submitted && thirdFormGroup.controls['Cvv'].errors"
-                                        class="invalid-feedback">
-                                        <div *ngIf="thirdFormGroup.controls['Cvv'].errors['required']">
-                                            This field is required
-                                        </div>
-                                        <div *ngIf="thirdFormGroup.controls['Cvv'].errors['pattern']">
-                                            This field only accepts number
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="col-md-3">
                                 <div class="form-row">
                                     <div class="col">
@@ -1163,17 +1235,15 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="row mt-1">
                             <div class="col-md-12 text-center">
-                                <button matStepperNext class="btn btn-success text-center" (click)="SavePaymentInfo()"
-                                    [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
+                                <button class="btn btn-success text-center" (click)="SavePaymentInfo()"
+                                    [disabled]="isLoading">
                                     Save & Continue
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        <button mat-button matStepperPrevious>Back</button>
                     </div>
                 </form>
             </mat-step>
@@ -1289,16 +1359,21 @@
                         <div class="row mt-1">
                             <div class="col-md-12 text-center">
                                 <button matStepperNext class="btn btn-success text-center" (click)="ReviewAndSave()"
-                                    [disabled]="isLoading" *ngIf="businessGroupID == 'New'">
+                                    [disabled]="isLoading">
                                     Review & Save
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <button mat-button matStepperPrevious>Back</button>
-                    </div>
                 </form>
+            </mat-step>
+            <mat-step label="Summary">
+                <div class="wrapper" style="background: white;border-radius: 15px;">
+                    <h4>
+                        <b>Summary of {{firstFormGroup.controls['BusinessgroupName'].value}}</b>
+                    </h4>
+                    <ng-template matStepLabel>Summary</ng-template>
+                </div>
             </mat-step>
         </mat-stepper>
     </div>

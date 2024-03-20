@@ -11,6 +11,15 @@ import { AppSettings } from '../../services/Constants';
 import { GroupListService } from '../../services/groupList/group-list.service';
 import { StateService } from '../../services/state/state.service';
 import { BusinessProfilesService } from '../../services/businessProfile/business-profiles.service';
+import { MatTableDataSource } from '@angular/material/table';
+
+export interface BusinessLocationList {
+  legalName: string;
+  businessName: string;
+  industry: string;
+  city: string;
+  pinCode: string;
+}
 
 @Component({
   selector: 'app-home',
@@ -109,6 +118,9 @@ export class HomeComponent {
   fileNameBusinessImage4: any = null;
   filePathBusinessImage4: any = null;
   //#endregion
+  dataSourceBusinessLocation: MatTableDataSource<BusinessLocationList>;
+  businessLocationDisplayedColumns: string[] = ['legalName', 'businessName', 'industry', 'city', 'pinCode', 'Action'];
+  showLocationList: Boolean = true;
 
   constructor(private aroute: ActivatedRoute, private route: Router, private fb: FormBuilder, private _uploadService: UploadServiceService,
     private _industryService: IndustryService, private _packageService: PackageTypeService, private _groupService: GroupListService,
@@ -162,7 +174,6 @@ export class HomeComponent {
     this.thirdFormGroup = this.fb.group({
       CardNo: [''],
       BusinessLocationName: ['', Validators.required],
-      PackageTypeID: ['', Validators.required],
       ExpiryDate: [''],
       Cvv: [''],
       ZipCode: ['', Validators.required],
@@ -171,8 +182,10 @@ export class HomeComponent {
       AccNo: [''],
       RoutingNo: [''],
       AccHolderName: [''],
-      selectedOption: ['1'],
-      GoLiveDate: ['']
+      selectedOption: [''],
+      GoLiveDate: [''],
+      paymentSchedule: [''],
+      paymentAmount: ['']
     });
     this.fourthFormGroup = this.fb.group({
       SrcBusinessLocationName: ['', Validators.required],
@@ -256,6 +269,7 @@ export class HomeComponent {
     this._businessProfileService.GetBusinessLocationByGroupId(1).subscribe({
       next: (data: any) => {
         this.businessLocationName = data;
+        this.dataSourceBusinessLocation = this.businessLocationName;
       },
       error: (error: any) => {
         console.log("This is error message", error)
@@ -601,7 +615,6 @@ export class HomeComponent {
   getBusinessGroupByID(id) {
     this._groupService.GetBusinessGroupByID(id).subscribe({
       next: (data: any) => {
-        console.log(data);
         this.isLinear = false;
 
         this.firstFormGroup.controls['BusinessgroupName'].setValue(data.businessGroupName);
@@ -696,6 +709,97 @@ export class HomeComponent {
       return;
     }
     this.isLoading = true;
+  }
+
+  AddNewLocation() {
+    this.showLocationList = false;
+  }
+
+  EditBusinessLocation(e) {
+    this._businessProfileService.GetBusinessLocationById(e.id).subscribe({
+      next: (data: any) => {
+        console.log(data);
+
+        this.secondFormGroup.controls['BusinessLocationName'].setValue(data.legalName);
+        this.secondFormGroup.controls['BusinessShortName'].setValue(data.businessName);
+        this.secondFormGroup.controls['PhoneNo'].setValue(data.phoneNo);
+        this.secondFormGroup.controls['Address'].setValue(data.adress);
+
+        let selectedState: { id: any, name: any }[] = [];
+        selectedState.push({
+          id: data.stateCodeID,
+          name: this.statesData.filter(x => x.id == data.stateCodeID)[0].name
+        });
+        this.secondFormGroup.controls['StateID'].setValue(selectedState);
+
+        this.secondFormGroup.controls['Pincode'].setValue(data.pinCode);
+        this.secondFormGroup.controls['Description'].setValue(data.descriptions);
+        this.secondFormGroup.controls['WebsiteUrl'].setValue(data.website);
+        this.secondFormGroup.controls['FacebookUrl'].setValue(data.facebookUrl);
+        this.secondFormGroup.controls['TwitterUrl'].setValue(data.twitterUrl);
+        this.secondFormGroup.controls['GoogleUrl'].setValue(data.googleUrl);
+        this.secondFormGroup.controls['InstagramUrl'].setValue(data.instagramUrl);
+        this.secondFormGroup.controls['YelpUrl'].setValue(data.yelpUrl);
+        this.secondFormGroup.controls['MonFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].monFromTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].monFromTime).getMinutes());
+        this.secondFormGroup.controls['MonToTime'].setValue(new Date(data.businesswiseWorkingDays[0].monToTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].monToTime).getMinutes());
+        this.secondFormGroup.controls['TueFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].tueFromTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].tueFromTime).getMinutes());
+        this.secondFormGroup.controls['TueToTime'].setValue(new Date(data.businesswiseWorkingDays[0].tueToTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].tueToTime).getMinutes());
+        this.secondFormGroup.controls['WedFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].wedFromTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].wedFromTime).getMinutes());
+        this.secondFormGroup.controls['WedToTime'].setValue(new Date(data.businesswiseWorkingDays[0].wedToTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].wedToTime).getMinutes());
+        this.secondFormGroup.controls['ThuFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].thuFromTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].thuFromTime).getMinutes());
+        this.secondFormGroup.controls['ThuToTime'].setValue(new Date(data.businesswiseWorkingDays[0].thuToTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].thuToTime).getMinutes());
+        this.secondFormGroup.controls['FriFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].friFromTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].friFromTime).getMinutes());
+        this.secondFormGroup.controls['FriToTime'].setValue(new Date(data.businesswiseWorkingDays[0].friToTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].friToTime).getMinutes());
+        this.secondFormGroup.controls['SatFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].satFromTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].satFromTime).getMinutes());
+        this.secondFormGroup.controls['SatToTime'].setValue(new Date(data.businesswiseWorkingDays[0].satToTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].satToTime).getMinutes());
+        this.secondFormGroup.controls['SunFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].sunFromTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].sunFromTime).getMinutes());
+        this.secondFormGroup.controls['SunToTime'].setValue(new Date(data.businesswiseWorkingDays[0].sunToTime).getHours() + ':' +
+          new Date(data.businesswiseWorkingDays[0].sunToTime).getMinutes());
+
+        this.showLocationList = false;
+
+        // BusinessLabelID: ['', Validators.required],
+      },
+      error: (error: any) => {
+
+      }
+    })
+  }
+
+  SaveLocationDetails() {
+    this.stepper.next();
+  }
+
+  changePaymentAmount(value: number) {
+    if (value == 1) {
+      this.thirdFormGroup.controls['paymentAmount'].setValue(
+        this.packageTypeData.filter((x: { id: any; }) => x.id == (
+          this.firstFormGroup.controls['PackageTypeID'].value[0].id
+        ))[0].pricePerMonth
+      );
+
+      console.log(this.thirdFormGroup.controls['paymentAmount'].value)
+    }
+    else if (value == 2) {
+      this.thirdFormGroup.controls['paymentAmount'].setValue(
+        this.packageTypeData.filter((x: { id: any; }) => x.id == (
+          this.firstFormGroup.controls['PackageTypeID'].value[0].id
+        ))[0].yearlyAmount
+      );
+    }
   }
 
 }
