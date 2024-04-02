@@ -1,5 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -15,6 +15,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { BusinessLabelService } from '../../services/businessLabel/business-label.service';
 import { ToastrService } from 'ngx-toastr';
 import { PaymentInfoService } from '../../services/paymentInfo/payment-info.service';
+import { SourceService } from '../../services/source/source.service';
+import { StripeCardComponent, StripeService } from 'ngx-stripe';
+import { StripeCardElementOptions, StripeElementsOptions, } from '@stripe/stripe-js';
 
 export interface BusinessLocationList {
   legalName: string;
@@ -29,6 +32,11 @@ export interface PaymentInfoList {
   paymentType: string;
   cardOrAccNumber: string;
   isDefault: string;
+}
+
+export interface SourcesList {
+  sourceName: string;
+  businessLocationName: string;
 }
 
 @Component({
@@ -46,6 +54,8 @@ export class HomeComponent {
   businessGroupID: any;
   submitted = false;
   secondStepSubmitted = false;
+  thirdStepSubmitted = false;
+  fourthStepSubmitted = false;
   //#region Group Logo variables
   fileGroupLogo: File;
   uploadProgressGroupLogo: any;
@@ -129,7 +139,7 @@ export class HomeComponent {
   filePathBusinessImage4: any = null;
   //#endregion
   dataSourceBusinessLocation: MatTableDataSource<BusinessLocationList>;
-  businessLocationDisplayedColumns: string[] = ['legalName', 'businessName', 'industry', 'city', 'pinCode', 'Action'];
+  businessLocationDisplayedColumns: string[] = ['legalName', 'businessName', 'industry', 'city', 'pinCode', 'Action', "Enable Business"];
   showLocationList: Boolean = true;
   selectedBusinessLabels: { id: number, name: string }[] = [];
   filteredBusinessLabels: any = [];
@@ -138,19 +148,72 @@ export class HomeComponent {
   paymentInfoDisplayedColumns: string[] = ['businessLocationName', 'paymentType', 'cardOrAccNumber', 'isDefault', 'Action'];
   showPaymentList: Boolean = true;
   paymentInfoes: any = [];
-  paymentInfoID: Number = 0;
+  paymentInfoID: number = 0;
+  businessLocationID: number = 0;
+  sourceID: number = 0;
+  sourcesData: any = [];
+  dataSourceSources: MatTableDataSource<SourcesList>;
+  sourcesDisplayedColumns: string[] = ['sourceName', 'businessLocationName', 'Action'];
+  showSourceList: Boolean = true;
+  businessGroupSaveBtn: any = 'Save & Continue';
+  businessLocationSaveBtn: any = 'Save & Continue';
+  paymentInfoSaveBtn: any = 'Save & Continue';
+  sourceSaveBtn: any = 'Review & Save';
+  latitude: any = '';
+  longitude: any = '';
+  industry: any = '';
+  customerUserName: any = '';
+  storeUserName: any = '';
+  customerSourceName: any = '';
+  storeSourceName: any = '';
+  isSourceLocationDisabled: boolean = false;
+  showCardNumber: boolean = false;
+  showCVV: boolean = false;
+  showZipCode: boolean = false;
+  ChkMakeDefaultTime = false;
+  isPaymentLocationDisabled: boolean = false;
+  stripeCustomerID: any = '';
+  cardOptions: StripeCardElementOptions = {
+    style: {
+      base: {
+        iconColor: '#666EE8',
+        color: '#31325F',
+        fontWeight: '300',
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        fontSize: '18px',
+        '::placeholder': {
+          color: '#212529'
+        }
+      },
+    },
+    disableLink: true
+  };
+  elementsOptions: StripeElementsOptions = {
+    locale: 'en'
+  };
+  @ViewChild(StripeCardComponent) card: StripeCardComponent;
+  @ViewChild('closeModal') closeModal: ElementRef;
+  filteredataForLocations: any = [];
+  filterDataForPaymentInfo: any = [];
+  filterDataForSources: any = [];
 
   constructor(private aroute: ActivatedRoute, private route: Router, private fb: FormBuilder, private _uploadService: UploadServiceService,
     private _industryService: IndustryService, private _packageService: PackageTypeService, private _groupService: GroupListService,
-    private _stateService: StateService, private _businessProfileService: BusinessProfilesService,
-    private _businessLabelService: BusinessLabelService, private toast: ToastrService, private _paymentInfoService: PaymentInfoService) {
+    private _stateService: StateService, private _businessProfileService: BusinessProfilesService, private toast: ToastrService,
+    private _businessLabelService: BusinessLabelService, private _paymentInfoService: PaymentInfoService,
+    private _sourceService: SourceService, private stripeService: StripeService) {
+
+    this.paymentInfoID = 0;
+    this.businessLocationID = 0;
+    this.sourceID = 0;
+    this.stripeCustomerID = '';
 
     this.firstFormGroup = this.fb.group({
-      BusinessgroupName: ['', Validators.required],
+      BusinessgroupName: ['', [Validators.required, Validators.pattern(/^(\s+\S+\s*)*(?!\s).*$/)]],
       IndustryTypeID: ['', Validators.required],
       PackageTypeID: ['', Validators.required],
-      SMSProfileID: ['', Validators.required],
-      SMSPhoneNumber: ['', Validators.required],
+      SMSProfileID: [''],
+      SMSPhoneNumber: [''],
       SignoutRequired: [false],
       SignoutHours: [''],
       SpinWheelRequired: [false],
@@ -165,10 +228,11 @@ export class HomeComponent {
       BusinessShortName: ['', Validators.required],
       PhoneNo: ['', Validators.required],
       Address: ['', Validators.required],
+      City: ['', Validators.required],
       StateID: ['', Validators.required],
       Pincode: ['', Validators.required],
-      BusinessLabelID: ['', Validators.required],
-      Description: ['', Validators.required],
+      BusinessLabelID: [''],
+      Description: [''],
       WebsiteUrl: [''],
       FacebookUrl: [''],
       TwitterUrl: [''],
@@ -191,20 +255,18 @@ export class HomeComponent {
       SunToTime: ['']
     });
     this.thirdFormGroup = this.fb.group({
-      CardNo: [''],
+      CardNoForSave: [''],
       BusinessLocationName: ['', Validators.required],
-      ExpiryDate: [''],
-      Cvv: [''],
       ZipCode: ['', Validators.required],
       ChkMakeDefault: [''],
       CardHolderName: [''],
       AccNo: [''],
       RoutingNo: [''],
-      selectedOption: [''],
-      GoLiveDate: [''],
-      paymentSchedule: [''],
-      paymentAmountMonthly: [''],
-      paymentAmountYearly: ['']
+      selectedOption: ['', Validators.required],
+      GoLiveDate: ['', Validators.required],
+      paymentSchedule: ['', Validators.required],
+      paymentAmountMonthly: [0],
+      paymentAmountYearly: [0]
     });
     this.fourthFormGroup = this.fb.group({
       SrcBusinessLocationName: ['', Validators.required],
@@ -213,12 +275,15 @@ export class HomeComponent {
       StoreTabletBrand: ['', Validators.required],
       StoreTabletModel: ['', Validators.required],
     });
+
+    // this.dataSourceBusinessLocation = this.filteredataForLocations;
+    // this.dataSourcePaymentInfo = this.filterDataForPaymentInfo;
+    // this.dataSourceSources = this.filterDataForSources;
   }
 
   ngOnInit() {
     this.aroute.params.subscribe((params: Params) => {
-      this.businessGroupID = params['id'],
-      this.paymentInfoID = params['paymentInfoID']
+      this.businessGroupID = params['id']
     });
     this.getIndustries();
     this.getPackageTypes();
@@ -226,9 +291,14 @@ export class HomeComponent {
     this.GetBusinessLabels();
 
     if (this.businessGroupID != null && this.businessGroupID != '' && this.businessGroupID != undefined && this.businessGroupID != 'New') {
+      this.businessGroupSaveBtn = 'Update & Continue';
       this.getBusinessGroupByID(this.businessGroupID);
       this.getBusinessLocationsByGroupID();
       this.getPaymentInfoesByGroupID();
+      this.getSourcesByGroupID();
+    }
+    else {
+      this.businessGroupSaveBtn = 'Save & Continue';
     }
 
     this.dropdownSettingsSingle = {
@@ -294,6 +364,7 @@ export class HomeComponent {
       next: (data: any) => {
         this.businessLocationName = data;
         this.dataSourceBusinessLocation = this.businessLocationName;
+        this.filteredataForLocations = data;
       },
       error: (error: any) => {
         console.log("This is error message", error)
@@ -306,6 +377,7 @@ export class HomeComponent {
       next: (data: any) => {
         this.paymentInfoes = data;
         this.dataSourcePaymentInfo = this.paymentInfoes;
+        this.filterDataForPaymentInfo = data;
       },
       error: (error: any) => {
         console.log("This is error message", error)
@@ -318,6 +390,19 @@ export class HomeComponent {
       next: (data) => {
         this.businessLabels = data;
         this.filteredBusinessLabels = this.businessLabels;
+      },
+      error: error => {
+        console.log("This is error message", error)
+      }
+    })
+  }
+
+  getSourcesByGroupID() {
+    this._sourceService.GetSourcesByBusinessGroupID(this.businessGroupID).subscribe({
+      next: (data) => {
+        this.sourcesData = data;
+        this.dataSourceSources = this.sourcesData;
+        this.filterDataForSources = data;
       },
       error: error => {
         console.log("This is error message", error)
@@ -636,6 +721,17 @@ export class HomeComponent {
   Cancel() {
     this.route.navigate(['group-list']);
     this.paymentInfoID = 0;
+    this.businessLocationID = 0;
+    this.sourceID = 0;
+    this.customerSourceName = '';
+    this.storeSourceName = '';
+    this.customerUserName = '';
+    this.storeUserName = '';
+    this.stripeCustomerID = '';
+    this.businessGroupSaveBtn = 'Save & Continue';
+    this.businessLocationSaveBtn = 'Save & Continue';
+    this.paymentInfoSaveBtn = 'Save & Continue';
+    this.sourceSaveBtn = 'Review & Save';
   }
 
   SaveGroupDetails() {
@@ -644,21 +740,39 @@ export class HomeComponent {
       return;
     }
     this.isLoading = true;
-    let model = this.createModel();
-    this._groupService.PostBusinessGroupForAdminPanel(model)
-      .subscribe({
-        next: (data) => {
-          console.log(data.id)
-          this.getBusinessGroupByID(data.id);
-          this.isLoading = false;
-          this.submitted = false;
-        },
-        error: error => {
-          console.log(error);
-          this.isLoading = false;
-          this.submitted = false;
-        }
-      });
+    let model = this.createBusinessGroupModel();
+    if (this.businessGroupID == 'New') {
+      this._groupService.PostBusinessGroupForAdminPanel(model)
+        .subscribe({
+          next: (data) => {
+            this.businessGroupID = data.id;
+            this.isLoading = false;
+            this.submitted = false;
+            this.stepper.next();
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.submitted = false;
+          }
+        });
+    }
+    else {
+      model.id = this.businessGroupID;
+      this._groupService.PutBusinessGroupForAdminPanel(model.id, model)
+        .subscribe({
+          next: (data) => {
+            this.isLoading = false;
+            this.submitted = false;
+            this.stepper.next();
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.submitted = false;
+          }
+        });
+    }
   }
 
   getBusinessGroupByID(id) {
@@ -682,12 +796,15 @@ export class HomeComponent {
         });
         this.firstFormGroup.controls['PackageTypeID'].setValue(selectedPackage);
         this.firstFormGroup.controls['SMSProfileID'].setValue(data.smsProfileID);
-        this.firstFormGroup.controls['SMSPhoneNumber'].setValue(data.smsFromNumber);
+        this.firstFormGroup.controls['SMSPhoneNumber'].setValue(data.smsFromNumber == 0 ? "" : data.smsFromNumber);
         this.firstFormGroup.controls['SignoutRequired'].setValue(data.isSignOutRequired);
         this.firstFormGroup.controls['SignoutHours'].setValue(data.autoSignOutTime);
         this.firstFormGroup.controls['SpinWheelRequired'].setValue(data.isSpinRequired);
 
-        let time = new Date(data.businessClosureTime).getHours() + ':' + new Date(data.businessClosureTime).getMinutes();
+        let time = (new Date(data.businessClosureTime).getHours() < 10 ? ("0" + new Date(data.businessClosureTime).getHours()) :
+          new Date(data.businessClosureTime).getHours()) + ':' +
+          (new Date(data.businessClosureTime).getMinutes() < 10 ? ("0" + new Date(data.businessClosureTime).getMinutes()) :
+            new Date(data.businessClosureTime).getMinutes());
         this.firstFormGroup.controls['BusinessClosureTime'].setValue(time);
 
         this.firstFormGroup.controls['FirstName'].setValue(data.firstName);
@@ -695,6 +812,8 @@ export class HomeComponent {
         this.firstFormGroup.controls['PhoneNumber'].setValue(data.mobile);
         this.firstFormGroup.controls['EmailID'].setValue(data.email);
         this.isEmailVerified = data.isEmailVerified;
+        this.verificationText = data.isEmailVerified == true ? 'Verified' :
+          (data.isEmailVerified == false ? 'Unverified' : '');
 
         this.filePathGroupLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.logoPath;
         this.uploadProgressGroupLogo = (100).toString() + "%";
@@ -707,7 +826,7 @@ export class HomeComponent {
     })
   }
 
-  createModel() {
+  createBusinessGroupModel() {
     let details = {
       "uniqueID": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "id": 0,
@@ -720,7 +839,7 @@ export class HomeComponent {
       "packageTypeID": this.firstFormGroup.controls['PackageTypeID'].value[0].id,
       "indutryTypeID": this.firstFormGroup.controls['IndustryTypeID'].value[0].id,
       "smsProfileID": this.firstFormGroup.controls['SMSProfileID'].value,
-      "smsFromNumber": this.firstFormGroup.controls['SMSPhoneNumber'].value,
+      "smsFromNumber": this.firstFormGroup.controls['SMSPhoneNumber'].value == "" ? 0 : this.firstFormGroup.controls['SMSPhoneNumber'].value,
       "isSignOutRequired": this.firstFormGroup.controls['SignoutRequired'].value,
       "autoSignOutTime": this.firstFormGroup.controls['SignoutHours'].value,
       "isSpinRequired": this.firstFormGroup.controls['SpinWheelRequired'].value,
@@ -735,6 +854,163 @@ export class HomeComponent {
     return details;
   }
 
+  createBusinessLocationModel() {
+    let details = {
+      "uniqueId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "id": 0,
+      "businessName": this.secondFormGroup.controls['BusinessShortName'].value,
+      "legalName": this.secondFormGroup.controls['BusinessLocationName'].value,
+      "adress": this.secondFormGroup.controls['Address'].value,
+      "phoneNo": this.secondFormGroup.controls['PhoneNo'].value,
+      "pinCode": this.secondFormGroup.controls['Pincode'].value,
+      "industry": this.industry,
+      "descriptions": this.secondFormGroup.controls['Description'].value,
+      "logoPath": this.fileNameBusinessLogo,
+      "imagePath": this.fileNameBusinessDisplayImage,
+      "website": this.secondFormGroup.controls['WebsiteUrl'].value,
+      "facebookUrl": this.secondFormGroup.controls['FacebookUrl'].value,
+      "twitterUrl": this.secondFormGroup.controls['TwitterUrl'].value,
+      "googleUrl": this.secondFormGroup.controls['GoogleUrl'].value,
+      "instagramUrl": this.secondFormGroup.controls['InstagramUrl'].value,
+      "yelpUrl": this.secondFormGroup.controls['YelpUrl'].value,
+      "stateId": 3,
+      "isActive": true,
+      "createdBy": AppSettings.GetCreatedBy(),
+      "createdDate": AppSettings.GetDate(),
+      "lastModifiedBy": AppSettings.GetLastModifiedBy(),
+      "lastModifiedDate": AppSettings.GetDate(),
+      "latitude": this.latitude,
+      "longitude": this.longitude,
+      "stateCodeId": this.secondFormGroup.controls['StateID'].value[0].id,
+      "city": this.secondFormGroup.controls['City'].value,
+      "businessGroupId": this.businessGroupID,
+      "metaData": "",
+      "galleryImagePath1": this.fileNameBusinessImage1,
+      "galleryImagePath2": this.fileNameBusinessImage2,
+      "galleryImagePath3": this.fileNameBusinessImage3,
+      "galleryImagePath4": this.fileNameBusinessImage4,
+      "isAgeRestriction": false,
+      "customerID": this.stripeCustomerID,
+      "businesswiseLabels": this.GetBusinessLabelModel(),
+      "businesswiseWorkingDays": this.GetBusinessWorkingHoursModel()
+    }
+
+    return details;
+  }
+
+  GetBusinessLabelModel() {
+    let details = [];
+    this.selectedBusinessLabels.forEach((element: any) => {
+      let tempdefDetails = {
+        "uniqueId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "id": 0,
+        "labelId": element.id,
+        "businessId": this.businessLocationID,
+        "isActive": true,
+        "createdBy": AppSettings.GetCreatedBy(),
+        "createdDate": AppSettings.GetDate(),
+        "lastModifiedBy": AppSettings.GetLastModifiedBy(),
+        "lastModifiedDate": AppSettings.GetDate(),
+      }
+      details.push(tempdefDetails);
+    });
+
+    return details;
+  }
+
+  GetBusinessWorkingHoursModel() {
+    let details = [];
+    let tempdefDetails = {
+      "uniqueId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "id": 0,
+      "businessId": this.businessLocationID,
+      "isActive": true,
+      "createdBy": AppSettings.GetCreatedBy(),
+      "createdDate": AppSettings.GetDate(),
+      "lastModifiedBy": AppSettings.GetLastModifiedBy(),
+      "lastModifiedDate": AppSettings.GetDate(),
+      "monFromTime": this.secondFormGroup.controls['MonFromTime'].value,
+      "monToTime": this.secondFormGroup.controls['MonToTime'].value,
+      "tueFromTime": this.secondFormGroup.controls['TueFromTime'].value,
+      "tueToTime": this.secondFormGroup.controls['TueToTime'].value,
+      "wedFromTime": this.secondFormGroup.controls['WedFromTime'].value,
+      "wedToTime": this.secondFormGroup.controls['WedToTime'].value,
+      "thuFromTime": this.secondFormGroup.controls['ThuFromTime'].value,
+      "thuToTime": this.secondFormGroup.controls['ThuToTime'].value,
+      "friFromTime": this.secondFormGroup.controls['FriFromTime'].value,
+      "friToTime": this.secondFormGroup.controls['FriToTime'].value,
+      "satFromTime": this.secondFormGroup.controls['SatFromTime'].value,
+      "satToTime": this.secondFormGroup.controls['SatToTime'].value,
+      "sunFromTime": this.secondFormGroup.controls['SunFromTime'].value,
+      "sunToTime": this.secondFormGroup.controls['SunToTime'].value,
+    }
+    details.push(tempdefDetails);
+
+    return details;
+  }
+
+  createPaymentInfoModel() {
+    let details = {
+      "uniqueId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "id": 0,
+      "name": "",
+      "cardNumber": this.thirdFormGroup.controls['CardNoForSave'].value,
+      "expireMonth": 0,
+      "expireYear": 0,
+      "cvv": 0,
+      "zipCode": this.thirdFormGroup.controls['ZipCode'].value,
+      "stateId": 3,
+      "isActive": true,
+      "createdBy": AppSettings.GetCreatedBy(),
+      "createdDate": AppSettings.GetDate(),
+      "lastModifiedBy": AppSettings.GetLastModifiedBy(),
+      "lastModifiedDate": AppSettings.GetDate(),
+      "businessGroupId": this.businessGroupID,
+      "businessLocationId": this.thirdFormGroup.controls['BusinessLocationName'].value[0].id,
+      "isDefault": this.thirdFormGroup.controls['ChkMakeDefault'].value == null ||
+        this.thirdFormGroup.controls['ChkMakeDefault'].value == undefined || this.thirdFormGroup.controls['ChkMakeDefault'].value == '' ? false
+        : this.thirdFormGroup.controls['ChkMakeDefault'].value,
+      "paymentType": this.thirdFormGroup.controls['selectedOption'].value,
+      "paymentScheduleID": this.thirdFormGroup.controls['paymentSchedule'].value,
+      "packageMonthlyAmount": this.thirdFormGroup.controls['paymentAmountMonthly'].value,
+      "packageYearlyAmount": this.thirdFormGroup.controls['paymentAmountYearly'].value,
+      "goLiveDate": this.thirdFormGroup.controls['GoLiveDate'].value,
+      "accountNumber": this.thirdFormGroup.controls['AccNo'].value,
+      "routingName": this.thirdFormGroup.controls['RoutingNo'].value,
+      "cardHolderName": this.thirdFormGroup.controls['CardHolderName'].value,
+      "paymentMethodID": ""
+    }
+
+    return details;
+  }
+
+  createSourceModel() {
+    let details = {
+      "uniqueId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "id": 0,
+      "sourceName": this.customerSourceName,
+      "isActive": true,
+      "createdBy": AppSettings.GetCreatedBy(),
+      "createdDate": AppSettings.GetDate(),
+      "lastModifiedBy": AppSettings.GetLastModifiedBy(),
+      "lastModifiedDate": AppSettings.GetDate(),
+      "businessLocationID": this.fourthFormGroup.controls['SrcBusinessLocationName'].value[0].id,
+      "businessLocationName": this.fourthFormGroup.controls['SrcBusinessLocationName'].value[0].businessName,
+      "businessGroupID": this.businessGroupID,
+      "businessGroupName": "",
+      "custTabletBrand": this.fourthFormGroup.controls['CustTabletBrand'].value,
+      "custTabletModel": this.fourthFormGroup.controls['CustTabletModel'].value,
+      "storeTabletBrand": this.fourthFormGroup.controls['StoreTabletBrand'].value,
+      "storeTabletModel": this.fourthFormGroup.controls['StoreTabletModel'].value,
+      "customerTabUserName": this.customerUserName,
+      "storeTabUserName": this.storeUserName,
+      "storeSourceName": this.storeSourceName,
+      "pairedID": 0
+    }
+
+    return details;
+  }
+
   numberOnly(event: any): boolean {
     const charCode = (event.which) ? event.which : event.keyCode;
     if (charCode > 31 && (charCode < 48 || charCode > 57)) {
@@ -744,36 +1020,140 @@ export class HomeComponent {
   }
 
   SavePaymentInfo() {
-    this.submitted = true;
-    if (this.thirdFormGroup.invalid) {
-      console.log("Invalid")
-      return;
-    }
+    this.thirdStepSubmitted = true;
     this.isLoading = true;
+
+    const name = this.thirdFormGroup.get('CardHolderName').value;
+    // this.stripeService.createToken(this.card.element, { name }).subscribe((result) => {
+    //   if (result.token) {
+    //     console.log(result.token.id);
+    //   } else if (result.error) {
+    //     this.isLoading = false;
+    //     console.log(result.error.message);
+    //   }
+    // });
+    let paymentID: any = '';
+    let expiryMonth: any = 0;
+    let expiryYear: any = 0;
+    this.stripeService.createPaymentMethod({ type: "card", card: this.card.element }).subscribe(({ error, paymentMethod }) => {
+      if (error) {
+        this.isLoading = false;
+        console.log(error.message);
+      }
+      else {
+        paymentID = paymentMethod.id;
+        expiryMonth = paymentMethod.card.exp_month < 10 ? ("0" + paymentMethod.card.exp_month) : paymentMethod.card.exp_month;
+        expiryYear = paymentMethod.card.exp_year;
+
+        this.thirdFormGroup.controls['CardNoForSave'].setValue(paymentMethod.card.last4);
+        this.thirdFormGroup.controls['ZipCode'].setValue(paymentMethod.billing_details.address.postal_code);
+
+        if (this.thirdFormGroup.invalid) {
+          console.log(this.thirdFormGroup)
+          this.isLoading = false;
+          return;
+        }
+
+        let model = this.createPaymentInfoModel();
+        model.paymentMethodID = paymentID;
+        model.expireMonth = expiryMonth;
+        model.expireYear = expiryYear;
+
+        if (this.paymentInfoID == 0) {
+          this._paymentInfoService.PostPaymentInfo(model)
+            .subscribe({
+              next: (data) => {
+                this.paymentInfoID = data.id;
+                this.isLoading = false;
+                this.submitted = false;
+                this.stepper.next();
+              },
+              error: error => {
+                console.log(error);
+                this.isLoading = false;
+                this.submitted = false;
+              }
+            });
+        }
+        else {
+          model.id = this.paymentInfoID;
+          this._paymentInfoService.PutPaymentInfo(model.id, model)
+            .subscribe({
+              next: (data) => {
+                this.isLoading = false;
+                this.submitted = false;
+                this.stepper.next();
+              },
+              error: error => {
+                console.log(error);
+                this.isLoading = false;
+                this.submitted = false;
+              }
+            });
+        }
+      }
+    });
   }
 
-  ReviewAndSave() {
-    this.submitted = true;
+  SaveSource() {
+    this.fourthStepSubmitted = true;
     if (this.fourthFormGroup.invalid) {
       return;
     }
     this.isLoading = true;
+    let model = this.createSourceModel();
+    if (this.sourceID == 0) {
+      this._sourceService.PostSourcesForAdminPanel(model)
+        .subscribe({
+          next: (data) => {
+            this.isLoading = false;
+            this.submitted = false;
+            this.stepper.next();
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.submitted = false;
+          }
+        });
+    }
+    else {
+      model.id = this.sourceID;
+      this._sourceService.PutSourcesForAdminPanel(model.id, model)
+        .subscribe({
+          next: (data) => {
+            this.isLoading = false;
+            this.submitted = false;
+            this.stepper.next();
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.submitted = false;
+          }
+        });
+    }
   }
 
   AddNewLocation() {
+    this.businessLocationID = 0;
     this.showLocationList = false;
   }
 
   EditBusinessLocation(e) {
     this._businessProfileService.GetBusinessLocationById(e.id).subscribe({
       next: (data: any) => {
-        console.log(data);
+        this.businessLocationID = e.id;
+        this.latitude = data.latitude;
+        this.longitude = data.longitude;
+        this.industry = data.industry;
+        this.stripeCustomerID = data.customerID;
 
         this.secondFormGroup.controls['BusinessLocationName'].setValue(data.legalName);
         this.secondFormGroup.controls['BusinessShortName'].setValue(data.businessName);
         this.secondFormGroup.controls['PhoneNo'].setValue(data.phoneNo);
         this.secondFormGroup.controls['Address'].setValue(data.adress);
-
+        this.secondFormGroup.controls['City'].setValue(data.city);
         let selectedState: { id: any, name: any }[] = [];
         selectedState.push({
           id: data.stateCodeID,
@@ -819,13 +1199,41 @@ export class HomeComponent {
           new Date(data.businesswiseWorkingDays[0].sunToTime).getMinutes());
 
         this.showLocationList = false;
+        this.businessLocationSaveBtn = "Update & Continue";
 
         // BusinessLabelID: ['', Validators.required],
+        let labels = this.GetBusinessLabelsForEdit(data['businesswiseLabels']);
+        this.selectedBusinessLabels = [];
+        labels.forEach(element => {
+          this.selectedBusinessLabels.push({
+            id: element.labelID,
+            name: this.businessLabels.filter(x => x.id == element.labelID)[0].name
+          })
+        });
       },
       error: (error: any) => {
 
       }
     })
+  }
+
+  GetBusinessLabelsForEdit(data: any) {
+    let details = [];
+    data.forEach((element: any) => {
+      let tempdefDetails = {
+        "uniqueID": element.uniqueId,
+        "id": element.id,
+        "businessID": element.businessId,
+        "labelID": element.labelId,
+        "isActive": element.isActive,
+        "createdDate": element.createdDate,
+        "createdBy": element.createdBy,
+        "lastModifiedBy": element.lastModifiedBy,
+        "lastModifiedDate": element.lastModifiedDate,
+      }
+      details.push(tempdefDetails);
+    });
+    return details;
   }
 
   SaveLocationDetails() {
@@ -834,7 +1242,40 @@ export class HomeComponent {
       return;
     }
 
-    this.stepper.next();
+    this.isLoading = true;
+    let model = this.createBusinessLocationModel();
+    if (this.businessLocationID == 0) {
+      this._businessProfileService.PostBusinessProfile(model)
+        .subscribe({
+          next: (data) => {
+            this.isLoading = false;
+            this.submitted = false;
+            this.getBusinessLocationsByGroupID();
+            this.stepper.next();
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.submitted = false;
+          }
+        });
+    }
+    else {
+      model.id = this.businessLocationID;
+      this._businessProfileService.PutBusinessProfile(model.id, model)
+        .subscribe({
+          next: (data) => {
+            this.isLoading = false;
+            this.submitted = false;
+            this.stepper.next();
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.submitted = false;
+          }
+        });
+    }
   }
 
   changePaymentAmount(value: number) {
@@ -854,6 +1295,35 @@ export class HomeComponent {
         );
       }
     }
+  }
+
+  changePaymentType(type) {
+    if ((type == 1) || (type == 2)) {
+      this.thirdFormGroup.controls['CardNoForSave'].addValidators(Validators.required);
+      this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
+
+      this.thirdFormGroup.controls['AccNo'].clearValidators();
+      this.thirdFormGroup.controls['RoutingNo'].clearValidators();
+
+      this.thirdFormGroup.controls['AccNo'].reset();
+      this.thirdFormGroup.controls['RoutingNo'].reset();
+      this.thirdFormGroup.controls['CardHolderName'].reset();
+    }
+    else if (type == 3) {
+      this.thirdFormGroup.controls['CardNoForSave'].clearValidators();
+
+      this.thirdFormGroup.controls['CardNoForSave'].reset();
+      this.thirdFormGroup.controls['CardHolderName'].reset();
+
+      this.thirdFormGroup.controls['AccNo'].addValidators(Validators.required);
+      this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
+      this.thirdFormGroup.controls['RoutingNo'].addValidators(Validators.required);
+    }
+    this.thirdFormGroup.controls["CardNoForSave"].updateValueAndValidity();
+    this.thirdFormGroup.controls["CardHolderName"].updateValueAndValidity();
+
+    this.thirdFormGroup.controls["AccNo"].updateValueAndValidity();
+    this.thirdFormGroup.controls["RoutingNo"].updateValueAndValidity();
   }
 
   businessLabelOnChange() {
@@ -885,6 +1355,7 @@ export class HomeComponent {
   }
 
   AddNewPaymentInfo() {
+    this.paymentInfoID = 0;
     this.showPaymentList = false;
   }
 
@@ -892,15 +1363,13 @@ export class HomeComponent {
     this._paymentInfoService.GetPaymentInfoByID(e.id).subscribe({
       next: (data: any) => {
         this.paymentInfoID = e.id;
-        this.thirdFormGroup.controls['CardNo'].setValue(data.cardNumber);
+        this.thirdFormGroup.controls['CardNoForSave'].setValue(data.cardNumber);
         let selectedLocation: { id: any, businessName: any }[] = [];
         selectedLocation.push({
           id: data.businessLocationId,
           businessName: this.businessLocationName.filter(x => x.id == data.businessLocationId)[0].businessName
         });
         this.thirdFormGroup.controls['BusinessLocationName'].setValue(selectedLocation);
-        this.thirdFormGroup.controls['ExpiryDate'].setValue(data.expireMonth + "/" + data.expireYear);
-        this.thirdFormGroup.controls['Cvv'].setValue(data.cvv);
         this.thirdFormGroup.controls['ZipCode'].setValue(data.zipCode);
         this.thirdFormGroup.controls['ChkMakeDefault'].setValue(data.isDefault);
         this.thirdFormGroup.controls['CardHolderName'].setValue(data.cardHolderName);
@@ -920,6 +1389,26 @@ export class HomeComponent {
         this.thirdFormGroup.controls['paymentAmountYearly'].setValue(data.packageYearlyAmount);
 
         this.showPaymentList = false;
+        this.isPaymentLocationDisabled = true;
+        this.thirdFormGroup.controls['selectedOption'].disable();
+        this.thirdFormGroup.controls['paymentSchedule'].disable();
+        this.paymentInfoSaveBtn = "Update & Continue";
+
+        if ((data.paymentType == 1) || (data.paymentType == 2)) {
+          this.thirdFormGroup.controls['CardNoForSave'].addValidators(Validators.required);
+          this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
+
+          this.thirdFormGroup.controls["CardNoForSave"].updateValueAndValidity();
+          this.thirdFormGroup.controls["CardHolderName"].updateValueAndValidity();
+        }
+        else if (data.paymentType == 3) {
+          this.thirdFormGroup.controls['AccNo'].addValidators(Validators.required);
+          this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
+          this.thirdFormGroup.controls['RoutingNo'].addValidators(Validators.required);
+
+          this.thirdFormGroup.controls["AccNo"].updateValueAndValidity();
+          this.thirdFormGroup.controls["RoutingNo"].updateValueAndValidity();
+        }
       },
       error: (error: any) => {
 
@@ -927,4 +1416,213 @@ export class HomeComponent {
     })
   }
 
+  AddNewSource() {
+    this.showSourceList = false;
+  }
+
+  EditSource(e) {
+    this._sourceService.GetSourcesByIDForAdminPanel(e.id).subscribe({
+      next: (data: any) => {
+        this.sourceID = e.id;
+
+        let selectedLocation: { id: any, businessName: any }[] = [];
+        selectedLocation.push({
+          id: data.businessLocationID,
+          businessName: this.businessLocationName.filter(x => x.id == data.businessLocationID)[0].businessName
+        });
+        this.fourthFormGroup.controls['SrcBusinessLocationName'].setValue(selectedLocation);
+        this.isSourceLocationDisabled = true;
+
+        this.fourthFormGroup.controls['CustTabletBrand'].setValue(data.custTabletBrand);
+        this.fourthFormGroup.controls['CustTabletModel'].setValue(data.custTabletModel);
+        this.fourthFormGroup.controls['StoreTabletBrand'].setValue(data.storeTabletBrand);
+        this.fourthFormGroup.controls['StoreTabletModel'].setValue(data.storeTabletModel);
+
+        this.customerSourceName = data.sourceName;
+        this.storeSourceName = data.storeSourceName;
+
+        this.customerUserName = data.customerTabUserName;
+        this.storeUserName = data.storeTabUserName;
+
+        this.showSourceList = false;
+        this.sourceSaveBtn = 'Review & Update';
+      },
+      error: (error: any) => {
+
+      }
+    })
+  }
+
+  onBusinessSelect() {
+    let value = this.fourthFormGroup.controls['SrcBusinessLocationName'].value[0].id;
+    this._sourceService.GetSourceCountByLocationID(value).subscribe({
+      next: (data) => {
+
+        this.customerSourceName = data.businessLocationName.toLowerCase() + (data.count > 0 ? (data.count + 1) : '') + "customer";
+        this.storeSourceName = data.businessLocationName.toLowerCase() + (data.count > 0 ? (data.count + 1) : '') + "store";
+
+        this.customerUserName = this.customerSourceName;
+        this.storeUserName = this.storeSourceName;
+      },
+      error: error => {
+        console.log("This is error message", error)
+      }
+    })
+  }
+
+  onBusinessDeSelected() {
+    this.customerSourceName = '';
+    this.storeSourceName = '';
+    this.customerUserName = '';
+    this.storeUserName = '';
+  }
+
+  DeletePaymentMethod() {
+    this._paymentInfoService.DeletePaymentInfo(this.paymentInfoID).subscribe({
+      next: (data: any): any => {
+        this.isLoading = false;
+        this.getPaymentInfoesByGroupID();
+      }, error(err) {
+        console.log(err)
+      },
+    });
+  }
+
+  deleteBtnOnClick(e) {
+    this.paymentInfoID = e.id;
+  }
+
+  showHideZipCode() {
+    this.showZipCode = !this.showZipCode;
+  }
+
+  onChangeDefaultTime() {
+    let getValueFrom = this.secondFormGroup.controls['MonFromTime'].value;
+    let getValueTo = this.secondFormGroup.controls['MonToTime'].value;
+
+    this.ChkMakeDefaultTime = !this.ChkMakeDefaultTime;
+
+    if (this.ChkMakeDefaultTime) {
+      this.secondFormGroup.controls['TueFromTime'].disable();
+      this.secondFormGroup.controls['TueToTime'].disable();
+      this.secondFormGroup.controls['WedFromTime'].disable();
+      this.secondFormGroup.controls['WedToTime'].disable();
+      this.secondFormGroup.controls['ThuFromTime'].disable();
+      this.secondFormGroup.controls['ThuToTime'].disable();
+      this.secondFormGroup.controls['FriFromTime'].disable();
+      this.secondFormGroup.controls['FriToTime'].disable();
+      this.secondFormGroup.controls['SatFromTime'].disable();
+      this.secondFormGroup.controls['SatToTime'].disable();
+      this.secondFormGroup.controls['SunFromTime'].disable();
+      this.secondFormGroup.controls['SunToTime'].disable();
+    }
+    else if (!this.ChkMakeDefaultTime) {
+      this.secondFormGroup.controls['TueFromTime'].enable();
+      this.secondFormGroup.controls['TueToTime'].enable();
+      this.secondFormGroup.controls['WedFromTime'].enable();
+      this.secondFormGroup.controls['WedToTime'].enable();
+      this.secondFormGroup.controls['ThuFromTime'].enable();
+      this.secondFormGroup.controls['ThuToTime'].enable();
+      this.secondFormGroup.controls['FriFromTime'].enable();
+      this.secondFormGroup.controls['FriToTime'].enable();
+      this.secondFormGroup.controls['SatFromTime'].enable();
+      this.secondFormGroup.controls['SatToTime'].enable();
+      this.secondFormGroup.controls['SunFromTime'].enable();
+      this.secondFormGroup.controls['SunToTime'].enable();
+    }
+    this.secondFormGroup.controls['TueFromTime'].setValue(getValueFrom);
+    this.secondFormGroup.controls['TueToTime'].setValue(getValueTo);
+    this.secondFormGroup.controls['WedFromTime'].setValue(getValueFrom);
+    this.secondFormGroup.controls['WedToTime'].setValue(getValueTo);
+    this.secondFormGroup.controls['ThuFromTime'].setValue(getValueFrom);
+    this.secondFormGroup.controls['ThuToTime'].setValue(getValueTo);
+    this.secondFormGroup.controls['FriFromTime'].setValue(getValueFrom);
+    this.secondFormGroup.controls['FriToTime'].setValue(getValueTo);
+    this.secondFormGroup.controls['SatFromTime'].setValue(getValueFrom);
+    this.secondFormGroup.controls['SatToTime'].setValue(getValueTo);
+    this.secondFormGroup.controls['SunFromTime'].setValue(getValueFrom);
+    this.secondFormGroup.controls['SunToTime'].setValue(getValueTo);
+  }
+
+  goToSteps(stepNumber: number, stepperType: string) {
+    switch (stepperType) {
+      case 'businessLocation':
+        this.stepper.selectedIndex = stepNumber - 1;
+        break;
+      case 'paymentInfo':
+        this.stepper.selectedIndex = stepNumber - 1;
+        break;
+      case 'sources':
+        this.stepper.selectedIndex = stepNumber - 1;
+        break;
+      default:
+    }
+  }
+
+  CheckIfBusinessGroupExists() {
+    let businessGroupName = this.firstFormGroup.controls['BusinessgroupName'].value;
+    let id = this.businessGroupID == 'New' ? 0 : this.businessGroupID;
+    console.log(businessGroupName)
+    console.log(id)
+    if (businessGroupName.trim() != '') {
+      this._groupService.CheckIfBusinessGroupExists(id, businessGroupName).subscribe({
+        next: (data: any) => {
+          if (data == 200) {
+            this.toast.warning('Business Group with same name already exists !', '', { positionClass: 'toast-bottom-right' });
+            this.firstFormGroup.controls['BusinessgroupName'].setValue('');
+          }
+          else if (data == 400) {
+            this.toast.error('Something went wrong !', '', { positionClass: 'toast-bottom-right' });
+            this.firstFormGroup.controls['BusinessgroupName'].setValue('');
+          }
+        },
+        error: (error: any) => {
+          this.toast.error('Something went wrong !', '', { positionClass: 'toast-bottom-right' });
+          this.firstFormGroup.controls['BusinessgroupName'].setValue('');
+          console.log("This is error message", error);
+        }
+      });
+    }
+  }
+
+  toggleBusinessGroup(element) {
+    this.businessLocationID = element.id;
+  }
+
+  enableBusinessLocation() {
+    this._businessProfileService.EnableDisableBusinessProfile(this.businessLocationID)
+      .subscribe({
+        next: (data) => {
+          this.closeModal.nativeElement.click();
+          this.getBusinessLocationsByGroupID();
+        },
+        error: error => {
+          console.log(error);
+        }
+      });
+  }
+
+  // Searching filter for Business Locations....
+  applyFiltersForLocation(event: any) {
+    const searchInput = event.target.value.toLowerCase();
+    this.dataSourceBusinessLocation = this.filteredataForLocations.filter((item: any) => {
+      return item.businessName.toLowerCase().includes(searchInput)
+    });
+  }
+
+  // Searching filter for Payment info......
+  applyFiltersForPaymentInfo(event: any) {
+    const searchInput = event.target.value.toLowerCase();
+    this.dataSourcePaymentInfo = this.filterDataForPaymentInfo.filter((item: any) => {
+      return item.businessLocationName.toLowerCase().includes(searchInput)
+    });
+  }
+
+  // Searching filter for Sources....
+  applyFiltersForSources(event: any) {
+    const searchInput = event.target.value.toLowerCase();
+    this.dataSourceSources = this.filterDataForSources.filter((item: any) => {
+      return item.businessLocationName.toLowerCase().includes(searchInput)
+    });
+  }
 }

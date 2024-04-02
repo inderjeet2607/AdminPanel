@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { HomeComponent } from './components/home/home.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -21,6 +21,9 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatListModule } from '@angular/material/list';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgxMaskModule } from 'ngx-mask';
+import { NavbarComponent } from './components/navbar/navbar.component'
+import { NgxStripeModule } from 'ngx-stripe';
 
 @NgModule({
   declarations: [
@@ -28,6 +31,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     LoginComponent,
     HomeComponent,
     GroupListComponent,
+    NavbarComponent,
   ],
   imports: [
     BrowserModule,
@@ -46,6 +50,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MatListModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot(),
+    NgxMaskModule.forRoot(),
+    NgxStripeModule.forRoot('pk_test_51OtUU9ANXWzVIo6gmFhQjk1ZoUafmmnbUdZb2vJZosTBBwK8JWbsB3kEMPSAzIEAjpGxpb6YUiC1AtyfpPpxesBe00ASEDLBCy')
   ],
   providers: [
     provideAnimationsAsync(),

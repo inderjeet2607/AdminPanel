@@ -1,7 +1,14 @@
 .bodyclass {
-    background-color: white;
+    background: #dbe7ec;
     padding: 15px;
     border-radius: 12px;
+    height: 100%;
+}
+
+.wrapper {
+    background: white;
+    border-radius: 15px;
+    margin: 20px;
 }
 
 .flexdivHeader {
@@ -37,4 +44,20 @@
     border: none;
     border-radius: 3px;
     color: white;
+}
+
+.navbar-brand {
+    margin-bottom: 10px;
+}
+
+.text-right {
+    text-align: right !important;
+    padding-right: 2rem;
+}
+
+.modal-dialog {
+    margin: 0 !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
 }

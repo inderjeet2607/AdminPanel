@@ -30,7 +30,7 @@
 }
 
 .bodyclass {
-    background-color: white;
+    background-color: #dbe7ec;
     padding: 15px;
     border-radius: 12px;
     overflow: hidden;
@@ -44,6 +44,21 @@
 .flexRight {
     flex: 1;
     text-align: right;
+}
+
+.wrapper {
+    background: white;
+    border-radius: 15px;
+    margin: 20px;
+}
+
+.text-right {
+    text-align: right !important;
+    padding-right: 2rem;
+}
+
+.navbar-brand {
+    margin-bottom: 10px;
 }
 
 .invalid-feedback {
@@ -106,3 +121,27 @@ i.icon-fs-info {
 .accordion {
     margin-bottom: 1%;
 }
+
+.modal-title {
+    color: darkgoldenrod;
+}
+
+.deleteclass {
+    background: #9b6f5b;
+    border: none;
+    border-radius: 3px;
+    color: white;
+}
+
+.editClassSummary {
+    background: #7DA3BA;
+    border: none;
+    border-radius: 3px;
+    color: white;
+    float: right;
+}
+
+/* .modal-header .close {
+    padding: 1rem 1rem;
+    margin: -1rem -3rem -1rem auto !important;
+} */
