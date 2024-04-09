@@ -1,0 +1,277 @@
+<app-navbar></app-navbar>
+
+<div class="wrapper">
+  <div class="row ml-2 d-flex">
+    <div class="col-md-7 mt-3 d-flex" style="align-items: center">
+      <div class="navbar-brand">
+        <span class="fa fa-file-text"></span>
+      </div>
+      <h2 class="mb-0">Add Payment</h2>
+    </div>
+    <div class="col-md-5 text-right mt-3">
+      <button
+        class="btn btn-success text-center brownColor mb-1 mr-3"
+        (click)="Cancel()"
+      >
+        <img
+          alt="phonevector"
+          class="filter-green"
+          src="../../../assets/img/icons/Cancel.svg"
+        />
+        Cancel
+      </button>
+    </div>
+  </div>
+  <div style="border-bottom: 1px solid #dadcdc; margin: 15px"></div>
+  <div class="pl-4 pr-4">
+    <form [formGroup]="firstFormGroup">
+      <div class="row" style="margin-bottom: 2%">
+        <div class="col-md-4">
+          <label for="businessGroup"> Business Group </label>
+          <ng-multiselect-dropdown
+            [placeholder]="'Choose Business Group'"
+            id="businessGroup"
+            [settings]="dropdownSettingsSingleGroup"
+            [data]="businessGroupData"
+            formControlName="businessGroupID"
+            (click)="dropDownSelect = true"
+            (ngModelChange)="getBusinessLocationsByGroupID($event)"
+          >
+          </ng-multiselect-dropdown>
+          <div
+            style="width: 100%"
+            *ngIf="
+              submitted && firstFormGroup.controls['businessGroupID'].errors
+            "
+          >
+            <div
+              *ngIf="
+                firstFormGroup.controls['businessGroupID'].errors['required']
+              "
+              style="font-size: 80%; color: #dc3545"
+            >
+              Business Group is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label for="businessLocation"> Business Location </label>
+          <ng-multiselect-dropdown
+            [placeholder]="'Choose Business Location'"
+            id="businessLocation"
+            [settings]="dropdownSettingsSingleLocation"
+            [data]="businessLocationData"
+            formControlName="businessLocationID"
+          >
+          </ng-multiselect-dropdown>
+          <div
+            style="width: 100%"
+            *ngIf="
+              submitted && firstFormGroup.controls['businessLocationID'].errors
+            "
+          >
+            <div
+              *ngIf="
+                firstFormGroup.controls['businessLocationID'].errors['required']
+              "
+              style="font-size: 80%; color: #dc3545"
+            >
+              Business Location is required
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-bottom: 2%">
+        <div class="col-md-4">
+          <label for="paymentDate"> Payment Date </label>
+          <!-- <i
+            class="icon-fs-info ng-scope"
+            ngbTooltip="Payment will be deducted on this date every month/year"
+            style="vertical-align: middle"
+          >
+          </i> -->
+          <input
+            id="paymentDate"
+            type="date"
+            class="form-control"
+            formControlName="paymentDate"
+            [ngClass]="{
+              'is-invalid':
+                submitted && firstFormGroup.controls['paymentDate'].errors
+            }"
+          />
+          <div
+            style="width: 100%"
+            *ngIf="submitted && firstFormGroup.controls['paymentDate'].errors"
+            class="invalid-feedback"
+          >
+            <div
+              *ngIf="firstFormGroup.controls['paymentDate'].errors['required']"
+            >
+              Payment Date is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label for="amount"> Amount </label>
+          <input
+            id="amount"
+            class="form-control"
+            formControlName="amount"
+            autocomplete="off"
+            [ngClass]="{
+              'is-invalid':
+                submitted && firstFormGroup.controls['amount'].errors
+            }"
+          />
+          <div
+            *ngIf="submitted && firstFormGroup.controls['amount'].errors"
+            class="invalid-feedback"
+          >
+            <div
+              *ngIf="
+                firstFormGroup.controls['amount'].errors['required'] ||
+                firstFormGroup.controls['amount'].errors['pattern']
+              "
+            >
+              Amount is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label for="method"> Method </label>
+          <ng-multiselect-dropdown
+            [placeholder]="'Choose Payment Method'"
+            id="method"
+            [settings]="dropdownSettingsSingleMethod"
+            [data]="methodData"
+            formControlName="method"
+          >
+          </ng-multiselect-dropdown>
+          <div
+            style="width: 100%"
+            *ngIf="submitted && firstFormGroup.controls['method'].errors"
+          >
+            <div
+              *ngIf="firstFormGroup.controls['method'].errors['required']"
+              style="font-size: 80%; color: #dc3545"
+            >
+              Payment Method is required
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-bottom: 2%">
+        <div class="col-md-4">
+          <div class="form-row">
+            <div class="col-md-12">
+              <label>Upload Payment PDF</label>
+            </div>
+            <div class="col-md-12">
+              <input
+                type="file"
+                accept="application/pdf"
+                class="custom-file"
+                id="paymentpdf"
+                (change)="onChange($event)"
+                [ngClass]="{
+                  'is-invalid':
+                    submitted &&
+                    (filePathpaymentpdf == null ||
+                      filePathpaymentpdf == undefined ||
+                      filePathpaymentpdf == '')
+                }"
+              />
+              <label class="custom-file-label" for="paymentpdf">
+                Upload PDF
+              </label>
+              <div
+                style="
+                  width: 80%;
+                  background-color: #7da3ba;
+                  height: 20%;
+                  margin-top: 1%;
+                  border-radius: 21px;
+                  font-size: 65%;
+                "
+                class="progress-bar"
+                role="progressbar"
+                [style.width]="uploadProgressfilepaymentpdf"
+                aria-valuenow="uploadProgressfilepaymentpdf"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                *ngIf="
+                  filePathpaymentpdf != null && filePathpaymentpdf != undefined
+                "
+              >
+                {{ uploadProgressfilepaymentpdf }}
+              </div>
+            </div>
+            <div
+              class="col"
+              *ngIf="filePathpaymentpdf != null"
+              style="position: relative"
+            >
+              <mat-icon
+                class="cancel-upload"
+                (click)="cancelUpload()"
+                *ngIf="
+                  uploadProgressfilepaymentpdf != undefined ||
+                  (filePathpaymentpdf != null &&
+                    filePathpaymentpdf != undefined &&
+                    filePathpaymentpdf != '')
+                "
+                style="
+                  color: black;
+                  overflow: inherit;
+                  position: absolute;
+                  cursor: pointer;
+                "
+              >
+                cancel
+              </mat-icon>
+            </div>
+            <div
+              *ngIf="
+                submitted &&
+                (filePathpaymentpdf == null ||
+                  filePathpaymentpdf == undefined ||
+                  filePathpaymentpdf == '')
+              "
+              style="font-size: 80%; color: #dc3545"
+            >
+              <div>Payment PDF is required</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row mt-4">
+          <div class="col-md-12 text-center" style="margin-bottom: 1%">
+            <button
+              class="btn btn-success text-center"
+              (click)="SavePayment()"
+              [disabled]="isLoading"
+            >
+              Save
+              <i
+                class="fa"
+                [ngClass]="{
+                  'fa-spin fa-spinner': isLoading,
+                  'fa-check': !isLoading
+                }"
+                style="color: white"
+              ></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

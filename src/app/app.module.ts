@@ -1,6 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
@@ -21,9 +20,13 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatListModule } from '@angular/material/list';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgxMaskModule } from 'ngx-mask';
 import { NavbarComponent } from './components/navbar/navbar.component'
 import { NgxStripeModule } from 'ngx-stripe';
+import { InvoiceComponent } from './components/invoice/invoice.component';
+import { PaymentsComponent } from './components/payments/payments.component';
+import { PaymentListComponent } from './components/payment-list/payment-list.component';
+import { InvoiceListComponent } from './components/invoice-list/invoice-list.component';
+import { GoogleMapsModule } from '@angular/google-maps';
 
 @NgModule({
   declarations: [
@@ -32,10 +35,16 @@ import { NgxStripeModule } from 'ngx-stripe';
     HomeComponent,
     GroupListComponent,
     NavbarComponent,
+    InvoiceComponent,
+    PaymentsComponent,
+    PaymentListComponent,
+    InvoiceListComponent,
+    
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
     MatStepperModule,
@@ -50,8 +59,8 @@ import { NgxStripeModule } from 'ngx-stripe';
     MatListModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot(),
-    NgxMaskModule.forRoot(),
-    NgxStripeModule.forRoot('pk_test_51OtUU9ANXWzVIo6gmFhQjk1ZoUafmmnbUdZb2vJZosTBBwK8JWbsB3kEMPSAzIEAjpGxpb6YUiC1AtyfpPpxesBe00ASEDLBCy')
+    NgxStripeModule.forRoot('pk_test_51OtUU9ANXWzVIo6gmFhQjk1ZoUafmmnbUdZb2vJZosTBBwK8JWbsB3kEMPSAzIEAjpGxpb6YUiC1AtyfpPpxesBe00ASEDLBCy'),
+    GoogleMapsModule
   ],
   providers: [
     provideAnimationsAsync(),

@@ -1,6 +1,6 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UploadServiceService } from '../../services/upload/upload-service.service';
@@ -18,6 +18,8 @@ import { PaymentInfoService } from '../../services/paymentInfo/payment-info.serv
 import { SourceService } from '../../services/source/source.service';
 import { StripeCardComponent, StripeService } from 'ngx-stripe';
 import { StripeCardElementOptions, StripeElementsOptions, } from '@stripe/stripe-js';
+import { PaymentDocsService } from '../../services/paymentDocs/payment-docs.service';
+import { GoogleMapsService } from '../../services/googleMaps/google-maps.service';
 
 export interface BusinessLocationList {
   legalName: string;
@@ -51,6 +53,8 @@ export class HomeComponent {
   secondFormGroup: FormGroup;
   thirdFormGroup: FormGroup;
   fourthFormGroup: FormGroup;
+  paymentDocFromGroup: FormGroup;
+  // paymentDocs: FormArray;
   businessGroupID: any;
   submitted = false;
   secondStepSubmitted = false;
@@ -62,7 +66,6 @@ export class HomeComponent {
   loadingGroupLogo: boolean = false;
   uploadSubGroupLogo: Subscription;
   isfileUploadedGroupLogo = false;
-  annImageGroupLogo: any;
   fileNameGroupLogo: any = null;
   filePathGroupLogo: any = null;
   //#endregion
@@ -74,13 +77,13 @@ export class HomeComponent {
   dropdownSettingsSinglePackage: IDropdownSettings = {};
   dropdownSettingsSingleState: IDropdownSettings = {};
   dropdownSettingsBusinessLocationName: IDropdownSettings = {};
+  dropdownSettingsPaymentDocs: IDropdownSettings = {};
   //#region Business Logo variables
   fileBusinessLogo: File;
   uploadProgressBusinessLogo: any;
   loadingBusinessLogo: boolean = false;
   uploadSubBusinessLogo: Subscription;
   isfileUploadedBusinessLogo = false;
-  annImageBusinessLogo: any;
   fileNameBusinessLogo: any = null;
   filePathBusinessLogo: any = null;
   //#endregion
@@ -91,7 +94,6 @@ export class HomeComponent {
   loadingBusinessDisplayImage: boolean = false;
   uploadSubBusinessDisplayImage: Subscription;
   isfileUploadedBusinessDisplayImage = false;
-  annImageBusinessDisplayImage: any;
   fileNameBusinessDisplayImage: any = null;
   filePathBusinessDisplayImage: any = null;
   //#endregion
@@ -104,7 +106,6 @@ export class HomeComponent {
   loadingBusinessImage1: boolean = false;
   uploadSubBusinessImage1: Subscription;
   isfileUploadedBusinessImage1 = false;
-  annImageBusinessImage1: any;
   fileNameBusinessImage1: any = null;
   filePathBusinessImage1: any = null;
   //#endregion
@@ -114,7 +115,6 @@ export class HomeComponent {
   loadingBusinessImage2: boolean = false;
   uploadSubBusinessImage2: Subscription;
   isfileUploadedBusinessImage2 = false;
-  annImageBusinessImage2: any;
   fileNameBusinessImage2: any = null;
   filePathBusinessImage2: any = null;
   //#endregion
@@ -124,7 +124,6 @@ export class HomeComponent {
   loadingBusinessImage3: boolean = false;
   uploadSubBusinessImage3: Subscription;
   isfileUploadedBusinessImage3 = false;
-  annImageBusinessImage3: any;
   fileNameBusinessImage3: any = null;
   filePathBusinessImage3: any = null;
   //#endregion
@@ -134,7 +133,6 @@ export class HomeComponent {
   loadingBusinessImage4: boolean = false;
   uploadSubBusinessImage4: Subscription;
   isfileUploadedBusinessImage4 = false;
-  annImageBusinessImage4: any;
   fileNameBusinessImage4: any = null;
   filePathBusinessImage4: any = null;
   //#endregion
@@ -167,9 +165,7 @@ export class HomeComponent {
   customerSourceName: any = '';
   storeSourceName: any = '';
   isSourceLocationDisabled: boolean = false;
-  showCardNumber: boolean = false;
-  showCVV: boolean = false;
-  showZipCode: boolean = false;
+  cardNumber: any = '';
   ChkMakeDefaultTime = false;
   isPaymentLocationDisabled: boolean = false;
   stripeCustomerID: any = '';
@@ -193,20 +189,43 @@ export class HomeComponent {
   };
   @ViewChild(StripeCardComponent) card: StripeCardComponent;
   @ViewChild('closeModal') closeModal: ElementRef;
+  @ViewChild('search') searchElementRef: ElementRef;
   filteredataForLocations: any = [];
   filterDataForPaymentInfo: any = [];
   filterDataForSources: any = [];
+  paymentMethodID: any = '';
+  expiryMonth: any = 0;
+  expiryYear: any = 0;
+  zipCode: string = '';
+  showNgxCard: boolean = true;
+  docTypeList: any = [];
+  docList: any = [];
+  selectedBusiness: any = [];
+  //#region PaymentDoc
+  filePaymentDoc: File;
+  loadingPaymentDoc: boolean = false;
+  uploadSubPaymentDoc: Subscription;
+  isfileUploadedPaymentDoc = false;
+  //#endregion
 
   constructor(private aroute: ActivatedRoute, private route: Router, private fb: FormBuilder, private _uploadService: UploadServiceService,
     private _industryService: IndustryService, private _packageService: PackageTypeService, private _groupService: GroupListService,
     private _stateService: StateService, private _businessProfileService: BusinessProfilesService, private toast: ToastrService,
     private _businessLabelService: BusinessLabelService, private _paymentInfoService: PaymentInfoService,
-    private _sourceService: SourceService, private stripeService: StripeService) {
+    private _sourceService: SourceService, private stripeService: StripeService, private _paymentDocService: PaymentDocsService,
+    private ngZone: NgZone, private googleMapsService: GoogleMapsService) {
 
     this.paymentInfoID = 0;
     this.businessLocationID = 0;
     this.sourceID = 0;
     this.stripeCustomerID = '';
+    this.showNgxCard = false;
+    this.paymentMethodID = '';
+    this.expiryMonth = 0;
+    this.expiryYear = 0;
+    this.cardNumber = 0;
+    this.zipCode = '';
+    this.selectedBusiness = [];
 
     this.firstFormGroup = this.fb.group({
       BusinessgroupName: ['', [Validators.required, Validators.pattern(/^(\s+\S+\s*)*(?!\s).*$/)]],
@@ -255,19 +274,18 @@ export class HomeComponent {
       SunToTime: ['']
     });
     this.thirdFormGroup = this.fb.group({
-      CardNoForSave: [''],
       BusinessLocationName: ['', Validators.required],
-      ZipCode: ['', Validators.required],
       ChkMakeDefault: [''],
       CardHolderName: [''],
-      AccNo: [''],
-      RoutingNo: [''],
       selectedOption: ['', Validators.required],
       GoLiveDate: ['', Validators.required],
       paymentSchedule: ['', Validators.required],
       paymentAmountMonthly: [0],
       paymentAmountYearly: [0]
     });
+    this.paymentDocFromGroup = this.fb.group({
+      paymentDocs: this.fb.array([])
+    })
     this.fourthFormGroup = this.fb.group({
       SrcBusinessLocationName: ['', Validators.required],
       CustTabletBrand: ['', Validators.required],
@@ -275,10 +293,6 @@ export class HomeComponent {
       StoreTabletBrand: ['', Validators.required],
       StoreTabletModel: ['', Validators.required],
     });
-
-    // this.dataSourceBusinessLocation = this.filteredataForLocations;
-    // this.dataSourcePaymentInfo = this.filterDataForPaymentInfo;
-    // this.dataSourceSources = this.filterDataForSources;
   }
 
   ngOnInit() {
@@ -289,6 +303,7 @@ export class HomeComponent {
     this.getPackageTypes();
     this.getStates();
     this.GetBusinessLabels();
+    this.getPaymentDocTypes();
 
     if (this.businessGroupID != null && this.businessGroupID != '' && this.businessGroupID != undefined && this.businessGroupID != 'New') {
       this.businessGroupSaveBtn = 'Update & Continue';
@@ -324,6 +339,20 @@ export class HomeComponent {
       textField: 'businessName',
       singleSelection: true
     }
+
+    this.dropdownSettingsPaymentDocs = {
+      idField: 'id',
+      textField: 'name',
+      singleSelection: true
+    }
+
+    // const data = this.paymentDocFromGroup.controls['paymentDocs'] as FormArray;
+    // docs.forEach(element => {
+    //   data.push(this.fb.group({
+    //     type: new FormControl(),
+    //     fileName: new FormControl()
+    //   })
+    // });
   }
 
   getIndustries() {
@@ -410,6 +439,43 @@ export class HomeComponent {
     })
   }
 
+  getPaymentDocsByLocationID(id) {
+    while (this.paymentDocs.length !== 0) {
+      this.paymentDocs.removeAt(0)
+    }
+
+    this._paymentDocService.GetLocationDocsByPaymentID(id).subscribe({
+      next: (data) => {
+        this.docList = data;
+        this.docList.forEach(element => {
+          this.paymentDocs.push(this.fb.group({
+            id: element.id,
+            type: [this.docTypeList.filter(x => x.id == element.documentType), Validators.required],
+            fileName: [element.documentPath, Validators.required],
+            uploadProgressPaymentDoc: [(element.documentPath != '' && element.documentPath != null && element.documentPath != undefined) ?
+              ((100).toString() + "%") : "0%"],
+            filePathPaymentDoc: [(element.documentPath != '' && element.documentPath != null && element.documentPath != undefined) ?
+              (AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + element.documentPath) : null],
+            paymentDocSubmitted: [false]
+          }));
+        });
+      },
+      error: error => {
+        console.log("This is error message", error)
+      }
+    })
+  }
+
+  getPaymentDocTypes() {
+    this.docTypeList.push({
+      id: 1,
+      name: 'Cancelled Cheque'
+    }, {
+      id: 2,
+      name: 'ID Proof'
+    });
+  }
+
   //#region BusinessGroupLogo
   onChange(event: any) {
     this.fileGroupLogo = event.target.files[0];
@@ -423,7 +489,6 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingGroupLogo = false; // Flag variable
           this.isfileUploadedGroupLogo = true;
-          this.annImageGroupLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileGroupLogo.name;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameGroupLogo = array[array.length - 1];
           this.filePathGroupLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameGroupLogo;
@@ -467,7 +532,6 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingBusinessLogo = false; // Flag variable
           this.isfileUploadedBusinessLogo = true;
-          this.annImageBusinessLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessLogo.name;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameBusinessLogo = array[array.length - 1];
           this.filePathBusinessLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessLogo;
@@ -511,7 +575,6 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingBusinessDisplayImage = false; // Flag variable
           this.isfileUploadedBusinessDisplayImage = true;
-          this.annImageBusinessDisplayImage = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessDisplayImage.name;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameBusinessDisplayImage = array[array.length - 1];
           this.filePathBusinessDisplayImage = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessDisplayImage;
@@ -555,7 +618,6 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingBusinessImage1 = false; // Flag variable
           this.isfileUploadedBusinessImage1 = true;
-          this.annImageBusinessImage1 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage1.name;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameBusinessImage1 = array[array.length - 1];
           this.filePathBusinessImage1 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage1;
@@ -599,7 +661,6 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingBusinessImage2 = false; // Flag variable
           this.isfileUploadedBusinessImage2 = true;
-          this.annImageBusinessImage2 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage2.name;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameBusinessImage2 = array[array.length - 1];
           this.filePathBusinessImage2 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage2;
@@ -643,7 +704,6 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingBusinessImage3 = false; // Flag variable
           this.isfileUploadedBusinessImage3 = true;
-          this.annImageBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage3.name;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameBusinessImage3 = array[array.length - 1];
           this.filePathBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage3;
@@ -687,7 +747,6 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingBusinessImage4 = false; // Flag variable
           this.isfileUploadedBusinessImage4 = true;
-          this.annImageBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileBusinessImage4.name;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameBusinessImage4 = array[array.length - 1];
           this.filePathBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameBusinessImage4;
@@ -732,6 +791,13 @@ export class HomeComponent {
     this.businessLocationSaveBtn = 'Save & Continue';
     this.paymentInfoSaveBtn = 'Save & Continue';
     this.sourceSaveBtn = 'Review & Save';
+    this.paymentMethodID = '';
+    this.expiryMonth = 0;
+    this.expiryYear = 0;
+    this.zipCode = '';
+    this.showNgxCard = true;
+    this.cardNumber = 0;
+    this.selectedBusiness = [];
   }
 
   SaveGroupDetails() {
@@ -815,10 +881,14 @@ export class HomeComponent {
         this.verificationText = data.isEmailVerified == true ? 'Verified' :
           (data.isEmailVerified == false ? 'Unverified' : '');
 
-        this.filePathGroupLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.logoPath;
-        this.uploadProgressGroupLogo = (100).toString() + "%";
-
-        this.fileNameGroupLogo = data.logoPath;
+        if (data.logoPath != '' && data.logoPath != null && data.logoPath != undefined) {
+          this.filePathGroupLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.logoPath;
+          this.uploadProgressGroupLogo = (100).toString() + "%";
+          this.fileNameGroupLogo = data.logoPath;
+        }
+        else {
+          this.cancelUploadBusinessLogo();
+        }
       },
       error: (error: any) => {
 
@@ -874,7 +944,7 @@ export class HomeComponent {
       "instagramUrl": this.secondFormGroup.controls['InstagramUrl'].value,
       "yelpUrl": this.secondFormGroup.controls['YelpUrl'].value,
       "stateId": 3,
-      "isActive": true,
+      "isActive": false,
       "createdBy": AppSettings.GetCreatedBy(),
       "createdDate": AppSettings.GetDate(),
       "lastModifiedBy": AppSettings.GetLastModifiedBy(),
@@ -954,11 +1024,11 @@ export class HomeComponent {
       "uniqueId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "id": 0,
       "name": "",
-      "cardNumber": this.thirdFormGroup.controls['CardNoForSave'].value,
-      "expireMonth": 0,
-      "expireYear": 0,
+      "cardNumber": this.cardNumber,
+      "expireMonth": this.expiryMonth,
+      "expireYear": this.expiryYear,
       "cvv": 0,
-      "zipCode": this.thirdFormGroup.controls['ZipCode'].value,
+      "zipCode": this.zipCode,
       "stateId": 3,
       "isActive": true,
       "createdBy": AppSettings.GetCreatedBy(),
@@ -975,10 +1045,10 @@ export class HomeComponent {
       "packageMonthlyAmount": this.thirdFormGroup.controls['paymentAmountMonthly'].value,
       "packageYearlyAmount": this.thirdFormGroup.controls['paymentAmountYearly'].value,
       "goLiveDate": this.thirdFormGroup.controls['GoLiveDate'].value,
-      "accountNumber": this.thirdFormGroup.controls['AccNo'].value,
-      "routingName": this.thirdFormGroup.controls['RoutingNo'].value,
+      "accountNumber": '',
+      "routingName": '',
       "cardHolderName": this.thirdFormGroup.controls['CardHolderName'].value,
-      "paymentMethodID": ""
+      "paymentMethodID": this.paymentMethodID
     }
 
     return details;
@@ -1023,76 +1093,58 @@ export class HomeComponent {
     this.thirdStepSubmitted = true;
     this.isLoading = true;
 
-    const name = this.thirdFormGroup.get('CardHolderName').value;
-    // this.stripeService.createToken(this.card.element, { name }).subscribe((result) => {
-    //   if (result.token) {
-    //     console.log(result.token.id);
-    //   } else if (result.error) {
-    //     this.isLoading = false;
-    //     console.log(result.error.message);
-    //   }
-    // });
-    let paymentID: any = '';
-    let expiryMonth: any = 0;
-    let expiryYear: any = 0;
-    this.stripeService.createPaymentMethod({ type: "card", card: this.card.element }).subscribe(({ error, paymentMethod }) => {
-      if (error) {
-        this.isLoading = false;
-        console.log(error.message);
-      }
-      else {
-        paymentID = paymentMethod.id;
-        expiryMonth = paymentMethod.card.exp_month < 10 ? ("0" + paymentMethod.card.exp_month) : paymentMethod.card.exp_month;
-        expiryYear = paymentMethod.card.exp_year;
+    if (this.thirdFormGroup.invalid) {
+      this.isLoading = false;
+      return;
+    }
 
-        this.thirdFormGroup.controls['CardNoForSave'].setValue(paymentMethod.card.last4);
-        this.thirdFormGroup.controls['ZipCode'].setValue(paymentMethod.billing_details.address.postal_code);
-
-        if (this.thirdFormGroup.invalid) {
-          console.log(this.thirdFormGroup)
+    let model = this.createPaymentInfoModel();
+    if (this.paymentInfoID == 0) {
+      this.stripeService.createPaymentMethod({ type: "card", card: this.card.element }).subscribe(({ error, paymentMethod }) => {
+        if (error) {
           this.isLoading = false;
-          return;
+          console.log(error.message);
         }
+        else {
+          this.paymentMethodID = paymentMethod.id;
+          this.expiryMonth = paymentMethod.card.exp_month;
+          this.expiryYear = paymentMethod.card.exp_year;
+          this.zipCode = paymentMethod.billing_details.address.postal_code;
+          this.cardNumber = paymentMethod.card.last4;
 
-        let model = this.createPaymentInfoModel();
-        model.paymentMethodID = paymentID;
-        model.expireMonth = expiryMonth;
-        model.expireYear = expiryYear;
-
-        if (this.paymentInfoID == 0) {
           this._paymentInfoService.PostPaymentInfo(model)
             .subscribe({
               next: (data) => {
                 this.paymentInfoID = data.id;
                 this.isLoading = false;
-                this.submitted = false;
+                this.thirdStepSubmitted = false;
                 this.stepper.next();
               },
               error: error => {
                 console.log(error);
                 this.isLoading = false;
-                this.submitted = false;
+                this.thirdStepSubmitted = false;
               }
             });
         }
-        else {
-          model.id = this.paymentInfoID;
-          this._paymentInfoService.PutPaymentInfo(model.id, model)
-            .subscribe({
-              next: (data) => {
-                this.isLoading = false;
-                this.submitted = false;
-                this.stepper.next();
-              },
-              error: error => {
-                console.log(error);
-                this.isLoading = false;
-                this.submitted = false;
-              }
-            });
-        }
-      }
-    });
+      });
+    }
+    else {
+      model.id = this.paymentInfoID;
+      this._paymentInfoService.PutPaymentInfo(model.id, model)
+        .subscribe({
+          next: (data) => {
+            this.isLoading = false;
+            this.thirdStepSubmitted = false;
+            this.stepper.next();
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.thirdStepSubmitted = false;
+          }
+        });
+    }
   }
 
   SaveSource() {
@@ -1107,13 +1159,13 @@ export class HomeComponent {
         .subscribe({
           next: (data) => {
             this.isLoading = false;
-            this.submitted = false;
+            this.fourthStepSubmitted = false;
             this.stepper.next();
           },
           error: error => {
             console.log(error);
             this.isLoading = false;
-            this.submitted = false;
+            this.fourthStepSubmitted = false;
           }
         });
     }
@@ -1123,13 +1175,13 @@ export class HomeComponent {
         .subscribe({
           next: (data) => {
             this.isLoading = false;
-            this.submitted = false;
+            this.fourthStepSubmitted = false;
             this.stepper.next();
           },
           error: error => {
             console.log(error);
             this.isLoading = false;
-            this.submitted = false;
+            this.fourthStepSubmitted = false;
           }
         });
     }
@@ -1201,7 +1253,6 @@ export class HomeComponent {
         this.showLocationList = false;
         this.businessLocationSaveBtn = "Update & Continue";
 
-        // BusinessLabelID: ['', Validators.required],
         let labels = this.GetBusinessLabelsForEdit(data['businesswiseLabels']);
         this.selectedBusinessLabels = [];
         labels.forEach(element => {
@@ -1210,6 +1261,60 @@ export class HomeComponent {
             name: this.businessLabels.filter(x => x.id == element.labelID)[0].name
           })
         });
+
+        if (data.logoPath != '' && data.logoPath != null && data.logoPath != undefined) {
+          this.filePathBusinessLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.logoPath;
+          this.uploadProgressBusinessLogo = (100).toString() + "%";
+          this.fileNameBusinessLogo = data.logoPath;
+        }
+        else {
+          this.cancelUploadBusinessLogo();
+        }
+
+        if (data.imagePath != '' && data.imagePath != null && data.imagePath != undefined) {
+          this.filePathBusinessDisplayImage = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.imagePath;
+          this.uploadProgressBusinessDisplayImage = (100).toString() + "%";
+          this.fileNameBusinessDisplayImage = data.imagePath;
+        }
+        else {
+          this.cancelUploadBusinessDisplayImage();
+        }
+
+        if (data.galleryImagePath1 != '' && data.galleryImagePath1 != null && data.galleryImagePath1 != undefined) {
+          this.filePathBusinessImage1 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath1;
+          this.uploadProgressBusinessImage1 = (100).toString() + "%";
+          this.fileNameBusinessImage1 = data.galleryImagePath1;
+        }
+        else {
+          this.cancelUploadBusinessImage1();
+        }
+
+        if (data.galleryImagePath2 != '' && data.galleryImagePath2 != null && data.galleryImagePath2 != undefined) {
+          this.filePathBusinessImage2 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath2;
+          this.uploadProgressBusinessImage2 = (100).toString() + "%";
+          this.fileNameBusinessImage2 = data.galleryImagePath2;
+        }
+        else {
+          this.cancelUploadBusinessImage2();
+        }
+
+        if (data.galleryImagePath3 != '' && data.galleryImagePath3 != null && data.galleryImagePath3 != undefined) {
+          this.filePathBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath3;
+          this.uploadProgressBusinessImage3 = (100).toString() + "%";
+          this.fileNameBusinessImage3 = data.galleryImagePath3;
+        }
+        else {
+          this.cancelUploadBusinessImage3();
+        }
+
+        if (data.galleryImagePath4 != '' && data.galleryImagePath4 != null && data.galleryImagePath4 != undefined) {
+          this.filePathBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath4;
+          this.uploadProgressBusinessImage4 = (100).toString() + "%";
+          this.fileNameBusinessImage4 = data.galleryImagePath4;
+        }
+        else {
+          this.cancelUploadBusinessImage4();
+        }
       },
       error: (error: any) => {
 
@@ -1249,14 +1354,14 @@ export class HomeComponent {
         .subscribe({
           next: (data) => {
             this.isLoading = false;
-            this.submitted = false;
+            this.secondStepSubmitted = false;
             this.getBusinessLocationsByGroupID();
             this.stepper.next();
           },
           error: error => {
             console.log(error);
             this.isLoading = false;
-            this.submitted = false;
+            this.secondStepSubmitted = false;
           }
         });
     }
@@ -1266,13 +1371,13 @@ export class HomeComponent {
         .subscribe({
           next: (data) => {
             this.isLoading = false;
-            this.submitted = false;
+            this.secondStepSubmitted = false;
             this.stepper.next();
           },
           error: error => {
             console.log(error);
             this.isLoading = false;
-            this.submitted = false;
+            this.secondStepSubmitted = false;
           }
         });
     }
@@ -1298,32 +1403,14 @@ export class HomeComponent {
   }
 
   changePaymentType(type) {
-    if ((type == 1) || (type == 2)) {
-      this.thirdFormGroup.controls['CardNoForSave'].addValidators(Validators.required);
+    if (type == 1 || type == 2) {
       this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
-
-      this.thirdFormGroup.controls['AccNo'].clearValidators();
-      this.thirdFormGroup.controls['RoutingNo'].clearValidators();
-
-      this.thirdFormGroup.controls['AccNo'].reset();
-      this.thirdFormGroup.controls['RoutingNo'].reset();
-      this.thirdFormGroup.controls['CardHolderName'].reset();
     }
-    else if (type == 3) {
-      this.thirdFormGroup.controls['CardNoForSave'].clearValidators();
-
-      this.thirdFormGroup.controls['CardNoForSave'].reset();
+    else if (type == 3 || type == 4) {
       this.thirdFormGroup.controls['CardHolderName'].reset();
-
-      this.thirdFormGroup.controls['AccNo'].addValidators(Validators.required);
-      this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
-      this.thirdFormGroup.controls['RoutingNo'].addValidators(Validators.required);
+      this.thirdFormGroup.controls['CardHolderName'].clearValidators();
     }
-    this.thirdFormGroup.controls["CardNoForSave"].updateValueAndValidity();
     this.thirdFormGroup.controls["CardHolderName"].updateValueAndValidity();
-
-    this.thirdFormGroup.controls["AccNo"].updateValueAndValidity();
-    this.thirdFormGroup.controls["RoutingNo"].updateValueAndValidity();
   }
 
   businessLabelOnChange() {
@@ -1356,26 +1443,34 @@ export class HomeComponent {
 
   AddNewPaymentInfo() {
     this.paymentInfoID = 0;
+    this.paymentMethodID = '';
     this.showPaymentList = false;
+    this.cardNumber = 0;
+    this.expiryMonth = 0;
+    this.expiryYear = 0;
+    this.zipCode = '';
+    this.showNgxCard = true;
   }
 
   EditPaymentInfo(e) {
     this._paymentInfoService.GetPaymentInfoByID(e.id).subscribe({
       next: (data: any) => {
         this.paymentInfoID = e.id;
-        this.thirdFormGroup.controls['CardNoForSave'].setValue(data.cardNumber);
         let selectedLocation: { id: any, businessName: any }[] = [];
         selectedLocation.push({
           id: data.businessLocationId,
           businessName: this.businessLocationName.filter(x => x.id == data.businessLocationId)[0].businessName
         });
         this.thirdFormGroup.controls['BusinessLocationName'].setValue(selectedLocation);
-        this.thirdFormGroup.controls['ZipCode'].setValue(data.zipCode);
         this.thirdFormGroup.controls['ChkMakeDefault'].setValue(data.isDefault);
         this.thirdFormGroup.controls['CardHolderName'].setValue(data.cardHolderName);
-        this.thirdFormGroup.controls['AccNo'].setValue(data.accountNumber);
-        this.thirdFormGroup.controls['RoutingNo'].setValue(data.routingName);
         this.thirdFormGroup.controls['selectedOption'].setValue(data.paymentType);
+
+        this.cardNumber = data.cardNumber;
+        this.paymentMethodID = data.paymentMethodID;
+        this.expiryMonth = data.expireMonth;
+        this.expiryYear = data.expireYear;
+        this.zipCode = data.zipCode;
 
         let dt = new Date(data.goLiveDate).getDate();
         let month = (new Date(data.goLiveDate).getMonth() + 1) < 10 ? ("0" + (new Date(data.goLiveDate).getMonth() + 1)) :
@@ -1394,21 +1489,12 @@ export class HomeComponent {
         this.thirdFormGroup.controls['paymentSchedule'].disable();
         this.paymentInfoSaveBtn = "Update & Continue";
 
-        if ((data.paymentType == 1) || (data.paymentType == 2)) {
-          this.thirdFormGroup.controls['CardNoForSave'].addValidators(Validators.required);
+        if (data.paymentType == 1 || data.paymentType == 2) {
           this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
-
-          this.thirdFormGroup.controls["CardNoForSave"].updateValueAndValidity();
           this.thirdFormGroup.controls["CardHolderName"].updateValueAndValidity();
         }
-        else if (data.paymentType == 3) {
-          this.thirdFormGroup.controls['AccNo'].addValidators(Validators.required);
-          this.thirdFormGroup.controls['CardHolderName'].addValidators(Validators.required);
-          this.thirdFormGroup.controls['RoutingNo'].addValidators(Validators.required);
 
-          this.thirdFormGroup.controls["AccNo"].updateValueAndValidity();
-          this.thirdFormGroup.controls["RoutingNo"].updateValueAndValidity();
-        }
+        this.showNgxCard = false;
       },
       error: (error: any) => {
 
@@ -1490,10 +1576,6 @@ export class HomeComponent {
 
   deleteBtnOnClick(e) {
     this.paymentInfoID = e.id;
-  }
-
-  showHideZipCode() {
-    this.showZipCode = !this.showZipCode;
   }
 
   onChangeDefaultTime() {
@@ -1624,5 +1706,201 @@ export class HomeComponent {
     this.dataSourceSources = this.filterDataForSources.filter((item: any) => {
       return item.businessLocationName.toLowerCase().includes(searchInput)
     });
+  }
+
+  // editCardDetails() {
+  //   this.showNgxCard = !this.showNgxCard;
+  // }
+
+  AddNewPaymentDoc() {
+    if (this.selectedBusiness.length == 0) {
+      this.toast.warning("Select Business Location !", '', { positionClass: 'toast-bottom-right' })
+      return;
+    }
+    this.paymentDocs.push(this.fb.group({
+      id: [0],
+      type: ['', Validators.required],
+      fileName: ['', Validators.required],
+      uploadProgressPaymentDoc: [null],
+      filePathPaymentDoc: [null],
+      paymentDocSubmitted: [false]
+    }));
+  }
+
+  get paymentDocs() {
+    return this.paymentDocFromGroup.get('paymentDocs') as FormArray;
+  }
+
+  ControlValue(index: number, controlName: string) {
+    return this.paymentDocs.at(index).get(controlName).value;
+  }
+
+  isInvalid(index: number, controlName: string) {
+    const control = this.paymentDocs.at(index).get(controlName);
+    return control.invalid;
+  }
+
+  createPaymentDocModel(i) {
+    let details = {
+      "id": this.paymentDocs.controls[i].value['id'],
+      "businessLocationID": this.selectedBusiness[0].id,
+      "documentType": this.paymentDocs.controls[i].value['type'][0].id,
+      "documentPath": this.paymentDocs.controls[i].value['fileName'],
+      "createdBy": AppSettings.GetCreatedBy(),
+      "createdDate": AppSettings.GetDate(),
+      "lastModifiedBy": AppSettings.GetLastModifiedBy(),
+      "lastModifiedDate": AppSettings.GetDate()
+    }
+
+    return details;
+  }
+
+  SavePaymentDoc(i) {
+    this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(true);
+    if (this.paymentDocs.at(i).invalid) {
+      return;
+    }
+
+    this.isLoading = true;
+    let model = this.createPaymentDocModel(i);
+    if (model.id == 0) {
+      this._paymentDocService.PostLocationwisePaymentDocs(model)
+        .subscribe({
+          next: (data) => {
+            this.paymentDocs.at(i).get('id').setValue(data.id);
+            this.toast.success("Saved Successfully !", '', { positionClass: 'toast-bottom-right' });
+            this.isLoading = false;
+            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
+          }
+        });
+    }
+    else {
+      this._paymentDocService.PutLocationwisePaymentDocs(model.id, model)
+        .subscribe({
+          next: (data) => {
+            this.toast.success("Updated Successfully !", '', { positionClass: 'toast-bottom-right' });
+            this.isLoading = false;
+            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
+          }
+        });
+    }
+  }
+
+  DeleteDoc(i) {
+    this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(true);
+    this.isLoading = true;
+
+    let id = this.paymentDocs.at(i).get('id').value;
+    if (id != 0) {
+      this._paymentDocService.DeleteLocationwisePaymentDocs(id)
+        .subscribe({
+          next: (data) => {
+            this.getPaymentDocsByLocationID(this.selectedBusiness[0].id);
+            this.toast.success("Deleted Successfully !", '', { positionClass: 'toast-bottom-right' });
+            this.isLoading = false;
+            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
+          },
+          error: error => {
+            console.log(error);
+            this.isLoading = false;
+            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
+          }
+        });
+    }
+    else {
+      const data = this.paymentDocFromGroup.controls['paymentDocs'] as FormArray;
+      data.removeAt(i);
+    }
+  }
+
+  onBusinessSelectedPaymentDocs() {
+    if (this.selectedBusiness.length > 0) {
+      this.getPaymentDocsByLocationID(this.selectedBusiness[0].id);
+    }
+    else {
+      this.docList = [];
+    }
+  }
+
+  // search Google Maps....
+  initAutocomplete() {
+    this.googleMapsService.api.then((maps) => {
+      let autocomplete = new maps.places.Autocomplete(
+        this.searchElementRef.nativeElement
+      );
+      autocomplete.addListener('place_changed', () => {
+        this.ngZone.run(() => {
+          this.latitude = autocomplete.getPlace().geometry.location.lat();
+          this.longitude = autocomplete.getPlace().geometry.location.lng();
+          this.secondFormGroup.controls['Address'].setValue(this.searchElementRef.nativeElement.value);
+        });
+      });
+    });
+  }
+
+  //#region BusinessImage1
+  onChangePaymentDoc(event: any, index) {
+    this.filePaymentDoc = event.target.files[0];
+
+    const uploadProgressPaymentDoc = this.paymentDocs.at(index).get('uploadProgressPaymentDoc');
+    const filePathPaymentDoc = this.paymentDocs.at(index).get('filePathPaymentDoc');
+    const fileName = this.paymentDocs.at(index).get('fileName');
+
+    if (this.filePaymentDoc) {
+      this.loadingPaymentDoc = true;
+      this.uploadSubPaymentDoc = this._uploadService.uploadBusinessImage(this.filePaymentDoc).subscribe((event: any) => {
+        if (event.type == HttpEventType.UploadProgress) {
+          uploadProgressPaymentDoc.setValue(Math.round(100 * (event.loaded / event.total)).toString() + "%")
+        }
+        if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
+          this.loadingPaymentDoc = false;
+          this.isfileUploadedPaymentDoc = true;
+          let array = event.partialText.split('|')[1].split('\\');
+          fileName.setValue(array[array.length - 1]);
+          filePathPaymentDoc.setValue(AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + array[array.length - 1]);
+        } else {
+          this.loadingPaymentDoc = false;
+          this.isfileUploadedPaymentDoc = false;
+        }
+      });
+    }
+    this.loadingPaymentDoc = false;
+  }
+
+  cancelUploadPaymentDoc(index) {
+    const uploadProgressPaymentDoc = this.paymentDocs.at(index).get('uploadProgressPaymentDoc');
+    if (this.uploadSubPaymentDoc != null) {
+      this.uploadSubPaymentDoc.unsubscribe();
+    }
+    uploadProgressPaymentDoc.setValue("0%");
+    this.isfileUploadedPaymentDoc = false;
+    this.resetBusinessPaymentDoc(index);
+  }
+
+  resetBusinessPaymentDoc(index) {
+    const uploadProgressPaymentDoc = this.paymentDocs.at(index).get('uploadProgressPaymentDoc');
+    const filePathPaymentDoc = this.paymentDocs.at(index).get('filePathPaymentDoc');
+    const fileName = this.paymentDocs.at(index).get('fileName');
+
+    this.filePaymentDoc = null;
+    filePathPaymentDoc.setValue(null);
+    uploadProgressPaymentDoc.setValue(null);
+    fileName.setValue(null);
+    this.uploadSubPaymentDoc = null;
+  }
+  //#endregion
+
+  navigateToList() {
+    this.route.navigate(['/group-list']);
   }
 }

@@ -50,6 +50,8 @@
     background: white;
     border-radius: 15px;
     margin: 20px;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .text-right {
@@ -141,7 +143,10 @@ i.icon-fs-info {
     float: right;
 }
 
-/* .modal-header .close {
-    padding: 1rem 1rem;
-    margin: -1rem -3rem -1rem auto !important;
-} */
+::ng-deep .mat-horizontal-content-container {
+    overflow: auto !important;
+}
+
+.btn-secondary {
+    border: none !important;
+}

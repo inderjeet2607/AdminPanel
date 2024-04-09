@@ -1,0 +1,80 @@
+<app-navbar></app-navbar>
+
+<div class="wrapper">
+  <div class="row ml-2 d-flex">
+    <div class="col-md-3 mt-3 d-flex" style="align-items: center">
+      <div class="navbar-brand">
+        <span class="fa fa-file-text"></span>
+      </div>
+      <h2 class="mb-0">Invoices</h2>
+    </div>
+    <div class="col-md-7">
+      <form [formGroup]="firstFormGroup" class="d-flex">
+        <div class="col-md-6 mt-3">
+          <ng-multiselect-dropdown [placeholder]="'Choose Business Group'" id="businessGroup"
+            [settings]="dropdownSettingsSingleGroup" [data]="businessGroupData" formControlName="businessGroupID"
+            (click)="dropDownSelect = true" (ngModelChange)="getBusinessLocationsByGroupID($event)">
+          </ng-multiselect-dropdown>
+        </div>
+        <div class="col-md-6 mt-3">
+          <ng-multiselect-dropdown [placeholder]="'Choose Business Location'" id="businessLocation"
+            [settings]="dropdownSettingsSingleLocation" [data]="businessLocationData"
+            formControlName="businessLocationID" (click)="dropDownSelectLocation = true"
+            (ngModelChange)="getInvoiceByBusinessLocationID($event)">
+          </ng-multiselect-dropdown>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-2 text-right mt-3">
+      <button class="btn btn-success text-center mr-3" (click)="AddNewInvoice()">
+        <span class="fa fa-plus"></span>
+        Create Invoice
+      </button>
+    </div>
+  </div>
+  <div style="border-bottom: 1px solid #dadcdc; margin: 15px"></div>
+
+  <div class="col-lg-12" style="padding: 1%;">
+    <table mat-table [dataSource]="invoicesData" class="mat-elevation-z8">
+      <ng-container matColumnDef="invoiceNo">
+        <th mat-header-cell *matHeaderCellDef>InvoiceNo</th>
+        <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.invoice_date | date : "MM-dd-yyyy" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="duration">
+        <th mat-header-cell *matHeaderCellDef>Duration</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.period_start | date : "MM-dd-yyyy" }} to
+          {{ element.period_end | date : "MM-dd-yyyy" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="currency">
+        <th mat-header-cell *matHeaderCellDef>Currency</th>
+        <td mat-cell *matCellDef="let element">$ {{ element.total }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="invoice">
+        <th mat-header-cell *matHeaderCellDef>Invoice</th>
+        <td mat-cell *matCellDef="let element">
+          <a [href]="element.invoice_pdf" download> Download </a>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center">
+      <i class="fa" [ngClass]="{
+          'fa-spin fa-spinner': isLoading,
+        }" style="color: rgb(0, 0, 0)"></i>
+    </div>
+  </div>
+</div>

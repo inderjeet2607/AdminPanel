@@ -1,9 +1,48 @@
 .subMenu-icon {
-    color: #7DA3BA;
-    width: 20px;
+  color: #7da3ba;
+  width: 20px;
 }
 
 .navbar {
-    background-color: #fff;
-    border-bottom: solid 2px #7da3ba;
+  background-color: #fff;
+  border-bottom: solid 2px #7da3ba;
+}
+
+.topnav a {
+  float: left;
+  display: block;
+  padding: 7px 12px;
+  text-decoration: none;
+  font-size: 14px;
+  border-bottom: 3px solid transparent;
+  color: #7da3ba;
+}
+
+.topnav a:hover {
+  border-bottom: 3px solid #7da3ba;
+  border-radius: 5px;
+}
+
+.topnav a.active {
+  border-bottom: 3px solid #7da3ba;
+  border-radius: 5px;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.show {
+  color: rgba(10, 8, 8, 0.9);
+}
+
+.navbar-light .navbar-nav .nav-link:focus,
+.navbar-light .navbar-nav .nav-link:active {
+  border-bottom: 3px solid #7da3ba;
+  border-radius: 5px;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: black;
+}
+.dropdown-menu:active {
+  background-color: black;
 }

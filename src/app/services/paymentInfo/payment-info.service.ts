@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { AppSettings } from '../Constants';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
+import { StripeService } from 'ngx-stripe';
+
+declare const Stripe;
 
 @Injectable({
   providedIn: 'root'
