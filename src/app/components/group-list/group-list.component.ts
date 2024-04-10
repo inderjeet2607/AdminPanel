@@ -74,6 +74,19 @@ export class GroupListComponent implements OnInit {
 
   toggleBusinessGroup(element) {
     this.businessGroupID = element.id;
+    this.getBusinessGroupByID(this.businessGroupID);
+  }
+
+  getBusinessGroupByID(id) {
+    this._groupService.GetBusinessGroupByID(id).subscribe({
+      next: (data: any) => {
+        this.firstFormGroup.controls['SMSProfileID'].setValue(data.smsProfileID);
+        this.firstFormGroup.controls['SMSPhoneNumber'].setValue(data.smsFromNumber == 0 ? "" : data.smsFromNumber);
+      },
+      error: (error: any) => {
+        console.log("This is error message", error)
+      }
+    })
   }
 
   Submit() {

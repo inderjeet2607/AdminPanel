@@ -1302,10 +1302,10 @@
                 <div class="row mt-1 mb-1">
                     <div class="col-md-12 p-0 d-flex">
                         <div class="col-md-4">
-                            <label for="Industry">
+                            <label for="loc">
                                 Business Location Name
                             </label>
-                            <ng-multiselect-dropdown [placeholder]="'Choose Business Location Name'"
+                            <ng-multiselect-dropdown id="loc" [placeholder]="'Choose Business Location Name'"
                                 id="businessLocationName" [settings]="dropdownSettingsBusinessLocationName"
                                 [data]="businessLocationName" [(ngModel)]="selectedBusiness"
                                 (onSelect)="onBusinessSelectedPaymentDocs()"
@@ -1350,37 +1350,38 @@
                                         <input type="file" class="custom-file" id="paymentDoc{{i}}"
                                             *ngIf="ControlValue(i,'uploadProgressPaymentDoc') == null"
                                             (change)="onChangePaymentDoc($event,i)">
-                                        <!-- <label class="custom-file-label" for="paymentDoc{{i}}">
-                                            Upload Document
-                                        </label> -->
                                         <div *ngIf="ControlValue(i,'paymentDocSubmitted') && isInvalid(i, 'fileName')"
                                             class="invalid-feedback">
                                             Document is required
                                         </div>
                                         <div class="row">
-                                            <a href="{{ControlValue(i,'filePathPaymentDoc')}}" download>
-                                                {{ControlValue(i,'fileName')}}
-                                            </a>
+                                            <div class="col-md-12 d-flex">
+                                                <div class="col-md-11">
+                                                    <a href="{{ControlValue(i,'filePathPaymentDoc')}}" download
+                                                        target="_blank">
+                                                        {{ControlValue(i,'fileName')}}
+                                                    </a>
+                                                </div>
+                                                <div class="col-md-1" *ngIf="ControlValue(i,'uploadProgressPaymentDoc') != null && 
+                                                        (ControlValue(i,'filePathPaymentDoc') != null && ControlValue(i,'filePathPaymentDoc') !=undefined 
+                                                        && ControlValue(i,'filePathPaymentDoc') != '')"
+                                                    style="position: relative;">
+                                                    <mat-icon class="cancel-upload" (click)="cancelUploadPaymentDoc(i)"
+                                                        style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
+                                                        cancel
+                                                    </mat-icon>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="row">
+                                        <div class="row" *ngIf="ControlValue(i,'uploadProgressPaymentDoc') != '100%'">
                                             <div class="col-md-12 d-flex">
                                                 <div class="col-md-11" style="background-color: #7DA3BA;height: 70%;margin-top: 1%;
                                                     border-radius: 21px;font-size: 65%;" class="progress-bar"
                                                     role="progressbar"
                                                     [style.width]="ControlValue(i,'uploadProgressPaymentDoc')"
                                                     aria-valuenow="ControlValue(i,'uploadProgressPaymentDoc')"
-                                                    aria-valuemin="0" aria-valuemax="100" *ngIf="ControlValue(i,'filePathPaymentDoc') != null && ControlValue(i,'filePathPaymentDoc') !=undefined
-                                                    && ControlValue(i,'filePathPaymentDoc') != ''">
+                                                    aria-valuemin="0" aria-valuemax="100">
                                                     {{ControlValue(i,'uploadProgressPaymentDoc')}}
-                                                </div>
-                                                <div class="col-md-1" *ngIf="ControlValue(i,'uploadProgressPaymentDoc') != undefined && 
-                                                    (ControlValue(i,'filePathPaymentDoc') != null && ControlValue(i,'filePathPaymentDoc') !=undefined 
-                                                    && ControlValue(i,'filePathPaymentDoc') != '')"
-                                                    style="position: relative;">
-                                                    <mat-icon class="cancel-upload" (click)="cancelUploadPaymentDoc(i)"
-                                                        style="color: black; overflow: inherit;position: absolute;margin-left: -4%;">
-                                                        cancel
-                                                    </mat-icon>
                                                 </div>
                                             </div>
                                         </div>

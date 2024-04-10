@@ -453,7 +453,7 @@ export class HomeComponent {
             type: [this.docTypeList.filter(x => x.id == element.documentType), Validators.required],
             fileName: [element.documentPath, Validators.required],
             uploadProgressPaymentDoc: [(element.documentPath != '' && element.documentPath != null && element.documentPath != undefined) ?
-              ((100).toString() + "%") : "0%"],
+              ((100).toString() + "%") : null],
             filePathPaymentDoc: [(element.documentPath != '' && element.documentPath != null && element.documentPath != undefined) ?
               (AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + element.documentPath) : null],
             paymentDocSubmitted: [false]
@@ -891,7 +891,7 @@ export class HomeComponent {
         }
       },
       error: (error: any) => {
-
+        console.log("This is error message", error)
       }
     })
   }
@@ -1829,6 +1829,9 @@ export class HomeComponent {
     }
     else {
       this.docList = [];
+      while (this.paymentDocs.length !== 0) {
+        this.paymentDocs.removeAt(0)
+      }
     }
   }
 
@@ -1840,11 +1843,18 @@ export class HomeComponent {
       );
       autocomplete.addListener('place_changed', () => {
         this.ngZone.run(() => {
+
           this.latitude = autocomplete.getPlace().geometry.location.lat();
           this.longitude = autocomplete.getPlace().geometry.location.lng();
           this.secondFormGroup.controls['Address'].setValue(this.searchElementRef.nativeElement.value);
         });
       });
+
+      this.searchElementRef.nativeElement.addEventListener('keydown', (event: any) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+        }
+      })
     });
   }
 
@@ -1858,7 +1868,7 @@ export class HomeComponent {
 
     if (this.filePaymentDoc) {
       this.loadingPaymentDoc = true;
-      this.uploadSubPaymentDoc = this._uploadService.uploadBusinessImage(this.filePaymentDoc).subscribe((event: any) => {
+      this._uploadService.uploadBusinessImage(this.filePaymentDoc).subscribe((event: any) => {
         if (event.type == HttpEventType.UploadProgress) {
           uploadProgressPaymentDoc.setValue(Math.round(100 * (event.loaded / event.total)).toString() + "%")
         }
@@ -1878,11 +1888,6 @@ export class HomeComponent {
   }
 
   cancelUploadPaymentDoc(index) {
-    const uploadProgressPaymentDoc = this.paymentDocs.at(index).get('uploadProgressPaymentDoc');
-    if (this.uploadSubPaymentDoc != null) {
-      this.uploadSubPaymentDoc.unsubscribe();
-    }
-    uploadProgressPaymentDoc.setValue("0%");
     this.isfileUploadedPaymentDoc = false;
     this.resetBusinessPaymentDoc(index);
   }
@@ -1896,7 +1901,6 @@ export class HomeComponent {
     filePathPaymentDoc.setValue(null);
     uploadProgressPaymentDoc.setValue(null);
     fileName.setValue(null);
-    this.uploadSubPaymentDoc = null;
   }
   //#endregion
 
