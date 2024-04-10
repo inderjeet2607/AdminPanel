@@ -550,7 +550,7 @@ export class HomeComponent {
     }
     this.uploadProgressBusinessLogo = "0%";
     this.isfileUploadedBusinessLogo = false;
-    this.fileNameBusinessLogo = 'Upload Image (Upto 1 MB)';
+    this.fileNameBusinessLogo = null;
     this.resetBusinessLogoDetails();
   }
 
@@ -593,7 +593,7 @@ export class HomeComponent {
     }
     this.uploadProgressBusinessDisplayImage = "0%";
     this.isfileUploadedBusinessDisplayImage = false;
-    this.fileNameBusinessDisplayImage = 'Upload Image (Upto 1 MB)';
+    this.fileNameBusinessDisplayImage = null;
     this.resetBusinessDisplayImageDetails();
   }
 
@@ -636,7 +636,7 @@ export class HomeComponent {
     }
     this.uploadProgressBusinessImage1 = "0%";
     this.isfileUploadedBusinessImage1 = false;
-    this.fileNameBusinessImage1 = 'Upload Image (Upto 1 MB)';
+    this.fileNameBusinessImage1 = null;
     this.resetBusinessImage1Details();
   }
 
@@ -679,7 +679,7 @@ export class HomeComponent {
     }
     this.uploadProgressBusinessImage2 = "0%";
     this.isfileUploadedBusinessImage2 = false;
-    this.fileNameBusinessImage2 = 'Upload Image (Upto 1 MB)';
+    this.fileNameBusinessImage2 = null;
     this.resetBusinessImage2Details();
   }
 
@@ -722,7 +722,7 @@ export class HomeComponent {
     }
     this.uploadProgressBusinessImage3 = "0%";
     this.isfileUploadedBusinessImage3 = false;
-    this.fileNameBusinessImage3 = 'Upload Image (Upto 1 MB)';
+    this.fileNameBusinessImage3 = null;
     this.resetBusinessImage3Details();
   }
 
@@ -765,7 +765,7 @@ export class HomeComponent {
     }
     this.uploadProgressBusinessImage4 = "0%";
     this.isfileUploadedBusinessImage4 = false;
-    this.fileNameBusinessImage4 = 'Upload Image (Upto 1 MB)';
+    this.fileNameBusinessImage4 = null;
     this.resetBusinessImage4Details();
   }
 
@@ -887,7 +887,7 @@ export class HomeComponent {
           this.fileNameGroupLogo = data.logoPath;
         }
         else {
-          this.cancelUploadBusinessLogo();
+          this.cancelUpload();
         }
       },
       error: (error: any) => {
