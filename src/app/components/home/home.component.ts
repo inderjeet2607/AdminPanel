@@ -505,7 +505,6 @@ export class HomeComponent {
     if (this.uploadSubGroupLogo != null) {
       this.uploadSubGroupLogo.unsubscribe();
     }
-    this.uploadProgressGroupLogo = "0%";
     this.isfileUploadedGroupLogo = false;
     this.reset();
   }
@@ -548,7 +547,6 @@ export class HomeComponent {
     if (this.uploadSubBusinessLogo != null) {
       this.uploadSubBusinessLogo.unsubscribe();
     }
-    this.uploadProgressBusinessLogo = "0%";
     this.isfileUploadedBusinessLogo = false;
     this.fileNameBusinessLogo = null;
     this.resetBusinessLogoDetails();
@@ -591,7 +589,6 @@ export class HomeComponent {
     if (this.uploadSubBusinessDisplayImage != null) {
       this.uploadSubBusinessDisplayImage.unsubscribe();
     }
-    this.uploadProgressBusinessDisplayImage = "0%";
     this.isfileUploadedBusinessDisplayImage = false;
     this.fileNameBusinessDisplayImage = null;
     this.resetBusinessDisplayImageDetails();
@@ -634,7 +631,6 @@ export class HomeComponent {
     if (this.uploadSubBusinessImage1 != null) {
       this.uploadSubBusinessImage1.unsubscribe();
     }
-    this.uploadProgressBusinessImage1 = "0%";
     this.isfileUploadedBusinessImage1 = false;
     this.fileNameBusinessImage1 = null;
     this.resetBusinessImage1Details();
@@ -677,7 +673,6 @@ export class HomeComponent {
     if (this.uploadSubBusinessImage2 != null) {
       this.uploadSubBusinessImage2.unsubscribe();
     }
-    this.uploadProgressBusinessImage2 = "0%";
     this.isfileUploadedBusinessImage2 = false;
     this.fileNameBusinessImage2 = null;
     this.resetBusinessImage2Details();
@@ -720,7 +715,6 @@ export class HomeComponent {
     if (this.uploadSubBusinessImage3 != null) {
       this.uploadSubBusinessImage3.unsubscribe();
     }
-    this.uploadProgressBusinessImage3 = "0%";
     this.isfileUploadedBusinessImage3 = false;
     this.fileNameBusinessImage3 = null;
     this.resetBusinessImage3Details();
@@ -763,7 +757,6 @@ export class HomeComponent {
     if (this.uploadSubBusinessImage4 != null) {
       this.uploadSubBusinessImage4.unsubscribe();
     }
-    this.uploadProgressBusinessImage4 = "0%";
     this.isfileUploadedBusinessImage4 = false;
     this.fileNameBusinessImage4 = null;
     this.resetBusinessImage4Details();
@@ -1221,36 +1214,107 @@ export class HomeComponent {
         this.secondFormGroup.controls['GoogleUrl'].setValue(data.googleUrl);
         this.secondFormGroup.controls['InstagramUrl'].setValue(data.instagramUrl);
         this.secondFormGroup.controls['YelpUrl'].setValue(data.yelpUrl);
-        this.secondFormGroup.controls['MonFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].monFromTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].monFromTime).getMinutes());
-        this.secondFormGroup.controls['MonToTime'].setValue(new Date(data.businesswiseWorkingDays[0].monToTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].monToTime).getMinutes());
-        this.secondFormGroup.controls['TueFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].tueFromTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].tueFromTime).getMinutes());
-        this.secondFormGroup.controls['TueToTime'].setValue(new Date(data.businesswiseWorkingDays[0].tueToTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].tueToTime).getMinutes());
-        this.secondFormGroup.controls['WedFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].wedFromTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].wedFromTime).getMinutes());
-        this.secondFormGroup.controls['WedToTime'].setValue(new Date(data.businesswiseWorkingDays[0].wedToTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].wedToTime).getMinutes());
-        this.secondFormGroup.controls['ThuFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].thuFromTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].thuFromTime).getMinutes());
-        this.secondFormGroup.controls['ThuToTime'].setValue(new Date(data.businesswiseWorkingDays[0].thuToTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].thuToTime).getMinutes());
-        this.secondFormGroup.controls['FriFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].friFromTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].friFromTime).getMinutes());
-        this.secondFormGroup.controls['FriToTime'].setValue(new Date(data.businesswiseWorkingDays[0].friToTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].friToTime).getMinutes());
-        this.secondFormGroup.controls['SatFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].satFromTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].satFromTime).getMinutes());
-        this.secondFormGroup.controls['SatToTime'].setValue(new Date(data.businesswiseWorkingDays[0].satToTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].satToTime).getMinutes());
-        this.secondFormGroup.controls['SunFromTime'].setValue(new Date(data.businesswiseWorkingDays[0].sunFromTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].sunFromTime).getMinutes());
-        this.secondFormGroup.controls['SunToTime'].setValue(new Date(data.businesswiseWorkingDays[0].sunToTime).getHours() + ':' +
-          new Date(data.businesswiseWorkingDays[0].sunToTime).getMinutes());
+
+        let monFrom = ((new Date(data.businesswiseWorkingDays[0].monFromTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].monFromTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].monFromTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].monFromTime).getMinutes()));
+        this.secondFormGroup.controls['MonFromTime'].setValue(monFrom);
+
+        let monTo = ((new Date(data.businesswiseWorkingDays[0].monToTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].monToTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].monToTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].monToTime).getMinutes()));
+        this.secondFormGroup.controls['MonToTime'].setValue(monTo);
+
+        let tueFrom = ((new Date(data.businesswiseWorkingDays[0].tueFromTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].tueFromTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].tueFromTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].tueFromTime).getMinutes()));
+        this.secondFormGroup.controls['TueFromTime'].setValue(tueFrom);
+
+        let tueTo = ((new Date(data.businesswiseWorkingDays[0].tueToTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].tueToTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].tueToTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].tueToTime).getMinutes()));
+        this.secondFormGroup.controls['TueToTime'].setValue(tueTo);
+
+        let wedFrom = ((new Date(data.businesswiseWorkingDays[0].wedFromTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].wedFromTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].wedFromTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].wedFromTime).getMinutes()));
+        this.secondFormGroup.controls['WedFromTime'].setValue(wedFrom);
+
+        let wedTo = ((new Date(data.businesswiseWorkingDays[0].wedToTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].wedToTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].wedToTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].wedToTime).getMinutes()));
+        this.secondFormGroup.controls['WedToTime'].setValue(wedTo);
+
+        let thuFrom = ((new Date(data.businesswiseWorkingDays[0].thuFromTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].thuFromTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].thuFromTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].thuFromTime).getMinutes()));
+        this.secondFormGroup.controls['ThuFromTime'].setValue(thuFrom);
+
+        let thuTo = ((new Date(data.businesswiseWorkingDays[0].thuToTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].thuToTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].thuToTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].thuToTime).getMinutes()));
+        this.secondFormGroup.controls['ThuToTime'].setValue(thuTo);
+
+        let friFrom = ((new Date(data.businesswiseWorkingDays[0].friFromTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].friFromTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].friFromTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].friFromTime).getMinutes()));
+        this.secondFormGroup.controls['FriFromTime'].setValue(friFrom);
+
+        let friTo = ((new Date(data.businesswiseWorkingDays[0].friToTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].friToTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].friToTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].friToTime).getMinutes()));
+        this.secondFormGroup.controls['FriToTime'].setValue(friTo);
+
+        let satFrom = ((new Date(data.businesswiseWorkingDays[0].satFromTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].satFromTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].satFromTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].satFromTime).getMinutes()));
+        this.secondFormGroup.controls['SatFromTime'].setValue(satFrom);
+
+        let satTo = ((new Date(data.businesswiseWorkingDays[0].satToTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].satToTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].satToTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].satToTime).getMinutes()));
+        this.secondFormGroup.controls['SatToTime'].setValue(satTo);
+
+        let sunFrom = ((new Date(data.businesswiseWorkingDays[0].sunFromTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].sunFromTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].sunFromTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].sunFromTime).getMinutes()));
+        this.secondFormGroup.controls['SunFromTime'].setValue(sunFrom);
+
+        let sunTo = ((new Date(data.businesswiseWorkingDays[0].sunToTime).getHours() < 10 ? '0' : '') +
+          (new Date(data.businesswiseWorkingDays[0].sunToTime).getHours())) + ':' +
+          ((new Date(data.businesswiseWorkingDays[0].sunToTime).getMinutes() < 10 ? '0' : '') +
+            (new Date(data.businesswiseWorkingDays[0].sunToTime).getMinutes()));
+        this.secondFormGroup.controls['SunToTime'].setValue(sunTo);
 
         this.showLocationList = false;
+
+        this.secondFormGroup.controls['TueFromTime'].enable();
+        this.secondFormGroup.controls['TueToTime'].enable();
+        this.secondFormGroup.controls['WedFromTime'].enable();
+        this.secondFormGroup.controls['WedToTime'].enable();
+        this.secondFormGroup.controls['ThuFromTime'].enable();
+        this.secondFormGroup.controls['ThuToTime'].enable();
+        this.secondFormGroup.controls['FriFromTime'].enable();
+        this.secondFormGroup.controls['FriToTime'].enable();
+        this.secondFormGroup.controls['SatFromTime'].enable();
+        this.secondFormGroup.controls['SatToTime'].enable();
+        this.secondFormGroup.controls['SunFromTime'].enable();
+        this.secondFormGroup.controls['SunToTime'].enable();
+        this.ChkMakeDefaultTime = false;
+
         this.businessLocationSaveBtn = "Update & Continue";
 
         let labels = this.GetBusinessLabelsForEdit(data['businesswiseLabels']);
