@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'ngx-toastr/toastr';
+@import 'scss/fonts/santoshi/css/satoshi.css';
 
 html,
 body {
@@ -10,8 +11,21 @@ body {
 
 body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-family: 'Satoshi-Regular', sans-serif !important;
 }
+
+.mat-mdc-table .mat-mdc-header-cell {
+    font-family: 'Satoshi-Regular', sans-serif !important;
+}
+
+.mat-mdc-cell {
+    font-family: 'Satoshi-Regular', sans-serif !important;
+}
+
+.mat-horizontal-stepper-wrapper {
+    font-family: 'Satoshi-Regular', sans-serif !important;
+}
+
 ::-webkit-scrollbar {
     width: 0px;
     height: 0px;

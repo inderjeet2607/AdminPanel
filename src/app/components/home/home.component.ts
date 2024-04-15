@@ -149,6 +149,7 @@ export class HomeComponent {
   paymentInfoID: number = 0;
   businessLocationID: number = 0;
   sourceID: number = 0;
+  indexID: any = '';
   sourcesData: any = [];
   dataSourceSources: MatTableDataSource<SourcesList>;
   sourcesDisplayedColumns: string[] = ['sourceName', 'businessLocationName', 'Action'];
@@ -226,6 +227,11 @@ export class HomeComponent {
     this.cardNumber = 0;
     this.zipCode = '';
     this.selectedBusiness = [];
+    this.indexID = '';
+    this.customerSourceName = '';
+    this.storeSourceName = '';
+    this.customerUserName = '';
+    this.storeUserName = '';
 
     this.firstFormGroup = this.fb.group({
       BusinessgroupName: ['', [Validators.required, Validators.pattern(/^(\s+\S+\s*)*(?!\s).*$/)]],
@@ -345,14 +351,6 @@ export class HomeComponent {
       textField: 'name',
       singleSelection: true
     }
-
-    // const data = this.paymentDocFromGroup.controls['paymentDocs'] as FormArray;
-    // docs.forEach(element => {
-    //   data.push(this.fb.group({
-    //     type: new FormControl(),
-    //     fileName: new FormControl()
-    //   })
-    // });
   }
 
   getIndustries() {
@@ -791,6 +789,8 @@ export class HomeComponent {
     this.showNgxCard = true;
     this.cardNumber = 0;
     this.selectedBusiness = [];
+    this.thirdFormGroup.controls['ChkMakeDefault'].enable();
+    this.indexID = '';
   }
 
   SaveGroupDetails() {
@@ -805,6 +805,7 @@ export class HomeComponent {
         .subscribe({
           next: (data) => {
             this.businessGroupID = data.id;
+            this.businessGroupSaveBtn = 'Update & Continue';
             this.isLoading = false;
             this.submitted = false;
             this.stepper.next();
@@ -1090,39 +1091,62 @@ export class HomeComponent {
       this.isLoading = false;
       return;
     }
-
-    let model = this.createPaymentInfoModel();
+    let paymentType = this.thirdFormGroup.controls['selectedOption'].value;
     if (this.paymentInfoID == 0) {
-      this.stripeService.createPaymentMethod({ type: "card", card: this.card.element }).subscribe(({ error, paymentMethod }) => {
-        if (error) {
-          this.isLoading = false;
-          console.log(error.message);
-        }
-        else {
-          this.paymentMethodID = paymentMethod.id;
-          this.expiryMonth = paymentMethod.card.exp_month;
-          this.expiryYear = paymentMethod.card.exp_year;
-          this.zipCode = paymentMethod.billing_details.address.postal_code;
-          this.cardNumber = paymentMethod.card.last4;
+      if (paymentType == 1 || paymentType == 2) {
+        this.stripeService.createPaymentMethod({ type: "card", card: this.card.element }).subscribe(({ error, paymentMethod }) => {
+          if (error) {
+            this.isLoading = false;
+            console.log(error.message);
+          }
+          else {
+            console.log(paymentMethod.id)
+            this.paymentMethodID = paymentMethod.id;
+            this.expiryMonth = paymentMethod.card.exp_month;
+            this.expiryYear = paymentMethod.card.exp_year;
+            this.zipCode = paymentMethod.billing_details.address.postal_code;
+            this.cardNumber = paymentMethod.card.last4;
 
-          this._paymentInfoService.PostPaymentInfo(model)
-            .subscribe({
-              next: (data) => {
-                this.paymentInfoID = data.id;
-                this.isLoading = false;
-                this.thirdStepSubmitted = false;
-                this.stepper.next();
-              },
-              error: error => {
-                console.log(error);
-                this.isLoading = false;
-                this.thirdStepSubmitted = false;
-              }
-            });
-        }
-      });
+            let model = this.createPaymentInfoModel();
+            this._paymentInfoService.PostPaymentInfo(model)
+              .subscribe({
+                next: (data) => {
+                  this.paymentInfoID = data.id;
+                  this.paymentInfoSaveBtn = 'Update & Continue';
+                  this.isLoading = false;
+                  this.thirdStepSubmitted = false;
+                  this.stepper.next();
+                },
+                error: error => {
+                  console.log(error);
+                  this.isLoading = false;
+                  this.thirdStepSubmitted = false;
+                }
+              });
+          }
+        });
+      }
+      else {
+        let model = this.createPaymentInfoModel();
+        this._paymentInfoService.PostPaymentInfo(model)
+          .subscribe({
+            next: (data) => {
+              this.paymentInfoID = data.id;
+              this.paymentInfoSaveBtn = 'Update & Continue';
+              this.isLoading = false;
+              this.thirdStepSubmitted = false;
+              this.stepper.next();
+            },
+            error: error => {
+              console.log(error);
+              this.isLoading = false;
+              this.thirdStepSubmitted = false;
+            }
+          });
+      }
     }
     else {
+      let model = this.createPaymentInfoModel();
       model.id = this.paymentInfoID;
       this._paymentInfoService.PutPaymentInfo(model.id, model)
         .subscribe({
@@ -1151,6 +1175,8 @@ export class HomeComponent {
       this._sourceService.PostSourcesForAdminPanel(model)
         .subscribe({
           next: (data) => {
+            this.sourceID = data.id;
+            this.sourceSaveBtn = 'Update & Continue';
             this.isLoading = false;
             this.fourthStepSubmitted = false;
             this.stepper.next();
@@ -1417,6 +1443,8 @@ export class HomeComponent {
       this._businessProfileService.PostBusinessProfile(model)
         .subscribe({
           next: (data) => {
+            this.businessLocationID = data.id;
+            this.businessLocationSaveBtn = 'Update & Continue';
             this.isLoading = false;
             this.secondStepSubmitted = false;
             this.getBusinessLocationsByGroupID();
@@ -1527,6 +1555,9 @@ export class HomeComponent {
         });
         this.thirdFormGroup.controls['BusinessLocationName'].setValue(selectedLocation);
         this.thirdFormGroup.controls['ChkMakeDefault'].setValue(data.isDefault);
+        if (data.isDefault == true) {
+          this.thirdFormGroup.controls['ChkMakeDefault'].disable();
+        }
         this.thirdFormGroup.controls['CardHolderName'].setValue(data.cardHolderName);
         this.thirdFormGroup.controls['selectedOption'].setValue(data.paymentType);
 
@@ -1860,30 +1891,38 @@ export class HomeComponent {
     }
   }
 
-  DeleteDoc(i) {
-    this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(true);
-    this.isLoading = true;
+  deletePaymentDocOnClick(i) {
+    this.indexID = i;
+  }
 
-    let id = this.paymentDocs.at(i).get('id').value;
-    if (id != 0) {
-      this._paymentDocService.DeleteLocationwisePaymentDocs(id)
-        .subscribe({
-          next: (data) => {
-            this.getPaymentDocsByLocationID(this.selectedBusiness[0].id);
-            this.toast.success("Deleted Successfully !", '', { positionClass: 'toast-bottom-right' });
-            this.isLoading = false;
-            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
-          },
-          error: error => {
-            console.log(error);
-            this.isLoading = false;
-            this.paymentDocs.at(i).get('paymentDocSubmitted').setValue(false);
-          }
-        });
-    }
-    else {
-      const data = this.paymentDocFromGroup.controls['paymentDocs'] as FormArray;
-      data.removeAt(i);
+  DeleteDoc() {
+    if (this.indexID.toString() != "") {
+      this.paymentDocs.at(this.indexID).get('paymentDocSubmitted').setValue(true);
+      this.isLoading = true;
+
+      let id = this.paymentDocs.at(this.indexID).get('id').value;
+      if (id != 0) {
+        this._paymentDocService.DeleteLocationwisePaymentDocs(id)
+          .subscribe({
+            next: (data) => {
+              this.getPaymentDocsByLocationID(this.selectedBusiness[0].id);
+              this.toast.success("Deleted Successfully !", '', { positionClass: 'toast-bottom-right' });
+              this.isLoading = false;
+              this.indexID = '';
+            },
+            error: error => {
+              console.log(error);
+              this.isLoading = false;
+              this.paymentDocs.at(this.indexID).get('paymentDocSubmitted').setValue(false);
+              this.indexID = '';
+            }
+          });
+      }
+      else {
+        const data = this.paymentDocFromGroup.controls['paymentDocs'] as FormArray;
+        data.removeAt(this.indexID);
+        this.indexID = '';
+      }
     }
   }
 
