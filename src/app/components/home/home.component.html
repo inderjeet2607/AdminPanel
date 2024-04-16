@@ -147,7 +147,7 @@
                                     Auto Sign-out time (in Hours)
                                 </label>
                                 <input id="signOutHours" class="form-control" formControlName="SignoutHours"
-                                    autocomplete="off">
+                                    autocomplete="off" (keypress)="numberOnly($event)">
                             </div>
                         </div>
 
@@ -258,6 +258,8 @@
                             <div class="col-md-12 text-center">
                                 <button class="btn btn-success text-center" (click)="SaveGroupDetails()"
                                     [disabled]="isLoading">
+                                    <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                        style="color:white;"></i>
                                     {{businessGroupSaveBtn}}
                                 </button>
                             </div>
@@ -378,8 +380,12 @@
                                 Are you sure You want to enable this Business Location ?
                             </div>
                             <div class="modal-footer">
-                                <button type="button" (click)="enableBusinessLocation()"
-                                    class="btn btn-primary">Enable</button>
+                                <button type="button" (click)="enableBusinessLocation()" [disabled]="isLoading"
+                                    class="btn btn-primary">
+                                    <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                        style="color:white;"></i>
+                                    Enable
+                                </button>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                     (click)="getBusinessLocationsByGroupID()">Close</button>
                             </div>
@@ -993,6 +999,8 @@
                         <div class="col-md-12 text-center">
                             <button class="btn btn-success text-center" (click)="SaveLocationDetails()"
                                 [disabled]="isLoading">
+                                <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                    style="color:white;"></i>
                                 {{businessLocationSaveBtn}}
                             </button>
                         </div>
@@ -1101,7 +1109,11 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-danger" id="deletePaymentID" value=""
-                                    (click)="DeletePaymentMethod()" data-dismiss="modal">Delete</button>
+                                    (click)="DeletePaymentMethod()" data-dismiss="modal" [disabled]="isLoading">
+                                    <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                        style="color:white;"></i>
+                                    Delete
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1305,6 +1317,8 @@
                             <div class="col-md-12 text-center">
                                 <button class="btn btn-success text-center" (click)="SavePaymentInfo()"
                                     [disabled]="isLoading">
+                                    <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                        style="color:white;"></i>
                                     {{paymentInfoSaveBtn}}
                                 </button>
                             </div>
@@ -1402,11 +1416,16 @@
                                     </td>
                                     <td style="text-align: center;">
                                         <button class="btn btn-success mr-2" *ngIf="ControlValue(i,'id') == 0"
-                                            (click)="SavePaymentDoc(i)">
+                                            (click)="SavePaymentDoc(i)" [disabled]="isLoading">
+                                            <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                                style="color:white;"></i>
                                             Save
                                         </button>
                                         <button class="btn btn-secondary mr-2" style="background: #7DA3BA;"
-                                            *ngIf="ControlValue(i,'id') != 0" (click)="SavePaymentDoc(i)">
+                                            *ngIf="ControlValue(i,'id') != 0" (click)="SavePaymentDoc(i)"
+                                            [disabled]="isLoading">
+                                            <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                                style="color:white;"></i>
                                             Update
                                         </button>
                                         <button class="btn btn-danger" (click)="deletePaymentDocOnClick(i)"
@@ -1437,7 +1456,11 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-danger" value="" (click)="DeleteDoc()"
-                                    data-dismiss="modal">Delete</button>
+                                    data-dismiss="modal" [disabled]="isLoading">
+                                    <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                        style="color:white;"></i>
+                                    Delete
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1650,6 +1673,8 @@
                             <div class="col-md-12 text-center">
                                 <button class="btn btn-success text-center" (click)="SaveSource()"
                                     [disabled]="isLoading">
+                                    <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}"
+                                        style="color:white;"></i>
                                     {{sourceSaveBtn}}
                                 </button>
                             </div>
@@ -2380,7 +2405,7 @@
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <button class="editClassSummary" (click)="goToSteps(4, 'sources')">
+                                            <button class="editClassSummary" (click)="goToSteps(5, 'sources')">
                                                 Edit
                                                 <i class="fa fa-pencil"></i>
                                             </button>

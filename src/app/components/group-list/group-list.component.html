@@ -37,7 +37,8 @@
                 <td mat-cell *matCellDef="let element"> {{element.industryType}} </td>
             </ng-container>
             <ng-container matColumnDef="countLocations">
-                <th mat-header-cell *matHeaderCellDef style="text-align: center;"> <b>(Active / Total) Location Count</b> </th>
+                <th mat-header-cell *matHeaderCellDef style="text-align: center;"> <b>(Active / Total) Location
+                        Count</b> </th>
                 <td mat-cell *matCellDef="let element" style="text-align: center;"> {{element.activeLocationsCount}} /
                     {{element.countLocations}}
                 </td>
@@ -112,7 +113,10 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" (click)="Submit()" class="btn btn-primary">Submit</button>
+                        <button type="button" (click)="Submit()" class="btn btn-primary" [disabled]="isLoading">
+                            <i class="fa" [ngClass]="{'fa-spin fa-spinner mr-2': isLoading}" style="color:white;"></i>
+                            Submit
+                        </button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                             (click)="getBusinessGroups()">Close</button>
                     </div>

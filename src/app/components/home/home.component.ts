@@ -1085,12 +1085,12 @@ export class HomeComponent {
 
   SavePaymentInfo() {
     this.thirdStepSubmitted = true;
-    this.isLoading = true;
 
     if (this.thirdFormGroup.invalid) {
-      this.isLoading = false;
       return;
     }
+
+    this.isLoading = true;
     let paymentType = this.thirdFormGroup.controls['selectedOption'].value;
     if (this.paymentInfoID == 0) {
       if (paymentType == 1 || paymentType == 2) {
@@ -1659,11 +1659,13 @@ export class HomeComponent {
   }
 
   DeletePaymentMethod() {
+    this.isLoading = true;
     this._paymentInfoService.DeletePaymentInfo(this.paymentInfoID).subscribe({
       next: (data: any): any => {
         this.isLoading = false;
         this.getPaymentInfoesByGroupID();
       }, error(err) {
+        this.isLoading = false;
         console.log(err)
       },
     });
@@ -1739,8 +1741,6 @@ export class HomeComponent {
   CheckIfBusinessGroupExists() {
     let businessGroupName = this.firstFormGroup.controls['BusinessgroupName'].value;
     let id = this.businessGroupID == 'New' ? 0 : this.businessGroupID;
-    console.log(businessGroupName)
-    console.log(id)
     if (businessGroupName.trim() != '') {
       this._groupService.CheckIfBusinessGroupExists(id, businessGroupName).subscribe({
         next: (data: any) => {
@@ -1767,13 +1767,16 @@ export class HomeComponent {
   }
 
   enableBusinessLocation() {
+    this.isLoading = true;
     this._businessProfileService.EnableDisableBusinessProfile(this.businessLocationID)
       .subscribe({
         next: (data) => {
+          this.isLoading = false;
           this.closeModal.nativeElement.click();
           this.getBusinessLocationsByGroupID();
         },
         error: error => {
+          this.isLoading = false;
           console.log(error);
         }
       });
@@ -1921,6 +1924,7 @@ export class HomeComponent {
       else {
         const data = this.paymentDocFromGroup.controls['paymentDocs'] as FormArray;
         data.removeAt(this.indexID);
+        this.isLoading = false;
         this.indexID = '';
       }
     }
