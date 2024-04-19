@@ -17,8 +17,7 @@
             [settings]="dropdownSettingsSingleGroup"
             [data]="businessGroupData"
             formControlName="businessGroupID"
-            (click)="dropDownSelect = true"
-            (ngModelChange)="getBusinessLocationsByGroupID($event)"
+            (onSelect)="getBusinessLocationsByGroupID()"
           >
           </ng-multiselect-dropdown>
         </div>
@@ -29,8 +28,7 @@
             [settings]="dropdownSettingsSingleLocation"
             [data]="businessLocationData"
             formControlName="businessLocationID"
-            (click)="dropDownSelectLocation = true"
-            (ngModelChange)="getPaymentsByBusinessLocationID($event)"
+            (onSelect)="getPaymentsByBusinessLocationID()"
           >
           </ng-multiselect-dropdown>
         </div>
@@ -50,16 +48,26 @@
 
   <div class="col-lg-12" style="padding: 1%;">
     <table mat-table [dataSource]="paymentData" class="mat-elevation-z8">
+      <ng-container matColumnDef="receiptNumber">
+        <th mat-header-cell *matHeaderCellDef>Payment No.</th>
+        <td mat-cell *matCellDef="let element">{{ element.receiptNumber }}</td>
+      </ng-container>
+      
       <ng-container matColumnDef="Date & Time">
         <th mat-header-cell *matHeaderCellDef>Date & Time</th>
         <td mat-cell *matCellDef="let element">
-          {{ element.created | date : "MM-dd-yyyy" }}
+          {{ element.created | date : "MMM dd, yyyy" }}
         </td>
+      </ng-container>
+
+      <ng-container matColumnDef="invoiceNumber">
+        <th mat-header-cell *matHeaderCellDef>Invoice No.</th>
+        <td mat-cell *matCellDef="let element">{{ element.invoiceNumber }}</td>
       </ng-container>
 
       <ng-container matColumnDef="Amount">
         <th mat-header-cell *matHeaderCellDef>Amount</th>
-        <td mat-cell *matCellDef="let element">{{ element.total }}</td>
+        <td mat-cell *matCellDef="let element">$ {{ element.total }}</td>
       </ng-container>
 
       <ng-container matColumnDef="Method">

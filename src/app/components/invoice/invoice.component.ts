@@ -25,40 +25,28 @@ export class InvoiceComponent {
   submitted = false;
   isLoading = false;
   dropDownSelect = false;
-  fileinvoicepdf: File;
-  uploadProgressfileinvoicepdf: any;
-  loadingGroupLogo: boolean = false;
-  uploadfileinvoicepdf: Subscription;
-  isfileUploadedinvoicepdf = false;
-  anninvoicepdf: any;
-  fileNameinvoicepdf: any = null;
-  filePathinvoicepdf: any = null;
   userData: any = JSON.parse(localStorage.getItem('UserData'));
 
   constructor(
     private fb: FormBuilder,
     private _groupService: GroupListService,
     private _businessProfileService: BusinessProfilesService,
-    private _uploadService: UploadServiceService,
     private _clientInvoice: ClientInvoiceService,
     private toast: ToastrService,
     private route: Router
   ) {
     this.firstFormGroup = this.fb.group({
-      invoiceNo: ['', Validators.required],
       businessGroupID: ['', Validators.required],
       businessLocationID: ['', Validators.required],
       invoiceDate: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
-      amount: ['', Validators.required],
-      invoicepdf: ['', Validators.required],
+      amount: ['', Validators.required],      
     });
   }
 
   ngOnInit() {
     this.getBusinessGroups();
-    // this.getBusinessLocationsByGroupID()
     this.dropdownSettingsSingleGroup = {
       idField: 'id',
       textField: 'businessGroupName',
@@ -84,8 +72,8 @@ export class InvoiceComponent {
     });
   }
 
-  getBusinessLocationsByGroupID(event) {
-    if (this.dropDownSelect) {
+  getBusinessLocationsByGroupID() {
+    // if (this.dropDownSelect) {
       this.firstFormGroup.controls['businessLocationID'].setValue('');
       if (this.firstFormGroup.controls['businessGroupID'].value.length != 0) {
         let groupID =
@@ -103,70 +91,7 @@ export class InvoiceComponent {
       } else {
         this.businessLocationData = [];
       }
-    }
-  }
-
-  onChange(event: any) {
-    this.fileinvoicepdf = event.target.files[0];
-
-    if (this.fileinvoicepdf) {
-      if (this.fileinvoicepdf.type === 'application/pdf') {
-        this.uploadfileinvoicepdf = this._uploadService
-          .uploadBusinessImage(this.fileinvoicepdf)
-          .subscribe((event: any) => {
-            if (event.type == HttpEventType.UploadProgress) {
-              this.uploadProgressfileinvoicepdf =
-                Math.round(100 * (event.loaded / event.total)).toString() + '%';
-            }
-            if (
-              event.partialText != undefined &&
-              event.partialText.split('|')[0] == 'file uploaded'
-            ) {
-              this.isfileUploadedinvoicepdf = true;
-              this.anninvoicepdf =
-                AppSettings.API_ENDPOINT +
-                AppSettings.Root_ENDPOINT +
-                '/' +
-                this.fileinvoicepdf.name;
-              let array = event.partialText.split('|')[1].split('\\');
-              this.fileNameinvoicepdf = array[array.length - 1];
-              this.filePathinvoicepdf =
-                AppSettings.API_ENDPOINT +
-                AppSettings.Root_ENDPOINT +
-                '/' +
-                this.fileNameinvoicepdf;
-              this.firstFormGroup.controls['invoicepdf'].setValue(
-                this.fileNameinvoicepdf
-              );
-            } else {
-              this.isfileUploadedinvoicepdf = false;
-            }
-          });
-      } else {
-        this.toast.warning('Select PDF File!', '', {
-          positionClass: 'toast-bottom-right',
-        });
-      }
-    }
-    event.target.value = '';
-  }
-
-  cancelUpload() {
-    if (this.uploadfileinvoicepdf != null) {
-      this.uploadfileinvoicepdf.unsubscribe();
-    }
-    this.uploadProgressfileinvoicepdf = '0%';
-    this.isfileUploadedinvoicepdf = false;
-    this.reset();
-  }
-
-  reset() {
-    this.fileinvoicepdf = null;
-    this.fileNameinvoicepdf = null;
-    this.filePathinvoicepdf = null;
-    this.uploadProgressfileinvoicepdf = null;
-    this.uploadfileinvoicepdf = null;
-    this.firstFormGroup.controls['invoicepdf'].setValue('');
+    // }
   }
 
   SaveInvoice() {
@@ -179,7 +104,7 @@ export class InvoiceComponent {
       uniqueId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       id: 0,
       userId: this.userData.userId,
-      invoiceNo: this.firstFormGroup.controls['invoiceNo'].value,
+      invoiceNo: null,
       invoiceDate: this.firstFormGroup.controls['invoiceDate'].value,
       fromPeriod: this.firstFormGroup.controls['startDate'].value,
       toPeriod: this.firstFormGroup.controls['endDate'].value,
@@ -190,7 +115,7 @@ export class InvoiceComponent {
       createdDate: AppSettings.GetDate(),
       lastModifiedBy: AppSettings.GetLastModifiedBy(),
       lastModifiedDate: AppSettings.GetDate(),
-      invoiceFilePath: this.fileNameinvoicepdf,
+      invoiceFilePath: null,
       businessLocationId:
         this.firstFormGroup.controls['businessLocationID'].value[0].id,
       businessGroupId:
@@ -199,12 +124,7 @@ export class InvoiceComponent {
 
     this._clientInvoice.PostClientInvoice(invoice).subscribe({
       next: (data) => {
-        this.submitted = false;
-        this.fileinvoicepdf = null;
-        this.fileNameinvoicepdf = null;
-        this.filePathinvoicepdf = null;
-        this.uploadProgressfileinvoicepdf = null;
-        this.uploadfileinvoicepdf = null;
+        this.submitted = false;       
         this.dropDownSelect = false;
         this.firstFormGroup.reset();
         this.toast.success('Invoice Created Successfully!', '', {

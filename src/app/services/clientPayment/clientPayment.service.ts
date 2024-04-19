@@ -32,4 +32,19 @@ export class ClientPaymentsService {
         })
       );
   }
+
+  public GetDueInvoicesByBusinessLocationId(BusinessLocationId) {
+    return this.httpClient
+      .get<any>(
+        this.apiUrl +
+          '/GetDueInvoicesByBusinessLocationId/' +
+          BusinessLocationId
+      )
+      .pipe(
+        map((data) => {
+          console.log(data)
+          return data;
+        })
+      );
+  }
 }

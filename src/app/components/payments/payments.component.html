@@ -63,6 +63,8 @@
             [settings]="dropdownSettingsSingleLocation"
             [data]="businessLocationData"
             formControlName="businessLocationID"
+            (click)="dropDownSelectLocation = true"
+            (ngModelChange)="getDueInvoicesByLocation($event)"
           >
           </ng-multiselect-dropdown>
           <div
@@ -78,6 +80,33 @@
               style="font-size: 80%; color: #dc3545"
             >
               Business Location is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label for="invoice"> Invoice </label>
+          <ng-multiselect-dropdown
+            [placeholder]="'Choose Invoice Number'"
+            id="invoice"
+            [settings]="dropdownSettingsSingleInvoice"
+            [data]="invoiceData"
+            formControlName="invoiceID"
+          >
+          </ng-multiselect-dropdown>
+          <div
+            style="width: 100%"
+            *ngIf="
+              submitted && firstFormGroup.controls['invoiceID'].errors
+            "
+          >
+            <div
+              *ngIf="
+                firstFormGroup.controls['invoiceID'].errors['required']
+              "
+              style="font-size: 80%; color: #dc3545"
+            >
+            Invoice Number is required
             </div>
           </div>
         </div>
@@ -161,91 +190,6 @@
               style="font-size: 80%; color: #dc3545"
             >
               Payment Method is required
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-bottom: 2%">
-        <div class="col-md-4">
-          <div class="form-row">
-            <div class="col-md-12">
-              <label>Upload Payment PDF</label>
-            </div>
-            <div class="col-md-12">
-              <input
-                type="file"
-                accept="application/pdf"
-                class="custom-file"
-                id="paymentpdf"
-                (change)="onChange($event)"
-                [ngClass]="{
-                  'is-invalid':
-                    submitted &&
-                    (filePathpaymentpdf == null ||
-                      filePathpaymentpdf == undefined ||
-                      filePathpaymentpdf == '')
-                }"
-              />
-              <label class="custom-file-label" for="paymentpdf">
-                Upload PDF
-              </label>
-              <div
-                style="
-                  width: 80%;
-                  background-color: #7da3ba;
-                  height: 20%;
-                  margin-top: 1%;
-                  border-radius: 21px;
-                  font-size: 65%;
-                "
-                class="progress-bar"
-                role="progressbar"
-                [style.width]="uploadProgressfilepaymentpdf"
-                aria-valuenow="uploadProgressfilepaymentpdf"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                *ngIf="
-                  filePathpaymentpdf != null && filePathpaymentpdf != undefined
-                "
-              >
-                {{ uploadProgressfilepaymentpdf }}
-              </div>
-            </div>
-            <div
-              class="col"
-              *ngIf="filePathpaymentpdf != null"
-              style="position: relative"
-            >
-              <mat-icon
-                class="cancel-upload"
-                (click)="cancelUpload()"
-                *ngIf="
-                  uploadProgressfilepaymentpdf != undefined ||
-                  (filePathpaymentpdf != null &&
-                    filePathpaymentpdf != undefined &&
-                    filePathpaymentpdf != '')
-                "
-                style="
-                  color: black;
-                  overflow: inherit;
-                  position: absolute;
-                  cursor: pointer;
-                "
-              >
-                cancel
-              </mat-icon>
-            </div>
-            <div
-              *ngIf="
-                submitted &&
-                (filePathpaymentpdf == null ||
-                  filePathpaymentpdf == undefined ||
-                  filePathpaymentpdf == '')
-              "
-              style="font-size: 80%; color: #dc3545"
-            >
-              <div>Payment PDF is required</div>
             </div>
           </div>
         </div>

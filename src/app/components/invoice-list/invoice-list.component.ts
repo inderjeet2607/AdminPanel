@@ -56,7 +56,7 @@ export class InvoiceListComponent {
     this.dropdownSettingsSingleGroup = {
       idField: 'id',
       textField: 'businessGroupName',
-      singleSelection: true,
+      singleSelection: true
     };
 
     this.dropdownSettingsSingleLocation = {
@@ -82,42 +82,40 @@ export class InvoiceListComponent {
     });
   }
 
-  getBusinessLocationsByGroupID(event) {
-    if (this.dropDownSelect) {
-      this.firstFormGroup.controls['businessLocationID'].setValue('');
-      if (this.firstFormGroup.controls['businessGroupID'].value.length != 0) {
-        let groupID =
-          this.firstFormGroup.controls['businessGroupID'].value[0].id;
-        this._businessProfileService
-          .GetBusinessLocationByGroupId(groupID)
-          .subscribe({
-            next: (data: any) => {
-              this.businessLocationData = data;
-            },
-            error: (error: any) => {
-              console.log('This is error message', error);
-            },
-          });
-      } else {
-        this.businessLocationData = [];
-      }
+  getBusinessLocationsByGroupID() {
+    // if (this.dropDownSelect) {
+    this.firstFormGroup.controls['businessLocationID'].setValue('');
+    if (this.firstFormGroup.controls['businessGroupID'].value.length != 0) {
+      let groupID =
+        this.firstFormGroup.controls['businessGroupID'].value[0].id;
+      this._businessProfileService
+        .GetBusinessLocationByGroupId(groupID)
+        .subscribe({
+          next: (data: any) => {
+            this.businessLocationData = data;
+          },
+          error: (error: any) => {
+            console.log('This is error message', error);
+          },
+        });
     }
+    else {
+      this.businessLocationData = [];
+    }
+    // }
   }
 
-  getInvoiceByBusinessLocationID(event) {
-    if (this.dropDownSelectLocation) {
+  getInvoiceByBusinessLocationID() {
+    // if (this.dropDownSelectLocation) {
+    this.invoicesData = [];
+    if (this.firstFormGroup.controls['businessLocationID'].value.length != 0) {
+      this.isLoading = true;
+      let locationID = this.firstFormGroup.controls['businessLocationID'].value[0].id;
+      this.GetClientInvoicesByBusinessLocationId(locationID);
+    } else {
       this.invoicesData = [];
-      if (
-        this.firstFormGroup.controls['businessLocationID'].value.length != 0
-      ) {
-        this.isLoading = true;
-        let locationID =
-          this.firstFormGroup.controls['businessLocationID'].value[0].id;
-        this.GetClientInvoicesByBusinessLocationId(locationID);
-      } else {
-        this.businessLocationData = [];
-      }
     }
+    // }
   }
 
   GetClientInvoicesByBusinessLocationId(locationId) {

@@ -13,14 +13,15 @@
         <div class="col-md-6 mt-3">
           <ng-multiselect-dropdown [placeholder]="'Choose Business Group'" id="businessGroup"
             [settings]="dropdownSettingsSingleGroup" [data]="businessGroupData" formControlName="businessGroupID"
-            (click)="dropDownSelect = true" (ngModelChange)="getBusinessLocationsByGroupID($event)">
+            (click)="dropDownSelect = true" (onSelect)="getBusinessLocationsByGroupID()"
+            (onDeSelect)="getBusinessLocationsByGroupID()">
           </ng-multiselect-dropdown>
         </div>
         <div class="col-md-6 mt-3">
           <ng-multiselect-dropdown [placeholder]="'Choose Business Location'" id="businessLocation"
             [settings]="dropdownSettingsSingleLocation" [data]="businessLocationData"
             formControlName="businessLocationID" (click)="dropDownSelectLocation = true"
-            (ngModelChange)="getInvoiceByBusinessLocationID($event)">
+            (onSelect)="getInvoiceByBusinessLocationID()" (onDeSelect)="getInvoiceByBusinessLocationID()">
           </ng-multiselect-dropdown>
         </div>
       </form>
@@ -37,32 +38,32 @@
   <div class="col-lg-12" style="padding: 1%;">
     <table mat-table [dataSource]="invoicesData" class="mat-elevation-z8">
       <ng-container matColumnDef="invoiceNo">
-        <th mat-header-cell *matHeaderCellDef>InvoiceNo</th>
+        <th mat-header-cell *matHeaderCellDef><b>InvoiceNo</b></th>
         <td mat-cell *matCellDef="let element">{{ element.id }}</td>
       </ng-container>
 
       <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <th mat-header-cell *matHeaderCellDef><b>Date</b></th>
         <td mat-cell *matCellDef="let element">
-          {{ element.invoice_date | date : "MM-dd-yyyy" }}
+          {{ element.invoice_date | date : "MMM dd, yyyy" }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="duration">
-        <th mat-header-cell *matHeaderCellDef>Duration</th>
+        <th mat-header-cell *matHeaderCellDef><b>Duration</b></th>
         <td mat-cell *matCellDef="let element">
-          {{ element.period_start | date : "MM-dd-yyyy" }} to
-          {{ element.period_end | date : "MM-dd-yyyy" }}
+          {{ element.period_start | date : "MMM dd, yyyy" }} to
+          {{ element.period_end | date : "MMM dd, yyyy" }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="currency">
-        <th mat-header-cell *matHeaderCellDef>Currency</th>
+        <th mat-header-cell *matHeaderCellDef><b>Amount</b></th>
         <td mat-cell *matCellDef="let element">$ {{ element.total }}</td>
       </ng-container>
 
       <ng-container matColumnDef="invoice">
-        <th mat-header-cell *matHeaderCellDef>Invoice</th>
+        <th mat-header-cell *matHeaderCellDef><b>Invoice</b></th>
         <td mat-cell *matCellDef="let element">
           <a [href]="element.invoice_pdf" download> Download </a>
         </td>
@@ -72,9 +73,7 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
     <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center">
-      <i class="fa" [ngClass]="{
-          'fa-spin fa-spinner': isLoading,
-        }" style="color: rgb(0, 0, 0)"></i>
+      <i class="fa" [ngClass]="{'fa-spin fa-spinner': isLoading}" style="color: rgb(0, 0, 0)"></i>
     </div>
   </div>
 </div>

@@ -20,14 +20,17 @@ import { ClientPaymentsService } from '../../services/clientPayment/clientPaymen
 export class PaymentsComponent {
   dropdownSettingsSingleGroup: IDropdownSettings = {};
   dropdownSettingsSingleLocation: IDropdownSettings = {};
+  dropdownSettingsSingleInvoice: IDropdownSettings = {};
   dropdownSettingsSingleMethod: IDropdownSettings = {};
   firstFormGroup: FormGroup;
   businessGroupData: any = [];
   businessLocationData: any = [];
+  invoiceData: any = [];
   methodData: any = [];
   submitted = false;
   isLoading = false;
   dropDownSelect = false;
+  dropDownSelectLocation = false;
   filepaymentpdf: File;
   uploadProgressfilepaymentpdf: any;
   loadingGroupLogo: boolean = false;
@@ -50,18 +53,18 @@ export class PaymentsComponent {
     this.firstFormGroup = this.fb.group({
       businessGroupID: ['', Validators.required],
       businessLocationID: ['', Validators.required],
+      invoiceID: ['', Validators.required],
       paymentDate: ['', Validators.required],
       method: ['', Validators.required],
-      amount: ['', Validators.required],
-      paymentpdf: ['', Validators.required],
+      amount: ['', Validators.required],     
     });
   }
 
   ngOnInit() {
     this.methodData = [
-      { id: 1, methodName: 'Cash' },
-      { id: 2, methodName: 'Cheque' },
-      { id: 3, methodName: 'Online' },
+      { id: 1, methodName: 'Credit Card' },
+      { id: 2, methodName: 'Debit Card' },
+      { id: 3, methodName: 'E-Cheque' },
     ];
     this.getBusinessGroups();
     // this.getBusinessLocationsByGroupID()
@@ -74,6 +77,12 @@ export class PaymentsComponent {
     this.dropdownSettingsSingleLocation = {
       idField: 'id',
       textField: 'businessName',
+      singleSelection: true,
+    };
+
+    this.dropdownSettingsSingleInvoice = {
+      idField: 'id',
+      textField: 'number',
       singleSelection: true,
     };
 
@@ -107,6 +116,7 @@ export class PaymentsComponent {
           .subscribe({
             next: (data: any) => {
               this.businessLocationData = data;
+              console.log(data)
             },
             error: (error: any) => {
               console.log('This is error message', error);
@@ -118,69 +128,26 @@ export class PaymentsComponent {
     }
   }
 
-  onChange(event: any) {
-    this.filepaymentpdf = event.target.files[0];
-
-    if (this.filepaymentpdf) {
-      if (this.filepaymentpdf.type === 'application/pdf') {
-      this.uploadfilepaymentpdf = this._uploadService
-        .uploadBusinessImage(this.filepaymentpdf)
-        .subscribe((event: any) => {
-          if (event.type == HttpEventType.UploadProgress) {
-            this.uploadProgressfilepaymentpdf =
-              Math.round(100 * (event.loaded / event.total)).toString() + '%';
-          }
-          if (
-            event.partialText != undefined &&
-            event.partialText.split('|')[0] == 'file uploaded'
-          ) {
-            this.isfileUploadedpaymentpdf = true;
-            this.annpaymentpdf =
-              AppSettings.API_ENDPOINT +
-              AppSettings.Root_ENDPOINT +
-              '/' +
-              this.filepaymentpdf.name;
-            let array = event.partialText.split('|')[1].split('\\');
-            this.fileNamepaymentpdf = array[array.length - 1];
-            this.filePathpaymentpdf =
-              AppSettings.API_ENDPOINT +
-              AppSettings.Root_ENDPOINT +
-              '/' +
-              this.fileNamepaymentpdf;
-
-            this.firstFormGroup.controls['paymentpdf'].setValue(
-              this.fileNamepaymentpdf
-            );
-          } else {
-            this.isfileUploadedpaymentpdf = false;
-          }
-        });
-      }
-      else{
-        this.toast.warning('Select PDF File!', '', {
-          positionClass: 'toast-bottom-right',
-        });
+  getDueInvoicesByLocation(event) {
+    if (this.dropDownSelectLocation) {
+      this.firstFormGroup.controls['invoiceID'].setValue('');
+      if (this.firstFormGroup.controls['businessLocationID'].value.length != 0) {
+        let locationID =
+          this.firstFormGroup.controls['businessLocationID'].value[0].id;
+        this._clientPayment.GetDueInvoicesByBusinessLocationId(locationID)
+          .subscribe({
+            next: (data: any) => {
+              this.invoiceData = data;
+              console.log(data)
+            },
+            error: (error: any) => {
+              console.log('This is error message', error);
+            },
+          });
+      } else {
+        this.invoiceData = [];
       }
     }
-    event.target.value = '';
-  }
-
-  cancelUpload() {
-    if (this.uploadfilepaymentpdf != null) {
-      this.uploadfilepaymentpdf.unsubscribe();
-    }
-    this.uploadProgressfilepaymentpdf = '0%';
-    this.isfileUploadedpaymentpdf = false;
-    this.reset();
-  }
-
-  reset() {
-    this.filepaymentpdf = null;
-    this.fileNamepaymentpdf = null;
-    this.filePathpaymentpdf = null;
-    this.uploadProgressfilepaymentpdf = null;
-    this.uploadfilepaymentpdf = null;
-    this.firstFormGroup.controls['paymentpdf'].setValue('');
   }
 
   SavePayment() {
@@ -197,13 +164,13 @@ export class PaymentsComponent {
       paymentMethodId: this.firstFormGroup.controls['method'].value[0].id,
       paidAmount: this.firstFormGroup.controls['amount'].value,
       statusId: 3,
-      billIds: null,
+      billIds: this.firstFormGroup.controls['invoiceID'].value[0].id,
       isActive: true,
       createdBy: AppSettings.GetCreatedBy(),
       createdDate: AppSettings.GetDate(),
       lastModifiedBy: AppSettings.GetLastModifiedBy(),
       lastModifiedDate: AppSettings.GetDate(),
-      paymentFilePath: this.fileNamepaymentpdf,
+      paymentFilePath: null,
       businessLocationId:
         this.firstFormGroup.controls['businessLocationID'].value[0].id,
       businessGroupId:
@@ -213,12 +180,8 @@ export class PaymentsComponent {
     this._clientPayment.PostClientPayment(payment).subscribe({
       next: (data) => {
         this.submitted = false;
-        this.filepaymentpdf = null;
-        this.fileNamepaymentpdf = null;
-        this.filePathpaymentpdf = null;
-        this.uploadProgressfilepaymentpdf = null;
-        this.uploadfilepaymentpdf = null;
         this.dropDownSelect = false;
+        this.dropDownSelectLocation = false;
         this.firstFormGroup.reset();
         this.toast.success('Payment Created Successfully!', '', {
           positionClass: 'toast-bottom-right',

@@ -24,7 +24,7 @@ export class PaymentListComponent {
   dropDownSelectLocation = false;
   // dataSource: MatTableDataSource<InvoiceList>;
   paymentData: any = [];
-  displayedColumns: string[] = ['Date & Time', 'Amount', 'Method'];
+  displayedColumns: string[] = ['receiptNumber', 'Date & Time', 'invoiceNumber', 'Amount', 'Method'];
 
   constructor(
     private route: Router,
@@ -71,43 +71,42 @@ export class PaymentListComponent {
     });
   }
 
-  getBusinessLocationsByGroupID(event) {
-    if (this.dropDownSelect) {
-      this.paymentData = [];
-      this.firstFormGroup.controls['businessLocationID'].setValue('');
-      if (this.firstFormGroup.controls['businessGroupID'].value.length != 0) {
-        let groupID =
-          this.firstFormGroup.controls['businessGroupID'].value[0].id;
-        this._businessProfileService
-          .GetBusinessLocationByGroupId(groupID)
-          .subscribe({
-            next: (data: any) => {
-              this.businessLocationData = data;
-            },
-            error: (error: any) => {
-              console.log('This is error message', error);
-            },
-          });
-      } else {
-        this.businessLocationData = [];
-      }
+  getBusinessLocationsByGroupID() {
+    // if (this.dropDownSelect) {
+    this.paymentData = [];
+    this.firstFormGroup.controls['businessLocationID'].setValue('');
+    if (this.firstFormGroup.controls['businessGroupID'].value.length != 0) {
+      let groupID =
+        this.firstFormGroup.controls['businessGroupID'].value[0].id;
+      this._businessProfileService
+        .GetBusinessLocationByGroupId(groupID)
+        .subscribe({
+          next: (data: any) => {
+            this.businessLocationData = data;
+          },
+          error: (error: any) => {
+            console.log('This is error message', error);
+          },
+        });
+    } 
+    else {
+      this.businessLocationData = [];
     }
+    // }
   }
 
-  getPaymentsByBusinessLocationID(event) {
-    if (this.dropDownSelectLocation) {
-      this.paymentData = [];
-      if (
-        this.firstFormGroup.controls['businessLocationID'].value.length != 0
-      ) {
-        this.isLoading = true;
-        let locationID =
-          this.firstFormGroup.controls['businessLocationID'].value[0].id;
-        this.GetClientInvoicesByBusinessLocationId(locationID);
-      } else {
-        this.businessLocationData = [];
-      }
-    }
+  getPaymentsByBusinessLocationID() {
+    // if (this.dropDownSelectLocation) {
+    this.paymentData = [];
+    if (this.firstFormGroup.controls['businessLocationID'].value.length != 0) {
+      this.isLoading = true;
+      let locationID = this.firstFormGroup.controls['businessLocationID'].value[0].id;
+      this.GetClientInvoicesByBusinessLocationId(locationID);
+    } 
+    // else {
+    //   this.paymentData = [];
+    // }
+    // }
   }
 
   GetClientInvoicesByBusinessLocationId(locationId) {

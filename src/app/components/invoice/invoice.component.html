@@ -9,15 +9,8 @@
       <h2 class="mb-0">Add Invoice</h2>
     </div>
     <div class="col-md-5 text-right mt-3">
-      <button
-        class="btn btn-success text-center brownColor mb-1 mr-3"
-        (click)="Cancel()"
-      >
-        <img
-          alt="phonevector"
-          class="filter-green"
-          src="../../../assets/img/icons/Cancel.svg"
-        />
+      <button class="btn btn-success text-center brownColor mb-1 mr-3" (click)="Cancel()">
+        <img alt="phonevector" class="filter-green" src="../../../assets/img/icons/Cancel.svg" />
         Cancel
       </button>
     </div>
@@ -28,28 +21,14 @@
       <div class="row" style="margin-bottom: 2%">
         <div class="col-md-4">
           <label for="businessGroup"> Business Group </label>
-          <ng-multiselect-dropdown
-            [placeholder]="'Choose Business Group'"
-            id="businessGroup"
-            [settings]="dropdownSettingsSingleGroup"
-            [data]="businessGroupData"
-            formControlName="businessGroupID"
-            (click)="dropDownSelect = true"
-            (ngModelChange)="getBusinessLocationsByGroupID($event)"
-          >
+          <ng-multiselect-dropdown [placeholder]="'Choose Business Group'" id="businessGroup"
+            [settings]="dropdownSettingsSingleGroup" [data]="businessGroupData" formControlName="businessGroupID"
+            (click)="dropDownSelect = true" (onSelect)="getBusinessLocationsByGroupID()"
+            (onDeSelect)="getBusinessLocationsByGroupID()">
           </ng-multiselect-dropdown>
-          <div
-            style="width: 100%"
-            *ngIf="
-              submitted && firstFormGroup.controls['businessGroupID'].errors
-            "
-          >
-            <div
-              *ngIf="
-                firstFormGroup.controls['businessGroupID'].errors['required']
-              "
-              style="font-size: 80%; color: #dc3545"
-            >
+          <div style="width: 100%" *ngIf="submitted && firstFormGroup.controls['businessGroupID'].errors">
+            <div *ngIf="firstFormGroup.controls['businessGroupID'].errors['required']"
+              style="font-size: 80%; color: #dc3545">
               Business Group is required
             </div>
           </div>
@@ -57,55 +36,18 @@
 
         <div class="col-md-4">
           <label for="businessLocation"> Business Location </label>
-          <ng-multiselect-dropdown
-            [placeholder]="'Choose Business Location'"
-            id="businessLocation"
-            [settings]="dropdownSettingsSingleLocation"
-            [data]="businessLocationData"
-            formControlName="businessLocationID"
-          >
+          <ng-multiselect-dropdown [placeholder]="'Choose Business Location'" id="businessLocation"
+            [settings]="dropdownSettingsSingleLocation" [data]="businessLocationData"
+            formControlName="businessLocationID">
           </ng-multiselect-dropdown>
-          <div
-            style="width: 100%"
-            *ngIf="
-              submitted && firstFormGroup.controls['businessLocationID'].errors
-            "
-          >
-            <div
-              *ngIf="
-                firstFormGroup.controls['businessLocationID'].errors['required']
-              "
-              style="font-size: 80%; color: #dc3545"
-            >
+          <div style="width: 100%" *ngIf="submitted && firstFormGroup.controls['businessLocationID'].errors">
+            <div *ngIf="firstFormGroup.controls['businessLocationID'].errors['required']"
+              style="font-size: 80%; color: #dc3545">
               Business Location is required
             </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <label for="invoiceNo"> Invoice No. </label>
-          <input
-            id="invoiceNo"
-            class="form-control"
-            formControlName="invoiceNo"
-            autocomplete="off"
-            [ngClass]="{
-              'is-invalid':
-                submitted && firstFormGroup.controls['invoiceNo'].errors
-            }"
-          />
-          <div
-            *ngIf="submitted && firstFormGroup.controls['invoiceNo'].errors"
-            class="invalid-feedback"
-          >
-            <div
-              *ngIf="firstFormGroup.controls['invoiceNo'].errors['required']"
-            >
-              Invoice No is required
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row" style="margin-bottom: 2%">
+
         <div class="col-md-4">
           <label for="invoiceDate"> Invoice Date </label>
           <!-- <i
@@ -114,29 +56,17 @@
             style="vertical-align: middle"
           >
           </i> -->
-          <input
-            id="invoiceDate"
-            type="date"
-            class="form-control"
-            formControlName="invoiceDate"
-            [ngClass]="{
-              'is-invalid':
-                submitted && firstFormGroup.controls['invoiceDate'].errors
-            }"
-          />
-          <div
-            style="width: 100%"
-            *ngIf="submitted && firstFormGroup.controls['invoiceDate'].errors"
-            class="invalid-feedback"
-          >
-            <div
-              *ngIf="firstFormGroup.controls['invoiceDate'].errors['required']"
-            >
+          <input id="invoiceDate" type="date" class="form-control" formControlName="invoiceDate"
+            [ngClass]="{'is-invalid':submitted && firstFormGroup.controls['invoiceDate'].errors}" />
+          <div style="width: 100%" *ngIf="submitted && firstFormGroup.controls['invoiceDate'].errors"
+            class="invalid-feedback">
+            <div *ngIf="firstFormGroup.controls['invoiceDate'].errors['required']">
               Invoice Date is required
             </div>
           </div>
         </div>
-
+      </div>
+      <div class="row" style="margin-bottom: 2%">
         <div class="col-md-4">
           <label for="startDate"> Start Date </label>
           <!-- <i
@@ -145,24 +75,11 @@
           style="vertical-align: middle"
         >
         </i> -->
-          <input
-            id="startDate"
-            type="date"
-            class="form-control"
-            formControlName="startDate"
-            [ngClass]="{
-              'is-invalid':
-                submitted && firstFormGroup.controls['startDate'].errors
-            }"
-          />
-          <div
-            style="width: 100%"
-            *ngIf="submitted && firstFormGroup.controls['startDate'].errors"
-            class="invalid-feedback"
-          >
-            <div
-              *ngIf="firstFormGroup.controls['startDate'].errors['required']"
-            >
+          <input id="startDate" type="date" class="form-control" formControlName="startDate"
+            [ngClass]="{'is-invalid':submitted && firstFormGroup.controls['startDate'].errors}" />
+          <div style="width: 100%" *ngIf="submitted && firstFormGroup.controls['startDate'].errors"
+            class="invalid-feedback">
+            <div *ngIf="firstFormGroup.controls['startDate'].errors['required']">
               Start Date is required
             </div>
           </div>
@@ -176,135 +93,30 @@
           style="vertical-align: middle"
         >
         </i> -->
-          <input
-            id="endDate"
-            type="date"
-            class="form-control"
-            formControlName="endDate"
-            [ngClass]="{
+          <input id="endDate" type="date" class="form-control" formControlName="endDate" [ngClass]="{
               'is-invalid':
                 submitted && firstFormGroup.controls['endDate'].errors
-            }"
-          />
-          <div
-            style="width: 100%"
-            *ngIf="submitted && firstFormGroup.controls['endDate'].errors"
-            class="invalid-feedback"
-          >
+            }" />
+          <div style="width: 100%" *ngIf="submitted && firstFormGroup.controls['endDate'].errors"
+            class="invalid-feedback">
             <div *ngIf="firstFormGroup.controls['endDate'].errors['required']">
               End Date is required
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="row" style="margin-bottom: 2%">
         <div class="col-md-4">
           <label for="amount"> Amount </label>
-          <input
-            id="amount"
-            class="form-control"
-            formControlName="amount"
-            autocomplete="off"
-            [ngClass]="{
+          <input id="amount" class="form-control" formControlName="amount" autocomplete="off" [ngClass]="{
               'is-invalid':
                 submitted && firstFormGroup.controls['amount'].errors
-            }"
-          />
-          <div
-            *ngIf="submitted && firstFormGroup.controls['amount'].errors"
-            class="invalid-feedback"
-          >
-            <div
-              *ngIf="
+            }" />
+          <div *ngIf="submitted && firstFormGroup.controls['amount'].errors" class="invalid-feedback">
+            <div *ngIf="
                 firstFormGroup.controls['amount'].errors['required'] ||
                 firstFormGroup.controls['amount'].errors['pattern']
-              "
-            >
+              ">
               Amount is required
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-row">
-            <div class="col-md-12">
-              <label>Upload Invoice PDF</label>
-            </div>
-            <div class="col-md-12">
-              <input
-                type="file"
-                accept="application/pdf"
-                class="custom-file"
-                id="invoicepdf"
-                (change)="onChange($event)"
-                [ngClass]="{
-                  'is-invalid':
-                    submitted &&
-                    (filePathinvoicepdf == null ||
-                      filePathinvoicepdf == undefined ||
-                      filePathinvoicepdf == '')
-                }"
-              />
-              <label class="custom-file-label" for="invoicepdf">
-                Upload PDF
-              </label>
-              <div
-                style="
-                  width: 80%;
-                  background-color: #7da3ba;
-                  height: 20%;
-                  margin-top: 1%;
-                  border-radius: 21px;
-                  font-size: 65%;
-                "
-                class="progress-bar"
-                role="progressbar"
-                [style.width]="uploadProgressfileinvoicepdf"
-                aria-valuenow="uploadProgressfileinvoicepdf"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                *ngIf="
-                  filePathinvoicepdf != null && filePathinvoicepdf != undefined
-                "
-              >
-                {{ uploadProgressfileinvoicepdf }}
-              </div>
-            </div>
-            <div
-              class="col"
-              *ngIf="filePathinvoicepdf != null"
-              style="position: relative"
-            >
-              <!-- <img src="{{ filePathinvoicepdf }}" height="70px" /> -->
-              <mat-icon
-                class="cancel-upload"
-                (click)="cancelUpload()"
-                *ngIf="
-                  uploadProgressfileinvoicepdf != undefined ||
-                  (filePathinvoicepdf != null &&
-                    filePathinvoicepdf != undefined &&
-                    filePathinvoicepdf != '')
-                "
-                style="
-                  color: black;
-                  overflow: inherit;
-                  position: absolute;
-                  cursor: pointer;
-                "
-              >
-                cancel
-              </mat-icon>
-            </div>
-            <div
-              *ngIf="
-                submitted &&
-                (filePathinvoicepdf == null ||
-                  filePathinvoicepdf == undefined ||
-                  filePathinvoicepdf == '')
-              "
-              style="font-size: 80%; color: #dc3545"
-            >
-              <div>Invoice PDF is required</div>
             </div>
           </div>
         </div>
@@ -313,20 +125,12 @@
       <div class="row">
         <div class="row mt-4">
           <div class="col-md-12 text-center" style="margin-bottom: 1%">
-            <button
-              class="btn btn-success text-center"
-              (click)="SaveInvoice()"
-              [disabled]="isLoading"
-            >
+            <button class="btn btn-success text-center" (click)="SaveInvoice()" [disabled]="isLoading">
               Save
-              <i
-                class="fa"
-                [ngClass]="{
+              <i class="fa" [ngClass]="{
                   'fa-spin fa-spinner': isLoading,
                   'fa-check': !isLoading
-                }"
-                style="color: white"
-              ></i>
+                }" style="color: white"></i>
             </button>
           </div>
         </div>
