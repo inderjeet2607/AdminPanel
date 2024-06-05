@@ -170,6 +170,8 @@ export class HomeComponent {
   ChkMakeDefaultTime = false;
   isPaymentLocationDisabled: boolean = false;
   stripeCustomerID: any = '';
+  isAgeRestriction: Boolean = false;
+  isSponsored: Boolean = false;
   cardOptions: StripeCardElementOptions = {
     style: {
       base: {
@@ -232,6 +234,8 @@ export class HomeComponent {
     this.storeSourceName = '';
     this.customerUserName = '';
     this.storeUserName = '';
+    this.isAgeRestriction = false;
+    this.isSponsored = false;
 
     this.firstFormGroup = this.fb.group({
       BusinessgroupName: ['', [Validators.required, Validators.pattern(/^(\s+\S+\s*)*(?!\s).*$/)]],
@@ -791,6 +795,8 @@ export class HomeComponent {
     this.selectedBusiness = [];
     this.thirdFormGroup.controls['ChkMakeDefault'].enable();
     this.indexID = '';
+    this.isAgeRestriction = false;
+    this.isSponsored = false;
   }
 
   SaveGroupDetails() {
@@ -953,7 +959,8 @@ export class HomeComponent {
       "galleryImagePath2": this.fileNameBusinessImage2,
       "galleryImagePath3": this.fileNameBusinessImage3,
       "galleryImagePath4": this.fileNameBusinessImage4,
-      "isAgeRestriction": false,
+      "isAgeRestriction": this.isAgeRestriction,
+      "isSponsored": this.isSponsored,
       "customerID": this.stripeCustomerID,
       "businesswiseLabels": this.GetBusinessLabelModel(),
       "businesswiseWorkingDays": this.GetBusinessWorkingHoursModel()
@@ -1219,6 +1226,8 @@ export class HomeComponent {
         this.longitude = data.longitude;
         this.industry = data.industry;
         this.stripeCustomerID = data.customerID;
+        this.isAgeRestriction = data.isAgeRestriction;
+        this.isSponsored = data.isSponsored;
 
         this.secondFormGroup.controls['BusinessLocationName'].setValue(data.legalName);
         this.secondFormGroup.controls['BusinessShortName'].setValue(data.businessName);
@@ -1638,9 +1647,8 @@ export class HomeComponent {
     let value = this.fourthFormGroup.controls['SrcBusinessLocationName'].value[0].id;
     this._sourceService.GetSourceCountByLocationID(value).subscribe({
       next: (data) => {
-
-        this.customerSourceName = data.businessLocationName.toLowerCase() + (data.count > 0 ? (data.count + 1) : '') + "customer";
-        this.storeSourceName = data.businessLocationName.toLowerCase() + (data.count > 0 ? (data.count + 1) : '') + "store";
+        this.customerSourceName = data.sourceName + (data.count > 0 ? (data.count + 1) : '') + "customer";
+        this.storeSourceName = data.sourceName + (data.count > 0 ? (data.count + 1) : '') + "store";
 
         this.customerUserName = this.customerSourceName;
         this.storeUserName = this.storeSourceName;

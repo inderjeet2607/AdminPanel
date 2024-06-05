@@ -56,7 +56,7 @@ export class PaymentsComponent {
       invoiceID: ['', Validators.required],
       paymentDate: ['', Validators.required],
       method: ['', Validators.required],
-      amount: ['', Validators.required],     
+      amount: ['', Validators.required],
     });
   }
 
