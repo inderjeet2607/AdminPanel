@@ -39,6 +39,7 @@ export interface PaymentInfoList {
 export interface SourcesList {
   sourceName: string;
   businessLocationName: string;
+  storeSourceName: string;
 }
 
 @Component({
@@ -152,7 +153,7 @@ export class HomeComponent {
   indexID: any = '';
   sourcesData: any = [];
   dataSourceSources: MatTableDataSource<SourcesList>;
-  sourcesDisplayedColumns: string[] = ['sourceName', 'businessLocationName', 'Action'];
+  sourcesDisplayedColumns: string[] = ['sourceName', 'storeSourceName', 'businessLocationName', 'Action',];
   showSourceList: Boolean = true;
   businessGroupSaveBtn: any = 'Save & Continue';
   businessLocationSaveBtn: any = 'Save & Continue';
@@ -303,6 +304,8 @@ export class HomeComponent {
       StoreTabletBrand: ['', Validators.required],
       StoreTabletModel: ['', Validators.required],
     });
+
+    this.firstFormGroup.controls['SignoutHours'].disable();
   }
 
   ngOnInit() {
@@ -797,6 +800,7 @@ export class HomeComponent {
     this.indexID = '';
     this.isAgeRestriction = false;
     this.isSponsored = false;
+    this.firstFormGroup.controls['SignoutHours'].disable();
   }
 
   SaveGroupDetails() {
@@ -875,7 +879,21 @@ export class HomeComponent {
 
         this.firstFormGroup.controls['FirstName'].setValue(data.firstName);
         this.firstFormGroup.controls['LastName'].setValue(data.lastName);
-        this.firstFormGroup.controls['PhoneNumber'].setValue(data.mobile);
+
+        let phone: any = '';
+        const value = data.mobile.replace(/[^0-9]/g, '');
+        let format = '(***) ***-****';
+
+        for (let i = 0; i < value.length; i++) {
+          format = format.replace('*', value.charAt(i));
+        }
+
+        if (format.indexOf('*') >= 0) {
+          format = format.substring(0, format.indexOf('*'));
+        }
+        phone = format.trim();
+
+        this.firstFormGroup.controls['PhoneNumber'].setValue(phone);
         this.firstFormGroup.controls['EmailID'].setValue(data.email);
         this.isEmailVerified = data.isEmailVerified;
         this.verificationText = data.isEmailVerified == true ? 'Verified' :
@@ -888,6 +906,13 @@ export class HomeComponent {
         }
         else {
           this.cancelUpload();
+        }
+
+        if (data.isSignOutRequired == true) {
+          this.firstFormGroup.controls['SignoutHours'].enable();
+        }
+        else {
+          this.firstFormGroup.controls['SignoutHours'].disable();
         }
       },
       error: (error: any) => {
@@ -916,7 +941,7 @@ export class HomeComponent {
       "businessClosureTime": this.firstFormGroup.controls['BusinessClosureTime'].value,
       "firstName": this.firstFormGroup.controls['FirstName'].value,
       "lastName": this.firstFormGroup.controls['LastName'].value,
-      "mobile": this.firstFormGroup.controls['PhoneNumber'].value,
+      "mobile": this.firstFormGroup.controls['PhoneNumber'].value.replaceAll(/[^a-zA-Z0-9]/g, ''),
       "email": this.firstFormGroup.controls['EmailID'].value,
       "isEmailVerified": this.isEmailVerified
     }
@@ -931,7 +956,7 @@ export class HomeComponent {
       "businessName": this.secondFormGroup.controls['BusinessShortName'].value,
       "legalName": this.secondFormGroup.controls['BusinessLocationName'].value,
       "adress": this.secondFormGroup.controls['Address'].value,
-      "phoneNo": this.secondFormGroup.controls['PhoneNo'].value,
+      "phoneNo": this.secondFormGroup.controls['PhoneNo'].value.replaceAll(/[^a-zA-Z0-9]/g, ''),
       "pinCode": this.secondFormGroup.controls['Pincode'].value,
       "industry": this.industry,
       "descriptions": this.secondFormGroup.controls['Description'].value,
@@ -1231,7 +1256,20 @@ export class HomeComponent {
 
         this.secondFormGroup.controls['BusinessLocationName'].setValue(data.legalName);
         this.secondFormGroup.controls['BusinessShortName'].setValue(data.businessName);
-        this.secondFormGroup.controls['PhoneNo'].setValue(data.phoneNo);
+
+        let phone: any = '';
+        const value = data.phoneNo.replace(/[^0-9]/g, '');
+        let format = '(***) ***-****';
+
+        for (let i = 0; i < value.length; i++) {
+          format = format.replace('*', value.charAt(i));
+        }
+
+        if (format.indexOf('*') >= 0) {
+          format = format.substring(0, format.indexOf('*'));
+        }
+        phone = format.trim();
+        this.secondFormGroup.controls['PhoneNo'].setValue(phone);
         this.secondFormGroup.controls['Address'].setValue(data.adress);
         this.secondFormGroup.controls['City'].setValue(data.city);
         let selectedState: { id: any, name: any }[] = [];
@@ -1962,6 +2000,62 @@ export class HomeComponent {
           this.latitude = autocomplete.getPlace().geometry.location.lat();
           this.longitude = autocomplete.getPlace().geometry.location.lng();
           this.secondFormGroup.controls['Address'].setValue(this.searchElementRef.nativeElement.value);
+          let city = '';
+          let postal_code = '';
+          let state: any = [];
+          let country = '';
+          let fullAddress = autocomplete.getPlace().address_components[0].long_name + " " + autocomplete.getPlace().address_components[1].long_name + " " + autocomplete.getPlace().address_components[2].long_name;
+          autocomplete.getPlace().address_components?.forEach((element: any) => {
+
+            const types = element.types;
+            if (types.includes('locality')) {
+              city = element.long_name;
+            }
+
+            if (types.includes('postal_code')) {
+              postal_code = element.long_name;
+            }
+
+            if (types.includes('administrative_area_level_1')) {
+              state = element.short_name;
+            }
+
+            if (types.includes('country')) {
+              country = element.short_name === 'US' ? 'USA' : element.long_name;
+            }
+          });
+
+          let formattedAddress = autocomplete.getPlace().formatted_address || '';
+          const removeComponent = (address: string, component: string) => {
+            if (component) {
+              const index = address.indexOf(component);
+              if (index !== -1) {
+                address = address.substring(0, (index)) + address.substring(index + component.length);
+              }
+            }
+
+            return address;
+          }
+
+          formattedAddress = removeComponent(formattedAddress, city);
+          formattedAddress = removeComponent(formattedAddress, postal_code);
+          formattedAddress = removeComponent(formattedAddress, state);
+          formattedAddress = removeComponent(formattedAddress, country);
+          formattedAddress = formattedAddress
+            .replaceAll(',', '').trim();
+
+          this.secondFormGroup.controls['City'].setValue(city);
+          this.secondFormGroup.controls['Pincode'].setValue(postal_code);
+          this.secondFormGroup.controls['Address'].setValue(fullAddress);
+
+          let selectedState: { id: any, name: any }[] = [];
+          selectedState.push({
+            id: this.statesData.filter(x => x.name == state)[0].id,
+            name: this.statesData.filter(x => x.name == state)[0].name
+          });
+          console.log(selectedState)
+          this.secondFormGroup.controls['StateID'].setValue(selectedState);
+
         });
       });
 
@@ -2021,5 +2115,31 @@ export class HomeComponent {
 
   navigateToList() {
     this.route.navigate(['/group-list']);
+  }
+
+  toggleSignInSignOut() {
+    if (this.firstFormGroup.controls['SignoutRequired'].value == true) {
+      this.firstFormGroup.controls['SignoutHours'].enable();
+    }
+    else {
+      this.firstFormGroup.controls['SignoutHours'].disable();
+    }
+  }
+
+  formatNum(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    let inputValue = inputElement.value;
+    const value = inputValue.replace(/[^0-9]/g, '');
+    let format = '(***) ***-****';
+
+    for (let i = 0; i < value.length; i++) {
+      format = format.replace('*', value.charAt(i));
+    }
+
+    if (format.indexOf('*') >= 0) {
+      format = format.substring(0, format.indexOf('*'));
+    }
+
+    inputElement.value = format.trim();
   }
 }

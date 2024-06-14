@@ -125,7 +125,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="smsPhoneNo">
-                                    SMS From Phone No
+                                    SMS Outgoing number
                                 </label>
                                 <input id="smsPhoneNo" class="form-control" formControlName="SMSPhoneNumber"
                                     autocomplete="off" (keypress)="numberOnly($event)" maxlength="10">
@@ -136,9 +136,9 @@
                             <div class="col-md-6" style="display: flex;align-items: center;">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" formControlName="SignoutRequired"
-                                        value="" id="signOut">
+                                        value="" id="signOut" (change)="toggleSignInSignOut()">
                                     <label class="form-check-label" for="signOut">
-                                        Sign In Sign Out functionality Required ?
+                                        Sign In / Sign Out functionality Required ?
                                     </label>
                                 </div>
                             </div>
@@ -213,12 +213,13 @@
                                     Phone No
                                 </label>
                                 <input id="PhoneNo" class="form-control" formControlName="PhoneNumber"
-                                    autocomplete="off" (keypress)="numberOnly($event)" maxlength="10"
+                                    autocomplete="off" (keypress)="numberOnly($event)" maxlength="14"
+                                    (input)="formatNum($event)"
                                     [ngClass]="{ 'is-invalid': submitted && firstFormGroup.controls['PhoneNumber'].errors }">
                                 <div *ngIf="submitted && firstFormGroup.controls['PhoneNumber'].errors"
                                     class="invalid-feedback">
                                     <div *ngIf="firstFormGroup.controls['PhoneNumber'].errors['required']">
-                                        PhoneNumber is required
+                                        Phone Number is required
                                     </div>
                                 </div>
                             </div>
@@ -427,7 +428,7 @@
                                 <div *ngIf="secondStepSubmitted && secondFormGroup.controls['BusinessShortName'].errors"
                                     class="invalid-feedback">
                                     <div *ngIf="secondFormGroup.controls['BusinessShortName'].errors['required']">
-                                        Business Short Name is required
+                                        Display Name is required
                                     </div>
                                 </div>
                             </div>
@@ -437,7 +438,7 @@
                                     Phone No
                                 </label>
                                 <input id="phoneNo" class="form-control" formControlName="PhoneNo" autocomplete="off"
-                                    (keypress)="numberOnly($event)" maxlength="10"
+                                    (keypress)="numberOnly($event)" maxlength="14" (input)="formatNum($event)"
                                     [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['PhoneNo'].errors }">
                                 <div *ngIf="secondStepSubmitted && secondFormGroup.controls['PhoneNo'].errors"
                                     class="invalid-feedback">
@@ -501,7 +502,7 @@
                                     Zip Code
                                 </label>
                                 <input id="pincode" class="form-control" formControlName="Pincode" autocomplete="off"
-                                    maxlength="6" (keypress)="numberOnly($event)"
+                                    maxlength="5" (keypress)="numberOnly($event)" minlength="5"
                                     [ngClass]="{ 'is-invalid': secondStepSubmitted && secondFormGroup.controls['Pincode'].errors }">
                                 <div *ngIf="secondStepSubmitted && secondFormGroup.controls['Pincode'].errors"
                                     class="invalid-feedback">
@@ -640,7 +641,7 @@
 
                                     <div class="col" style="padding-right: 6px;">
                                         <div class="col-md-12" style="margin-left:0; padding-left: 0;">
-                                            <label>Display Image</label>
+                                            <label>App Display Image</label>
                                         </div>
                                         <div class="col-md-12">
                                             <input type="file" class="custom-file" id="businessDisplayImage"
@@ -679,7 +680,7 @@
                                         <div class="row">
                                             <div class="col-md-7">
                                                 <label for="hours">
-                                                    Business Working Hours
+                                                    Business Hours
                                                 </label>
                                             </div>
 
@@ -1029,7 +1030,7 @@
 
                 <table *ngIf="showPaymentList" mat-table [dataSource]="dataSourcePaymentInfo">
                     <ng-container matColumnDef="businessLocationName">
-                        <th mat-header-cell *matHeaderCellDef> <b>Business Name</b> </th>
+                        <th mat-header-cell *matHeaderCellDef> <b>Display Name</b> </th>
                         <td mat-cell *matCellDef="let element"> {{element.businessLocationName}} </td>
                     </ng-container>
                     <ng-container matColumnDef="paymentType">
@@ -1498,11 +1499,15 @@
 
                 <table *ngIf="showSourceList" mat-table [dataSource]="dataSourceSources">
                     <ng-container matColumnDef="sourceName">
-                        <th mat-header-cell *matHeaderCellDef> <b>Source Name</b> </th>
+                        <th mat-header-cell *matHeaderCellDef> <b>Customer Source Name</b> </th>
                         <td mat-cell *matCellDef="let element"> {{element.sourceName}} </td>
                     </ng-container>
+                    <ng-container matColumnDef="storeSourceName">
+                        <th mat-header-cell *matHeaderCellDef> <b>Store Source Name</b> </th>
+                        <td mat-cell *matCellDef="let element"> {{element.storeSourceName}}</td>
+                    </ng-container>
                     <ng-container matColumnDef="businessLocationName">
-                        <th mat-header-cell *matHeaderCellDef> <b>Business Name</b> </th>
+                        <th mat-header-cell *matHeaderCellDef> <b>Display Name</b> </th>
                         <td mat-cell *matCellDef="let element"> {{element.businessLocationName}}
                         </td>
                     </ng-container>
@@ -1535,7 +1540,7 @@
                                 <div class="form-row">
                                     <div class="col">
                                         <label for="Industry">
-                                            Business Location Name
+                                            Display Name
                                         </label>
                                         <ng-multiselect-dropdown [placeholder]="'Choose Business Location Name'"
                                             id="businessLocationName" [settings]="dropdownSettingsBusinessLocationName"
@@ -1548,7 +1553,7 @@
                                             class="invalid-feedback">
                                             <div
                                                 *ngIf="fourthFormGroup.controls['SrcBusinessLocationName'].errors['required']">
-                                                Business Location Name is required
+                                                Display Name is required
                                             </div>
                                         </div>
                                     </div>
@@ -1693,7 +1698,7 @@
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-md-4 pr-0"><label>
-                                        <b>Business Group :</b>
+                                        <b>Business Group:</b>
                                     </label></div>
                                 <div class="col-md-8">
                                     {{firstFormGroup.controls['BusinessgroupName'].value}}
@@ -1704,7 +1709,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>Industry Type :</b>
+                                        <b>Industry Type:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1716,7 +1721,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>Package Type :</b>
+                                        <b>Package Type:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1732,19 +1737,18 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>SMS Profile :</b>
+                                        <b>SMS Profile:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
-                                    {{firstFormGroup.controls['PackageTypeID'].value.length != 0 ?
-                                    firstFormGroup.controls['PackageTypeID'].value[0].packageName : ''}}
+                                    {{firstFormGroup.controls['SMSProfileID'].value}}
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-md-4"><label>
-                                        <b>SMS Phone :</b>
+                                        <b>SMS Outgoing number:</b>
                                     </label></div>
                                 <div class="col-md-8">
                                     {{firstFormGroup.controls['SMSPhoneNumber'].value}}
@@ -1755,7 +1759,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>Spin Wheel :</b>
+                                        <b>Spin Wheel:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1769,7 +1773,7 @@
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-md-4"><label>
-                                        <b>Sign In / Sign Out Required? :</b>
+                                        <b>Sign In / Sign Out Required?:</b>
                                     </label></div>
                                 <div class="col-md-8">
                                     {{firstFormGroup.controls['SignoutRequired'].value == true ? "Yes" : "No"}}
@@ -1780,7 +1784,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>Auto Signout Hours :</b>
+                                        <b>Auto Signout Hours:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1792,7 +1796,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>Daily Closure Time :</b>
+                                        <b>Daily Closure Time:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1806,9 +1810,9 @@
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-md-4"><label>
-                                        <b>Admin Email :</b>
+                                        <b>Admin Email:</b>
                                     </label></div>
-                                <div class="col-md-8">
+                                <div class="col-md-8" style="overflow-wrap: anywhere;">
                                     {{firstFormGroup.controls['EmailID'].value}}
                                 </div>
                             </div>
@@ -1817,7 +1821,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>Admin Phone Number :</b>
+                                        <b>Admin Phone:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1829,7 +1833,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <b>Admin Full Name :</b>
+                                        <b>Admin Name:</b>
                                     </label>
                                 </div>
                                 <div class="col-md-8">
@@ -1859,7 +1863,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <label>
-                                                                    <b>Legal Name :</b>
+                                                                    <b>Legal Name:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1871,7 +1875,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <label>
-                                                                    <b>Display Name :</b>
+                                                                    <b>Display Name:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1886,7 +1890,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <label>
-                                                                    <b>State :</b>
+                                                                    <b>State:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1900,7 +1904,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <label>
-                                                                    <b>Zip Code :</b>
+                                                                    <b>Zip Code:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1915,7 +1919,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4 pr-0">
                                                                 <label>
-                                                                    <b>Phone Number :</b>
+                                                                    <b>Phone Number:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1927,7 +1931,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <label>
-                                                                    <b>Business Labels :</b>
+                                                                    <b>Business Labels:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1945,7 +1949,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <label>
-                                                                    <b>Address :</b>
+                                                                    <b>Address:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1957,7 +1961,7 @@
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <label>
-                                                                    <b>Description :</b>
+                                                                    <b>Description:</b>
                                                                 </label>
                                                             </div>
                                                             <div class="col-md-8">
@@ -1987,18 +1991,18 @@
                                                 <div class="col-md-12 d-flex p-0">
                                                     <div class="col-md-2 pr-0">
                                                         <label>
-                                                            <b>Mon :</b>
+                                                            <b>Mon</b>
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="monFrom">
-                                                            From :
+                                                            From:
                                                         </label>
                                                         {{secondFormGroup.controls['MonFromTime'].value}}
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="monTo">
-                                                            To :
+                                                            To:
                                                         </label>
                                                         {{secondFormGroup.controls['MonToTime'].value}}
                                                     </div>
@@ -2007,18 +2011,18 @@
                                                 <div class="col-md-12 d-flex p-0">
                                                     <div class="col-md-2 pr-0">
                                                         <label>
-                                                            <b>Tue :</b>
+                                                            <b>Tue</b>
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="tueFrom">
-                                                            From :
+                                                            From:
                                                         </label>
                                                         {{secondFormGroup.controls['TueFromTime'].value}}
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="tueTo">
-                                                            To :
+                                                            To:
                                                         </label>
                                                         {{secondFormGroup.controls['TueToTime'].value}}
                                                     </div>
@@ -2027,12 +2031,12 @@
                                                 <div class="col-md-12 d-flex p-0">
                                                     <div class="col-md-2 pr-0">
                                                         <label>
-                                                            <b>Wed :</b>
+                                                            <b>Wed</b>
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="wedFrom">
-                                                            From :
+                                                            From:
                                                         </label>
                                                         {{secondFormGroup.controls['WedFromTime'].value}}
                                                     </div>
@@ -2047,18 +2051,18 @@
                                                 <div class="col-md-12 d-flex p-0">
                                                     <div class="col-md-2 pr-0">
                                                         <label>
-                                                            <b>Thu :</b>
+                                                            <b>Thu</b>
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="thuFrom">
-                                                            From :
+                                                            From:
                                                         </label>
                                                         {{secondFormGroup.controls['ThuFromTime'].value}}
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="thuTo">
-                                                            To :
+                                                            To:
                                                         </label>
                                                         {{secondFormGroup.controls['ThuToTime'].value}}
                                                     </div>
@@ -2067,18 +2071,18 @@
                                                 <div class="col-md-12 d-flex p-0">
                                                     <div class="col-md-2 pr-0">
                                                         <label>
-                                                            <b>Fri :</b>
+                                                            <b>Fri</b>
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="friFrom">
-                                                            From :
+                                                            From:
                                                         </label>
                                                         {{secondFormGroup.controls['FriFromTime'].value}}
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="friTo">
-                                                            To :
+                                                            To:
                                                         </label>
                                                         {{secondFormGroup.controls['FriToTime'].value}}
                                                     </div>
@@ -2087,18 +2091,18 @@
                                                 <div class="col-md-12 d-flex p-0">
                                                     <div class="col-md-2 pr-0">
                                                         <label>
-                                                            <b>Sat :</b>
+                                                            <b>Sat</b>
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="satFrom">
-                                                            From :
+                                                            From:
                                                         </label>
                                                         {{secondFormGroup.controls['SatFromTime'].value}}
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="satTo">
-                                                            To :
+                                                            To:
                                                         </label>
                                                         {{secondFormGroup.controls['SatToTime'].value}}
                                                     </div>
@@ -2107,18 +2111,18 @@
                                                 <div class="col-md-12 d-flex p-0">
                                                     <div class="col-md-2 pr-0">
                                                         <label>
-                                                            <b>Sun :</b>
+                                                            <b>Sun</b>
                                                         </label>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="sunFrom">
-                                                            From :
+                                                            From:
                                                         </label>
                                                         {{secondFormGroup.controls['SunFromTime'].value}}
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="sunTo">
-                                                            To :
+                                                            To:
                                                         </label>
                                                         {{secondFormGroup.controls['SunToTime'].value}}
                                                     </div>
@@ -2130,9 +2134,9 @@
                                             <div class="col-md-4 pl-0">
                                                 <div class="row">
                                                     <div class="col-md-4"><label>
-                                                            <b>Website URL :</b>
+                                                            <b>Website URL:</b>
                                                         </label></div>
-                                                    <div class="col-md-8" style="overflow-wrap: break-word;">
+                                                    <div class="col-md-8" style="overflow-wrap: anywhere;">
                                                         <a href="{{this.secondFormGroup.controls['WebsiteUrl'].value}}"
                                                             target="_blank">
                                                             {{this.secondFormGroup.controls['WebsiteUrl'].value}}
@@ -2144,10 +2148,10 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <label>
-                                                            <b>Facebook URL :</b>
+                                                            <b>Facebook URL:</b>
                                                         </label>
                                                     </div>
-                                                    <div class="col-md-8" style="overflow-wrap: break-word;">
+                                                    <div class="col-md-8" style="overflow-wrap: anywhere;">
                                                         <a href="{{this.secondFormGroup.controls['FacebookUrl'].value}}"
                                                             target="_blank">
                                                             {{this.secondFormGroup.controls['FacebookUrl'].value}}
@@ -2159,10 +2163,10 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <label>
-                                                            <b>Twitter URL :</b>
+                                                            <b>Twitter URL:</b>
                                                         </label>
                                                     </div>
-                                                    <div class="col-md-8" style="overflow-wrap: break-word;">
+                                                    <div class="col-md-8" style="overflow-wrap: anywhere;">
                                                         <a href="{{this.secondFormGroup.controls['TwitterUrl'].value}}"
                                                             target="_blank">
                                                             {{this.secondFormGroup.controls['TwitterUrl'].value}}
@@ -2176,9 +2180,9 @@
                                             <div class="col-md-4 pl-0">
                                                 <div class="row">
                                                     <div class="col-md-4"><label>
-                                                            <b>Instagram URL :</b>
+                                                            <b>Instagram URL:</b>
                                                         </label></div>
-                                                    <div class="col-md-8" style="overflow-wrap: break-word;">
+                                                    <div class="col-md-8" style="overflow-wrap: anywhere;">
                                                         <a href="{{this.secondFormGroup.controls['InstagramUrl'].value}}"
                                                             target="_blank">
                                                             {{this.secondFormGroup.controls['InstagramUrl'].value}}
@@ -2190,10 +2194,10 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <label>
-                                                            <b>Yelp URL :</b>
+                                                            <b>Yelp URL:</b>
                                                         </label>
                                                     </div>
-                                                    <div class="col-md-8" style="overflow-wrap: break-word;">
+                                                    <div class="col-md-8" style="overflow-wrap: anywhere;">
                                                         <a href="{{this.secondFormGroup.controls['YelpUrl'].value}}"
                                                             target="_blank">
                                                             {{this.secondFormGroup.controls['YelpUrl'].value}}
@@ -2205,10 +2209,10 @@
                                                 <div class="row">
                                                     <div class="col-md-4">
                                                         <label>
-                                                            <b>Google URL :</b>
+                                                            <b>Google URL:</b>
                                                         </label>
                                                     </div>
-                                                    <div class="col-md-8" style="overflow-wrap: break-word;">
+                                                    <div class="col-md-8" style="overflow-wrap: anywhere;">
                                                         <a href="{{this.secondFormGroup.controls['GoogleUrl'].value}}"
                                                             target="_blank">
                                                             {{this.secondFormGroup.controls['GoogleUrl'].value}}
@@ -2239,7 +2243,7 @@
                                             <div class="row">
                                                 <div class="col-md-4 pr-0">
                                                     <label>
-                                                        <b>Business Name :</b>
+                                                        <b>Business Name:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2254,7 +2258,7 @@
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <label>
-                                                        <b>Payment Schedule :</b>
+                                                        <b>Payment Schedule:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2269,7 +2273,7 @@
                                             <div class="row">
                                                 <div class="col-md-4 pr-0">
                                                     <label>
-                                                        <b>Amount :</b>
+                                                        <b>Amount:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2293,7 +2297,7 @@
                                             <div class="row">
                                                 <div class="col-md-4 pr-0">
                                                     <label>
-                                                        <b>Payment Type :</b>
+                                                        <b>Payment Type:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2313,7 +2317,7 @@
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <label>
-                                                        <b>Transaction Date :</b>
+                                                        <b>Transaction Date:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2329,7 +2333,7 @@
                                             <div class="row">
                                                 <div class="col-md-4 pr-0">
                                                     <label>
-                                                        <b>Card Holder Name :</b>
+                                                        <b>Card Holder Name:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2341,7 +2345,7 @@
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <label>
-                                                        <b>Card NUmber :</b>
+                                                        <b>Card NUmber:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2353,7 +2357,7 @@
                                             <div class="row">
                                                 <div class="col-md-4 pr-0">
                                                     <label>
-                                                        <b>Expiry Month/Year :</b>
+                                                        <b>Expiry Month/Year:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2368,7 +2372,7 @@
                                             <div class="row">
                                                 <div class="col-md-4 pr-0">
                                                     <label>
-                                                        <b>Is Default :</b>
+                                                        <b>Is Default:</b>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-8">
@@ -2397,7 +2401,7 @@
                                     <div class="row" style="margin-bottom: 1%;">
                                         <div class="col-md-6">
                                             <label>
-                                                <b>Business Location Name :</b>
+                                                <b>Display Name:</b>
                                                 {{fourthFormGroup.controls['SrcBusinessLocationName'].value.length != 0
                                                 ?
                                                 fourthFormGroup.controls['SrcBusinessLocationName'].value[0].businessName
@@ -2414,31 +2418,31 @@
                                     <div class="row" style="margin-bottom: 1%;">
                                         <h4> Customer Tablet </h4>
                                         <label>
-                                            <b>Source Name :</b> {{customerSourceName}}
+                                            <b>Source Name:</b> {{customerSourceName}}
                                         </label>
                                         <label>
-                                            <b>User Name :</b> {{customerUserName}}
+                                            <b>User Name:</b> {{customerUserName}}
                                         </label>
                                         <label>
-                                            <b>Tablet Brand :</b> {{fourthFormGroup.controls['CustTabletBrand'].value}}
+                                            <b>Tablet Brand:</b> {{fourthFormGroup.controls['CustTabletBrand'].value}}
                                         </label>
                                         <label>
-                                            <b>Tablet Model :</b> {{fourthFormGroup.controls['CustTabletModel'].value}}
+                                            <b>Tablet Model:</b> {{fourthFormGroup.controls['CustTabletModel'].value}}
                                         </label>
                                     </div>
                                     <div class="row" style="margin-bottom: 1%;">
                                         <h4> Store Tablet </h4>
                                         <label>
-                                            <b>Source Name :</b> {{storeSourceName}}
+                                            <b>Source Name:</b> {{storeSourceName}}
                                         </label>
                                         <label>
-                                            <b>User Name :</b> {{storeUserName}}
+                                            <b>User Name:</b> {{storeUserName}}
                                         </label>
                                         <label>
-                                            <b>Tablet Brand :</b> {{fourthFormGroup.controls['StoreTabletBrand'].value}}
+                                            <b>Tablet Brand:</b> {{fourthFormGroup.controls['StoreTabletBrand'].value}}
                                         </label>
                                         <label>
-                                            <b>Tablet Model :</b> {{fourthFormGroup.controls['StoreTabletModel'].value}}
+                                            <b>Tablet Model:</b> {{fourthFormGroup.controls['StoreTabletModel'].value}}
                                         </label>
                                     </div>
                                 </div>
