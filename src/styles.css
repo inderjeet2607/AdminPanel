@@ -2,6 +2,7 @@
 
 @import 'ngx-toastr/toastr';
 @import 'scss/fonts/santoshi/css/satoshi.css';
+@import "@ng-select/ng-select/themes/default.theme.css";
 
 html,
 body {

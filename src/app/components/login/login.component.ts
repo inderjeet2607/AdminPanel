@@ -107,7 +107,12 @@ export class LoginComponent {
       this.UserName = this.form.controls['username'].value;
       this.Password = this.form.controls['password'].value;
 
-      this._users.Login(this.UserName, this.Password).pipe()
+      let details = {
+        "userName": this.UserName,
+        "password": this.Password
+      }
+
+      this._users.Login(details).pipe()
         .subscribe({
           next: async (data) => {
             // localStorage.setItem('PackageDetails', JSON.stringify(data.package));

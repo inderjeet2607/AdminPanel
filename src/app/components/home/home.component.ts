@@ -1,6 +1,6 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UploadServiceService } from '../../services/upload/upload-service.service';
@@ -74,6 +74,27 @@ export class HomeComponent {
   packageTypeData: any = [];
   statesData: any = [];
   businessLocationName: any = [];
+  workingHours = [{ id: 1, name: "12:00 AM" }, { id: 2, name: "12:30 AM" },
+  { id: 3, name: "01:00 AM" }, { id: 4, name: "01:30 AM" }, { id: 5, name: "02:00 AM" },
+  { id: 6, name: "02:30 AM" }, { id: 7, name: "03:00 AM" }, { id: 8, name: "03:30 AM" },
+  { id: 9, name: "04:00 AM" }, { id: 10, name: "04:30 AM" }, { id: 11, name: "05:00 AM" },
+  { id: 12, name: "05:30 AM" }, { id: 13, name: "06:00 AM" }, { id: 14, name: "06:30 AM" },
+  { id: 15, name: "07:00 AM" }, { id: 16, name: "07:30 AM" }, { id: 17, name: "08:00 AM" },
+  { id: 18, name: "08:30 AM" }, { id: 19, name: "09:00 AM" }, { id: 20, name: "09:30 AM" },
+  { id: 21, name: "10:00 AM" }, { id: 22, name: "10:30 AM" }, { id: 23, name: "11:00 AM" },
+  { id: 24, name: "11:30 AM" }, { id: 25, name: "12:00 PM" }, { id: 26, name: "12:30 PM" },
+  { id: 27, name: "01:00 PM" }, { id: 28, name: "01:30 PM" }, { id: 29, name: "02:00 PM" },
+  { id: 30, name: "02:30 PM" }, { id: 31, name: "03:00 PM" }, { id: 32, name: "03:30 PM" },
+  { id: 33, name: "04:00 PM" }, { id: 34, name: "04:30 PM" }, { id: 35, name: "05:00 PM" },
+  { id: 36, name: "05:30 PM" }, { id: 37, name: "06:00 PM" }, { id: 38, name: "06:30 PM" },
+  { id: 39, name: "07:00 PM" }, { id: 40, name: "07:30 PM" }, { id: 41, name: "08:00 PM" },
+  { id: 42, name: "08:30 PM" }, { id: 43, name: "09:00 PM" }, { id: 44, name: "09:30 PM" },
+  { id: 45, name: "10:00 PM" }, { id: 46, name: "10:30 PM" }, { id: 47, name: "11:00 PM" },
+  { id: 48, name: "11:30 PM" }];
+  signOutHours: { val: number }[] = [{ val: 1 }, { val: 2 }, { val: 3 }, { val: 4 }, { val: 5 }, { val: 6 },
+  { val: 7 }, { val: 8 }, { val: 9 }, { val: 10 }, { val: 11 }, { val: 12 }, { val: 13 }, { val: 14 },
+  { val: 15 }, { val: 16 }, { val: 17 }, { val: 18 }, { val: 19 }, { val: 20 }, { val: 21 }, { val: 22 },
+  { val: 23 }, { val: 24 }];
   dropdownSettingsSingle: IDropdownSettings = {};
   dropdownSettingsSinglePackage: IDropdownSettings = {};
   dropdownSettingsSingleState: IDropdownSettings = {};
@@ -245,9 +266,9 @@ export class HomeComponent {
       SMSProfileID: [''],
       SMSPhoneNumber: [''],
       SignoutRequired: [false],
-      SignoutHours: [''],
+      SignoutHours: [null],
       SpinWheelRequired: [false],
-      BusinessClosureTime: ['', Validators.required],
+      BusinessClosureTime: [[], [Validators.required, this.validatePattern]],
       EmailID: ['', [Validators.required, Validators.pattern("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$")]],
       PhoneNumber: ['', Validators.required],
       FirstName: ['', Validators.required],
@@ -269,20 +290,20 @@ export class HomeComponent {
       GoogleUrl: [''],
       InstagramUrl: [''],
       YelpUrl: [''],
-      MonFromTime: [''],
-      MonToTime: [''],
-      TueFromTime: [''],
-      TueToTime: [''],
-      WedFromTime: [''],
-      WedToTime: [''],
-      ThuFromTime: [''],
-      ThuToTime: [''],
-      FriFromTime: [''],
-      FriToTime: [''],
-      SatFromTime: [''],
-      SatToTime: [''],
-      SunFromTime: [''],
-      SunToTime: ['']
+      MonFromTime: [[], [Validators.required, this.validatePattern]],
+      MonToTime: [[], [Validators.required, this.validatePattern]],
+      TueFromTime: [[], [Validators.required, this.validatePattern]],
+      TueToTime: [[], [Validators.required, this.validatePattern]],
+      WedFromTime: [[], [Validators.required, this.validatePattern]],
+      WedToTime: [[], [Validators.required, this.validatePattern]],
+      ThuFromTime: [[], [Validators.required, this.validatePattern]],
+      ThuToTime: [[], [Validators.required, this.validatePattern]],
+      FriFromTime: [[], [Validators.required, this.validatePattern]],
+      FriToTime: [[], [Validators.required, this.validatePattern]],
+      SatFromTime: [[], [Validators.required, this.validatePattern]],
+      SatToTime: [[], [Validators.required, this.validatePattern]],
+      SunFromTime: [[], [Validators.required, this.validatePattern]],
+      SunToTime: [[], [Validators.required, this.validatePattern]],
     });
     this.thirdFormGroup = this.fb.group({
       BusinessLocationName: ['', Validators.required],
@@ -307,7 +328,6 @@ export class HomeComponent {
 
     this.firstFormGroup.controls['SignoutHours'].disable();
   }
-
   ngOnInit() {
     this.aroute.params.subscribe((params: Params) => {
       this.businessGroupID = params['id']
@@ -496,7 +516,7 @@ export class HomeComponent {
           this.isfileUploadedGroupLogo = true;
           let array = event.partialText.split('|')[1].split('\\');
           this.fileNameGroupLogo = array[array.length - 1];
-          this.filePathGroupLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + this.fileNameGroupLogo;
+          this.filePathGroupLogo = this.fileNameGroupLogo;
         } else {
           this.loadingGroupLogo = false;
           this.isfileUploadedGroupLogo = false;
@@ -866,15 +886,26 @@ export class HomeComponent {
         });
         this.firstFormGroup.controls['PackageTypeID'].setValue(selectedPackage);
         this.firstFormGroup.controls['SMSProfileID'].setValue(data.smsProfileID);
-        this.firstFormGroup.controls['SMSPhoneNumber'].setValue(data.smsFromNumber == 0 ? "" : data.smsFromNumber);
+
+        let outgoingNumber: any = '';
+        const newValue = data.smsFromNumber.toString().replace(/[^0-9]/g, '');
+        let format = '(***) ***-****';
+
+        for (let i = 0; i < newValue.length; i++) {
+          format = format.replace('*', newValue.charAt(i));
+        }
+
+        if (format.indexOf('*') >= 0) {
+          format = format.substring(0, format.indexOf('*'));
+        }
+        outgoingNumber = format.trim();
+
+        this.firstFormGroup.controls['SMSPhoneNumber'].setValue(data.smsFromNumber == 0 ? "" : outgoingNumber);
         this.firstFormGroup.controls['SignoutRequired'].setValue(data.isSignOutRequired);
         this.firstFormGroup.controls['SignoutHours'].setValue(data.autoSignOutTime);
         this.firstFormGroup.controls['SpinWheelRequired'].setValue(data.isSpinRequired);
 
-        let time = (new Date(data.businessClosureTime).getHours() < 10 ? ("0" + new Date(data.businessClosureTime).getHours()) :
-          new Date(data.businessClosureTime).getHours()) + ':' +
-          (new Date(data.businessClosureTime).getMinutes() < 10 ? ("0" + new Date(data.businessClosureTime).getMinutes()) :
-            new Date(data.businessClosureTime).getMinutes());
+        let time = new Date(data.businessClosureTime).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
         this.firstFormGroup.controls['BusinessClosureTime'].setValue(time);
 
         this.firstFormGroup.controls['FirstName'].setValue(data.firstName);
@@ -882,16 +913,16 @@ export class HomeComponent {
 
         let phone: any = '';
         const value = data.mobile.replace(/[^0-9]/g, '');
-        let format = '(***) ***-****';
+        let newFormat = '(***) ***-****';
 
         for (let i = 0; i < value.length; i++) {
-          format = format.replace('*', value.charAt(i));
+          newFormat = newFormat.replace('*', value.charAt(i));
         }
 
-        if (format.indexOf('*') >= 0) {
-          format = format.substring(0, format.indexOf('*'));
+        if (newFormat.indexOf('*') >= 0) {
+          newFormat = newFormat.substring(0, newFormat.indexOf('*'));
         }
-        phone = format.trim();
+        phone = newFormat.trim();
 
         this.firstFormGroup.controls['PhoneNumber'].setValue(phone);
         this.firstFormGroup.controls['EmailID'].setValue(data.email);
@@ -900,7 +931,7 @@ export class HomeComponent {
           (data.isEmailVerified == false ? 'Unverified' : '');
 
         if (data.logoPath != '' && data.logoPath != null && data.logoPath != undefined) {
-          this.filePathGroupLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.logoPath;
+          this.filePathGroupLogo = data.logoPath;
           this.uploadProgressGroupLogo = (100).toString() + "%";
           this.fileNameGroupLogo = data.logoPath;
         }
@@ -934,11 +965,13 @@ export class HomeComponent {
       "packageTypeID": this.firstFormGroup.controls['PackageTypeID'].value[0].id,
       "indutryTypeID": this.firstFormGroup.controls['IndustryTypeID'].value[0].id,
       "smsProfileID": this.firstFormGroup.controls['SMSProfileID'].value,
-      "smsFromNumber": this.firstFormGroup.controls['SMSPhoneNumber'].value == "" ? 0 : this.firstFormGroup.controls['SMSPhoneNumber'].value,
+      "smsFromNumber": this.firstFormGroup.controls['SMSPhoneNumber'].value == "" ? 0 :
+        this.firstFormGroup.controls['SMSPhoneNumber'].value.replaceAll(/[^a-zA-Z0-9]/g, ''),
       "isSignOutRequired": this.firstFormGroup.controls['SignoutRequired'].value,
       "autoSignOutTime": this.firstFormGroup.controls['SignoutHours'].value,
       "isSpinRequired": this.firstFormGroup.controls['SpinWheelRequired'].value,
-      "businessClosureTime": this.firstFormGroup.controls['BusinessClosureTime'].value,
+      "businessClosureTime": this.firstFormGroup.controls['BusinessClosureTime'].value.label != undefined ?
+        this.firstFormGroup.controls['BusinessClosureTime'].value.label : this.firstFormGroup.controls['BusinessClosureTime'].value,
       "firstName": this.firstFormGroup.controls['FirstName'].value,
       "lastName": this.firstFormGroup.controls['LastName'].value,
       "mobile": this.firstFormGroup.controls['PhoneNumber'].value.replaceAll(/[^a-zA-Z0-9]/g, ''),
@@ -1025,20 +1058,34 @@ export class HomeComponent {
       "createdDate": AppSettings.GetDate(),
       "lastModifiedBy": AppSettings.GetLastModifiedBy(),
       "lastModifiedDate": AppSettings.GetDate(),
-      "monFromTime": this.secondFormGroup.controls['MonFromTime'].value,
-      "monToTime": this.secondFormGroup.controls['MonToTime'].value,
-      "tueFromTime": this.secondFormGroup.controls['TueFromTime'].value,
-      "tueToTime": this.secondFormGroup.controls['TueToTime'].value,
-      "wedFromTime": this.secondFormGroup.controls['WedFromTime'].value,
-      "wedToTime": this.secondFormGroup.controls['WedToTime'].value,
-      "thuFromTime": this.secondFormGroup.controls['ThuFromTime'].value,
-      "thuToTime": this.secondFormGroup.controls['ThuToTime'].value,
-      "friFromTime": this.secondFormGroup.controls['FriFromTime'].value,
-      "friToTime": this.secondFormGroup.controls['FriToTime'].value,
-      "satFromTime": this.secondFormGroup.controls['SatFromTime'].value,
-      "satToTime": this.secondFormGroup.controls['SatToTime'].value,
-      "sunFromTime": this.secondFormGroup.controls['SunFromTime'].value,
-      "sunToTime": this.secondFormGroup.controls['SunToTime'].value,
+      "monFromTime": this.secondFormGroup.controls['MonFromTime'].value.label != undefined ?
+        this.secondFormGroup.controls['MonFromTime'].value.label : this.secondFormGroup.controls['MonFromTime'].value,
+      "monToTime": this.secondFormGroup.controls['MonToTime'].value.label != undefined ?
+        this.secondFormGroup.controls['MonToTime'].value.label : this.secondFormGroup.controls['MonToTime'].value,
+      "tueFromTime": this.secondFormGroup.controls['TueFromTime'].value.label != undefined ?
+        this.secondFormGroup.controls['TueFromTime'].value.label : this.secondFormGroup.controls['TueFromTime'].value,
+      "tueToTime": this.secondFormGroup.controls['TueToTime'].value.label != undefined ?
+        this.secondFormGroup.controls['TueToTime'].value.label : this.secondFormGroup.controls['TueToTime'].value,
+      "wedFromTime": this.secondFormGroup.controls['WedFromTime'].value.label != undefined ?
+        this.secondFormGroup.controls['WedFromTime'].value.label : this.secondFormGroup.controls['WedFromTime'].value,
+      "wedToTime": this.secondFormGroup.controls['WedToTime'].value.label != undefined ?
+        this.secondFormGroup.controls['WedToTime'].value.label : this.secondFormGroup.controls['WedToTime'].value,
+      "thuFromTime": this.secondFormGroup.controls['ThuFromTime'].value.label != undefined ?
+        this.secondFormGroup.controls['ThuFromTime'].value.label : this.secondFormGroup.controls['ThuFromTime'].value,
+      "thuToTime": this.secondFormGroup.controls['ThuToTime'].value.label != undefined ?
+        this.secondFormGroup.controls['ThuToTime'].value.label : this.secondFormGroup.controls['ThuToTime'].value,
+      "friFromTime": this.secondFormGroup.controls['FriFromTime'].value.label != undefined ?
+        this.secondFormGroup.controls['FriFromTime'].value.label : this.secondFormGroup.controls['FriFromTime'].value,
+      "friToTime": this.secondFormGroup.controls['FriToTime'].value.label != undefined ?
+        this.secondFormGroup.controls['FriToTime'].value.label : this.secondFormGroup.controls['FriToTime'].value,
+      "satFromTime": this.secondFormGroup.controls['SatFromTime'].value.label != undefined ?
+        this.secondFormGroup.controls['SatFromTime'].value.label : this.secondFormGroup.controls['SatFromTime'].value,
+      "satToTime": this.secondFormGroup.controls['SatToTime'].value.label != undefined ?
+        this.secondFormGroup.controls['SatToTime'].value.label : this.secondFormGroup.controls['SatToTime'].value,
+      "sunFromTime": this.secondFormGroup.controls['SunFromTime'].value.label != undefined ?
+        this.secondFormGroup.controls['SunFromTime'].value.label : this.secondFormGroup.controls['SunFromTime'].value,
+      "sunToTime": this.secondFormGroup.controls['SunToTime'].value.label != undefined ?
+        this.secondFormGroup.controls['SunToTime'].value.label : this.secondFormGroup.controls['SunToTime'].value,
     }
     details.push(tempdefDetails);
 
@@ -1272,12 +1319,7 @@ export class HomeComponent {
         this.secondFormGroup.controls['PhoneNo'].setValue(phone);
         this.secondFormGroup.controls['Address'].setValue(data.adress);
         this.secondFormGroup.controls['City'].setValue(data.city);
-        let selectedState: { id: any, name: any }[] = [];
-        selectedState.push({
-          id: data.stateCodeID,
-          name: this.statesData.filter(x => x.id == data.stateCodeID)[0].name
-        });
-        this.secondFormGroup.controls['StateID'].setValue(selectedState);
+        this.secondFormGroup.controls['StateID'].setValue(data.stateCodeID);
 
         this.secondFormGroup.controls['Pincode'].setValue(data.pinCode);
         this.secondFormGroup.controls['Description'].setValue(data.descriptions);
@@ -1288,88 +1330,60 @@ export class HomeComponent {
         this.secondFormGroup.controls['InstagramUrl'].setValue(data.instagramUrl);
         this.secondFormGroup.controls['YelpUrl'].setValue(data.yelpUrl);
 
-        let monFrom = ((new Date(data.businesswiseWorkingDays[0].monFromTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].monFromTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].monFromTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].monFromTime).getMinutes()));
+        let monFrom = new Date(data.businesswiseWorkingDays[0].monFromTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['MonFromTime'].setValue(monFrom);
 
-        let monTo = ((new Date(data.businesswiseWorkingDays[0].monToTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].monToTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].monToTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].monToTime).getMinutes()));
+        let monTo = new Date(data.businesswiseWorkingDays[0].monToTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['MonToTime'].setValue(monTo);
 
-        let tueFrom = ((new Date(data.businesswiseWorkingDays[0].tueFromTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].tueFromTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].tueFromTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].tueFromTime).getMinutes()));
+        let tueFrom = new Date(data.businesswiseWorkingDays[0].tueFromTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['TueFromTime'].setValue(tueFrom);
 
-        let tueTo = ((new Date(data.businesswiseWorkingDays[0].tueToTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].tueToTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].tueToTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].tueToTime).getMinutes()));
+        let tueTo = new Date(data.businesswiseWorkingDays[0].tueToTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['TueToTime'].setValue(tueTo);
 
-        let wedFrom = ((new Date(data.businesswiseWorkingDays[0].wedFromTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].wedFromTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].wedFromTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].wedFromTime).getMinutes()));
+        let wedFrom = new Date(data.businesswiseWorkingDays[0].wedFromTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['WedFromTime'].setValue(wedFrom);
 
-        let wedTo = ((new Date(data.businesswiseWorkingDays[0].wedToTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].wedToTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].wedToTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].wedToTime).getMinutes()));
+        let wedTo = new Date(data.businesswiseWorkingDays[0].wedToTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['WedToTime'].setValue(wedTo);
 
-        let thuFrom = ((new Date(data.businesswiseWorkingDays[0].thuFromTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].thuFromTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].thuFromTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].thuFromTime).getMinutes()));
+        let thuFrom = new Date(data.businesswiseWorkingDays[0].thuFromTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['ThuFromTime'].setValue(thuFrom);
 
-        let thuTo = ((new Date(data.businesswiseWorkingDays[0].thuToTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].thuToTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].thuToTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].thuToTime).getMinutes()));
+        let thuTo = new Date(data.businesswiseWorkingDays[0].thuToTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['ThuToTime'].setValue(thuTo);
 
-        let friFrom = ((new Date(data.businesswiseWorkingDays[0].friFromTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].friFromTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].friFromTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].friFromTime).getMinutes()));
+        let friFrom = new Date(data.businesswiseWorkingDays[0].friFromTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['FriFromTime'].setValue(friFrom);
 
-        let friTo = ((new Date(data.businesswiseWorkingDays[0].friToTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].friToTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].friToTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].friToTime).getMinutes()));
+        let friTo = new Date(data.businesswiseWorkingDays[0].friToTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['FriToTime'].setValue(friTo);
 
-        let satFrom = ((new Date(data.businesswiseWorkingDays[0].satFromTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].satFromTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].satFromTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].satFromTime).getMinutes()));
+        let satFrom = new Date(data.businesswiseWorkingDays[0].satFromTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['SatFromTime'].setValue(satFrom);
 
-        let satTo = ((new Date(data.businesswiseWorkingDays[0].satToTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].satToTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].satToTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].satToTime).getMinutes()));
+        let satTo = new Date(data.businesswiseWorkingDays[0].satToTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['SatToTime'].setValue(satTo);
 
-        let sunFrom = ((new Date(data.businesswiseWorkingDays[0].sunFromTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].sunFromTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].sunFromTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].sunFromTime).getMinutes()));
+        let sunFrom = new Date(data.businesswiseWorkingDays[0].sunFromTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['SunFromTime'].setValue(sunFrom);
 
-        let sunTo = ((new Date(data.businesswiseWorkingDays[0].sunToTime).getHours() < 10 ? '0' : '') +
-          (new Date(data.businesswiseWorkingDays[0].sunToTime).getHours())) + ':' +
-          ((new Date(data.businesswiseWorkingDays[0].sunToTime).getMinutes() < 10 ? '0' : '') +
-            (new Date(data.businesswiseWorkingDays[0].sunToTime).getMinutes()));
+        let sunTo = new Date(data.businesswiseWorkingDays[0].sunToTime).toLocaleString('en-US',
+          { hour: '2-digit', minute: '2-digit', hour12: true });
         this.secondFormGroup.controls['SunToTime'].setValue(sunTo);
 
         this.showLocationList = false;
@@ -1400,7 +1414,7 @@ export class HomeComponent {
         });
 
         if (data.logoPath != '' && data.logoPath != null && data.logoPath != undefined) {
-          this.filePathBusinessLogo = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.logoPath;
+          this.filePathBusinessLogo = AppSettings.Root_ENDPOINT + data.logoPath;
           this.uploadProgressBusinessLogo = (100).toString() + "%";
           this.fileNameBusinessLogo = data.logoPath;
         }
@@ -1409,7 +1423,7 @@ export class HomeComponent {
         }
 
         if (data.imagePath != '' && data.imagePath != null && data.imagePath != undefined) {
-          this.filePathBusinessDisplayImage = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.imagePath;
+          this.filePathBusinessDisplayImage = AppSettings.Root_ENDPOINT + data.imagePath;
           this.uploadProgressBusinessDisplayImage = (100).toString() + "%";
           this.fileNameBusinessDisplayImage = data.imagePath;
         }
@@ -1418,7 +1432,7 @@ export class HomeComponent {
         }
 
         if (data.galleryImagePath1 != '' && data.galleryImagePath1 != null && data.galleryImagePath1 != undefined) {
-          this.filePathBusinessImage1 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath1;
+          this.filePathBusinessImage1 = AppSettings.Root_ENDPOINT + data.galleryImagePath1;
           this.uploadProgressBusinessImage1 = (100).toString() + "%";
           this.fileNameBusinessImage1 = data.galleryImagePath1;
         }
@@ -1427,7 +1441,7 @@ export class HomeComponent {
         }
 
         if (data.galleryImagePath2 != '' && data.galleryImagePath2 != null && data.galleryImagePath2 != undefined) {
-          this.filePathBusinessImage2 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath2;
+          this.filePathBusinessImage2 = AppSettings.Root_ENDPOINT + data.galleryImagePath2;
           this.uploadProgressBusinessImage2 = (100).toString() + "%";
           this.fileNameBusinessImage2 = data.galleryImagePath2;
         }
@@ -1436,7 +1450,7 @@ export class HomeComponent {
         }
 
         if (data.galleryImagePath3 != '' && data.galleryImagePath3 != null && data.galleryImagePath3 != undefined) {
-          this.filePathBusinessImage3 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath3;
+          this.filePathBusinessImage3 = AppSettings.Root_ENDPOINT + data.galleryImagePath3;
           this.uploadProgressBusinessImage3 = (100).toString() + "%";
           this.fileNameBusinessImage3 = data.galleryImagePath3;
         }
@@ -1445,7 +1459,7 @@ export class HomeComponent {
         }
 
         if (data.galleryImagePath4 != '' && data.galleryImagePath4 != null && data.galleryImagePath4 != undefined) {
-          this.filePathBusinessImage4 = AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + data.galleryImagePath4;
+          this.filePathBusinessImage4 = AppSettings.Root_ENDPOINT + data.galleryImagePath4;
           this.uploadProgressBusinessImage4 = (100).toString() + "%";
           this.fileNameBusinessImage4 = data.galleryImagePath4;
         }
@@ -1683,13 +1697,14 @@ export class HomeComponent {
 
   onBusinessSelect() {
     let value = this.fourthFormGroup.controls['SrcBusinessLocationName'].value[0].id;
+    const regex = /[^a-zA-Z0-9]/g;
     this._sourceService.GetSourceCountByLocationID(value).subscribe({
       next: (data) => {
-        this.customerSourceName = data.sourceName + (data.count > 0 ? (data.count + 1) : '') + "customer";
-        this.storeSourceName = data.sourceName + (data.count > 0 ? (data.count + 1) : '') + "store";
+        this.customerSourceName = data.sourceName + (data.count > 0 ? (data.count + 1) : '') + " - Customer";
+        this.storeSourceName = data.sourceName + (data.count > 0 ? (data.count + 1) : '') + " - Store";
 
-        this.customerUserName = this.customerSourceName;
-        this.storeUserName = this.storeSourceName;
+        this.customerUserName = data.sourceName.replace(regex, '').toLowerCase() + (data.count > 0 ? (data.count + 1) : '') + "customer";
+        this.storeUserName = data.sourceName.replace(regex, '').toLowerCase() + (data.count > 0 ? (data.count + 1) : '') + "store";
       },
       error: error => {
         console.log("This is error message", error)
@@ -1996,7 +2011,6 @@ export class HomeComponent {
       );
       autocomplete.addListener('place_changed', () => {
         this.ngZone.run(() => {
-
           this.latitude = autocomplete.getPlace().geometry.location.lat();
           this.longitude = autocomplete.getPlace().geometry.location.lng();
           this.secondFormGroup.controls['Address'].setValue(this.searchElementRef.nativeElement.value);
@@ -2004,7 +2018,6 @@ export class HomeComponent {
           let postal_code = '';
           let state: any = [];
           let country = '';
-          let fullAddress = autocomplete.getPlace().address_components[0].long_name + " " + autocomplete.getPlace().address_components[1].long_name + " " + autocomplete.getPlace().address_components[2].long_name;
           autocomplete.getPlace().address_components?.forEach((element: any) => {
 
             const types = element.types;
@@ -2046,16 +2059,15 @@ export class HomeComponent {
 
           this.secondFormGroup.controls['City'].setValue(city);
           this.secondFormGroup.controls['Pincode'].setValue(postal_code);
-          this.secondFormGroup.controls['Address'].setValue(fullAddress);
+          this.secondFormGroup.controls['Address'].setValue(formattedAddress);
 
-          let selectedState: { id: any, name: any }[] = [];
-          selectedState.push({
-            id: this.statesData.filter(x => x.name == state)[0].id,
-            name: this.statesData.filter(x => x.name == state)[0].name
-          });
-          console.log(selectedState)
+          // let selectedState: { id: any, name: any }[] = [];
+          // selectedState.push({
+          //   id: this.statesData.filter(x => x.name == state)[0].id,
+          //   name: this.statesData.filter(x => x.name == state)[0].name
+          // });
+          let selectedState = this.statesData.filter(x => x.name == state)[0].id;
           this.secondFormGroup.controls['StateID'].setValue(selectedState);
-
         });
       });
 
@@ -2063,7 +2075,7 @@ export class HomeComponent {
         if (event.key === 'Enter') {
           event.preventDefault();
         }
-      })
+      });
     });
   }
 
@@ -2084,9 +2096,9 @@ export class HomeComponent {
         if (event.partialText != undefined && event.partialText.split('|')[0] == "file uploaded") {
           this.loadingPaymentDoc = false;
           this.isfileUploadedPaymentDoc = true;
-          let array = event.partialText.split('|')[1].split('\\');
+          let array = event.partialText.split('|')[1].split('/');
           fileName.setValue(array[array.length - 1]);
-          filePathPaymentDoc.setValue(AppSettings.API_ENDPOINT + AppSettings.Root_ENDPOINT + "/" + array[array.length - 1]);
+          filePathPaymentDoc.setValue(AppSettings.Root_ENDPOINT + array[array.length - 1]);
         } else {
           this.loadingPaymentDoc = false;
           this.isfileUploadedPaymentDoc = false;
@@ -2120,26 +2132,55 @@ export class HomeComponent {
   toggleSignInSignOut() {
     if (this.firstFormGroup.controls['SignoutRequired'].value == true) {
       this.firstFormGroup.controls['SignoutHours'].enable();
+      this.firstFormGroup.controls['SignoutHours'].addValidators(Validators.required);
     }
     else {
       this.firstFormGroup.controls['SignoutHours'].disable();
+      this.firstFormGroup.controls['SignoutHours'].removeValidators(Validators.required);
+    }
+    this.firstFormGroup.controls['SignoutHours'].setValue(null);
+    this.firstFormGroup.controls["SignoutHours"].updateValueAndValidity();
+  }
+
+  formatNum(event: any) {
+    if (event.inputType != 'deleteContentBackward') {
+      const inputElement = event.target as HTMLInputElement;
+      let inputValue = inputElement.value;
+      const value = inputValue.replace(/[^0-9]/g, '');
+      let format = '(***) ***-****';
+
+      for (let i = 0; i < value.length; i++) {
+        format = format.replace('*', value.charAt(i));
+      }
+
+      if (format.indexOf('*') >= 0) {
+        format = format.substring(0, format.indexOf('*'));
+      }
+
+      inputElement.value = format.trim();
     }
   }
 
-  formatNum(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    let inputValue = inputElement.value;
-    const value = inputValue.replace(/[^0-9]/g, '');
-    let format = '(***) ***-****';
+  validatePattern(control: FormControl) {
+    const items = control.value;
+    const pattern = /^([1-9]|0[1-9]|1[0-2]):[0-5][0-9] ([AP][M])$/;
 
-    for (let i = 0; i < value.length; i++) {
-      format = format.replace('*', value.charAt(i));
+    if (items && items.label != undefined) {
+      const invalidItems = !pattern.test(items.label);
+      return invalidItems == true ? { invalidPattern: true } : null;
+    }
+    else if (items && items.label == undefined) {
+      const invalidItems = !pattern.test(items);
+      return invalidItems == true ? { invalidPattern: true } : null;
     }
 
-    if (format.indexOf('*') >= 0) {
-      format = format.substring(0, format.indexOf('*'));
-    }
+    return null;
+  }
 
-    inputElement.value = format.trim();
+  getStateName(id: any): string {
+    if (this.statesData != null && this.statesData != undefined && this.statesData != '' && this.statesData.length > 0) {
+      return this.statesData.filter(x => x.id == id)[0].name;
+    }
+    return '';
   }
 }

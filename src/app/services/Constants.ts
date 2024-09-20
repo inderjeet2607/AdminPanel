@@ -1,6 +1,6 @@
 export class AppSettings {
-    public static API_ENDPOINT = "http://ho.hitechprojects.co.in:8101";
-    public static Root_ENDPOINT = "/wwwroot";
+    public static API_ENDPOINT = "https://api.dev.revords.com";
+    public static Root_ENDPOINT = "https://s3-us-west-1.amazonaws.com/revords.live.files/";
 
     public static userData: any = JSON.parse(localStorage.getItem('UserData'));
     public static RefreshLocalStorage() {
